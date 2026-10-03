@@ -1,9 +1,7 @@
-function App() {
-  return (
-    <>
-      <p className="text-lg font-bold text-blue-300">Hi Raqeeb</p>
-    </>
-  );
-}
+import AppRoutes from "./routes/AppRoutes";
+
+const App = () => {
+  return <AppRoutes />;
+};
 
 export default App;
