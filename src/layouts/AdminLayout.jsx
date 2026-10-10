@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
 
-// ---- Sidebar items (غيّر المسارات لو الـ routes عندك مختلفة) ----
 const navItems = [
   { label: "Dashboard", to: "/admin/dashboard", icon: LayoutGrid },
   { label: "Users", to: "/admin/users", icon: UserPlus },
@@ -144,7 +143,11 @@ const AdminLayout = () => {
 
         {/* Footer */}
         <div className="mx-6 border-t border-white/10 py-5">
-          <div className="flex items-center gap-3 px-1">
+          <NavLink
+            to="/admin/profile"
+            onClick={() => setSidebarOpen(false)}
+            className="flex items-center gap-3 px-1"
+          >
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-xs font-bold">
               RH
             </div>
@@ -152,7 +155,7 @@ const AdminLayout = () => {
               <p className="text-xs font-bold">RAQEEB Hospital</p>
               <p className="text-[11px] text-teal-100/60">Single facility</p>
             </div>
-          </div>
+          </NavLink>
 
           <button
             type="button"

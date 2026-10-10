@@ -4,14 +4,17 @@ import Login from "../pages/auth/Login";
 
 import DoctorDashboard from "../pages/doctor/DoctorDashboard";
 import NurseDashboard from "../pages/nurse/NurseDashboard";
-import AdminDashboard from "../pages/admin/dashboard/AdminDashboard";
-
-import AdminLayout from "../layouts/AdminLayout";
 
 import ProtectedRoute from "./ProtectedRoute";
 import RoleRoute from "./RoleRoute";
+import adminRoutes from "./adminRoutes";
+
+import { useAuthStore } from "../store/authStore";
 
 const AppRoutes = () => {
+  const user = useAuthStore((state) => state.user);
+  const fallback = user ? `/${user.role}/dashboard` : "/login";
+
   return (
     <Routes>
       {/* Public Routes */}
@@ -30,20 +33,14 @@ const AppRoutes = () => {
         </Route>
 
         {/* Admin */}
-        <Route element={<RoleRoute allowedRole="admin" />}>
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<AdminDashboard />} />
-            {/* باقي صفحات الأدمن هتتضاف هنا */}
-          </Route>
-        </Route>
+        <Route element={<RoleRoute allowedRole="admin" />}>{adminRoutes}</Route>
       </Route>
 
       {/* Default */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/" element={<Navigate to={fallback} replace />} />
 
       {/* Unknown Routes */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      <Route path="*" element={<Navigate to={fallback} replace />} />
     </Routes>
   );
 };
