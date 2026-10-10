@@ -4,7 +4,9 @@ import Login from "../pages/auth/Login";
 
 import DoctorDashboard from "../pages/doctor/DoctorDashboard";
 import NurseDashboard from "../pages/nurse/NurseDashboard";
-import AdminDashboard from "../pages/admin/AdminDashboard";
+import AdminDashboard from "../pages/admin/dashboard/AdminDashboard";
+
+import AdminLayout from "../layouts/AdminLayout";
 
 import ProtectedRoute from "./ProtectedRoute";
 import RoleRoute from "./RoleRoute";
@@ -29,7 +31,11 @@ const AppRoutes = () => {
 
         {/* Admin */}
         <Route element={<RoleRoute allowedRole="admin" />}>
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<AdminDashboard />} />
+            {/* باقي صفحات الأدمن هتتضاف هنا */}
+          </Route>
         </Route>
       </Route>
 
