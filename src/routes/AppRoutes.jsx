@@ -2,12 +2,12 @@ import { Navigate, Route, Routes } from "react-router-dom";
 
 import Login from "../pages/auth/Login";
 
-import DoctorDashboard from "../pages/doctor/DoctorDashboard";
 import NurseDashboard from "../pages/nurse/NurseDashboard";
 
 import ProtectedRoute from "./ProtectedRoute";
 import RoleRoute from "./RoleRoute";
 import adminRoutes from "./adminRoutes";
+import doctorRoutes from "./DoctorRoutes";
 
 import { useAuthStore } from "../store/authStore";
 
@@ -24,7 +24,7 @@ const AppRoutes = () => {
       <Route element={<ProtectedRoute />}>
         {/* Doctor */}
         <Route element={<RoleRoute allowedRole="doctor" />}>
-          <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
+          {doctorRoutes}
         </Route>
 
         {/* Nurse */}
