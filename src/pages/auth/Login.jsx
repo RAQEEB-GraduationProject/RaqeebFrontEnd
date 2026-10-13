@@ -1,36 +1,49 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { mockUsers } from "../../data/mockUsers";
+import { useEffect, useState } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 import { useAuthStore } from "../../store/authStore";
+import { getDashboardPath } from "../../utils/roles";
 
 const Login = () => {
   const navigate = useNavigate();
-  const login = useAuthStore((state) => state.login);
 
-  const [email, setEmail] = useState("");
+  const login = useAuthStore((state) => state.login);
+  const clearError = useAuthStore((state) => state.clearError);
+  const isLoading = useAuthStore((state) => state.isLoading);
+  const error = useAuthStore((state) => state.error);
+  const user = useAuthStore((state) => state.user);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
+  const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [keepSignedIn, setKeepSignedIn] = useState(false);
-  const [error, setError] = useState("");
 
-  const handleLogin = (e) => {
+  // امسح أي error قديم لما الصفحة تفتح
+  useEffect(() => {
+    clearError();
+  }, [clearError]);
+
+  // لو عامل login فعلاً (أو لسه عامل login دلوقتي) → روح على داشبورد الـ role بتاعه
+  const dashboardPath = user ? getDashboardPath(user.role) : null;
+  if (isAuthenticated && dashboardPath) {
+    return <Navigate to={dashboardPath} replace />;
+  }
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+    if (isLoading) return;
 
-    const user = mockUsers.find(
-      (user) => user.email === email.trim() && user.password === password,
-    );
+    // لو نجح، الـ store بيتحدث والـ <Navigate> اللي فوق بيحوّلك تلقائي
+    await login({ userName: userName.trim(), password });
+  };
 
-    if (!user) {
-      setError("Invalid email or password.");
-      return;
-    }
-
-    login(user);
-    navigate(`/${user.role}/dashboard`);
+  const handleChange = (setter) => (e) => {
+    setter(e.target.value);
+    if (error) clearError();
   };
 
   const inputClass =
-    "w-full rounded-xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-800 placeholder:text-slate-400 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20";
+    "w-full rounded-xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-800 placeholder:text-slate-400 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20 disabled:cursor-not-allowed disabled:bg-slate-50";
 
   return (
     <div className="flex min-h-screen w-full bg-[#f7f9f8]">
@@ -100,21 +113,24 @@ const Login = () => {
             Use your hospital account to continue.
           </p>
 
-          <form onSubmit={handleLogin} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6" noValidate>
             <div>
               <label
-                htmlFor="email"
+                htmlFor="userName"
                 className="mb-2 block text-xs font-semibold text-slate-800"
               >
-                Hospital email
+                Username
               </label>
               <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@raqeeb.care"
+                id="userName"
+                type="text"
+                value={userName}
+                onChange={handleChange(setUserName)}
+                placeholder="Enter your username"
+                autoComplete="username"
+                maxLength={100}
                 className={inputClass}
+                disabled={isLoading}
                 required
               />
             </div>
@@ -130,9 +146,12 @@ const Login = () => {
                 id="password"
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={handleChange(setPassword)}
                 placeholder="Enter your password"
+                autoComplete="current-password"
+                maxLength={128}
                 className={inputClass}
+                disabled={isLoading}
                 required
               />
             </div>
@@ -168,9 +187,18 @@ const Login = () => {
 
             <button
               type="submit"
-              className="w-full rounded-xl bg-[#0e4f5c] py-4 text-sm font-bold text-white shadow-lg shadow-teal-900/20 transition hover:bg-[#0b424d] focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-2"
+              disabled={isLoading || !userName.trim() || !password}
+              aria-busy={isLoading}
+              className="w-full rounded-xl bg-[#0e4f5c] py-4 text-sm font-bold text-white shadow-lg shadow-teal-900/20 transition hover:bg-[#0b424d] focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Sign in securely
+              {isLoading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Loader2 size={16} className="animate-spin" />
+                  Signing in…
+                </span>
+              ) : (
+                "Sign in securely"
+              )}
             </button>
           </form>
 
@@ -178,14 +206,6 @@ const Login = () => {
             Need help? Contact Hospital IT at{" "}
             <span className="font-bold text-slate-600">ext. 2400</span>
           </p>
-
-          {/* Test accounts (احذفه قبل الـ Production) */}
-          <div className="mt-8 rounded-xl border border-dashed border-slate-300 bg-white p-4 text-xs text-slate-500">
-            <p className="mb-2 font-semibold text-slate-700">Test accounts</p>
-            <p>Doctor: doctor@raqeeb.com / 123456</p>
-            <p>Nurse: nurse@raqeeb.com / 123456</p>
-            <p>Admin: admin@raqeeb.com / 123456</p>
-          </div>
         </div>
       </div>
     </div>
