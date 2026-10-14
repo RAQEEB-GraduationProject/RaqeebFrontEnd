@@ -3,6 +3,7 @@ import { Route, Navigate } from "react-router-dom";
 import AdminLayout from "../layouts/AdminLayout";
 import AdminDashboard from "../pages/admin/dashboard/AdminDashboard";
 import UsersList from "../pages/admin/usersList/UsersList";
+import AddUser from "../pages/admin/usersList/AddUser";
 import UserDetails from "../pages/admin/usersList/UserDetails";
 import PatientsList from "../pages/admin/patientsList/PatientsList";
 import CtcaeRules from "../pages/admin/ctcaeRules/CtcaeRules";
@@ -19,6 +20,7 @@ const adminRoutes = (
 
     {/* Users */}
     <Route path="users" element={<UsersList />} />
+    <Route path="users/new" element={<AddUser />} />
     <Route path="users/:id" element={<UserDetails />} />
 
     <Route path="patients" element={<PatientsList />} />

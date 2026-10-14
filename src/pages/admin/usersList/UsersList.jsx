@@ -194,9 +194,7 @@ const UsersList = () => {
 
         <button
           type="button"
-          onClick={() => {
-            // Add User page will be connected here later.
-          }}
+          onClick={() => navigate("/admin/users/new")}
           className="flex items-center gap-3 rounded-xl bg-[#0f3d4c] px-6 py-4 text-sm font-bold text-white shadow-sm transition hover:bg-[#0b3240]"
         >
           <Plus size={18} />

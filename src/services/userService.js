@@ -22,6 +22,19 @@ const userService = {
 
     return mapUser(data);
   },
+
+  // POST {VITE_API_BASE_URL}/Auth/register  (base URL already ends with /api)
+  async register({ userName, email, phoneNumber, password, role }) {
+    const { data } = await api.post("/Auth/register", {
+      userName,
+      email,
+      phoneNumber,
+      password,
+      role,
+    });
+
+    return data;
+  },
 };
 
 export default userService;
