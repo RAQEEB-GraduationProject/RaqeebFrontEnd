@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useNavigate , useLocation  } from "react-router-dom";
 import {
   Bell,
   ChevronRight,
@@ -68,6 +68,11 @@ const AdminLayout = () => {
     logout();
     navigate("/login", { replace: true });
   };
+
+  const location = useLocation();
+  useEffect(() => {
+    console.log("Layout path changed to:", location.pathname);
+  }, [location.pathname]);
 
   return (
     <div className="min-h-screen bg-[#f3f6f6] text-slate-800">
