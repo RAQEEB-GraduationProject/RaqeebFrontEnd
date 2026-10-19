@@ -6,6 +6,7 @@ import {
   ChevronRight,
   LayoutGrid,
   Menu,
+  TriangleAlert,
   User,
   Users,
   X,
@@ -16,6 +17,7 @@ import { useAuthStore } from "../store/authStore";
 const navItems = [
   { label: "Dashboard", to: "/doctor/dashboard", icon: LayoutGrid },
   { label: "Patients", to: "/doctor/patients", icon: Users },
+  { label: "Alerts", to: "/doctor/alerts", icon: TriangleAlert },
   {
     label: "Notifications",
     to: "/doctor/notifications",
@@ -67,7 +69,7 @@ const DoctorLayout = () => {
     <div className="min-h-screen bg-[#f6f8fc] text-slate-800">
       {/* ================= Top navbar ================= */}
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white">
-        <div className="flex h-[92px] items-center justify-between gap-4 px-6 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:px-12">
+        <div className="flex h-[92px] items-center justify-between gap-4 px-6 xl:grid xl:grid-cols-[1fr_auto_1fr] xl:px-12">
           {/* Brand */}
           <NavLink to="/doctor/dashboard" className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#e3eefd] to-[#c3d8f8] text-lg font-bold text-[#3f5ea8] shadow-sm">
@@ -82,7 +84,7 @@ const DoctorLayout = () => {
           </NavLink>
 
           {/* Desktop nav (center) */}
-          <nav className="hidden items-center gap-2 lg:flex">
+          <nav className="hidden items-center gap-2 xl:flex">
             {navItems.map(({ label, to, icon: Icon, showDot }) => (
               <NavLink key={to} to={to} className={linkClass}>
                 <Icon size={20} strokeWidth={1.6} />
@@ -136,7 +138,7 @@ const DoctorLayout = () => {
             <button
               type="button"
               onClick={() => setMobileOpen((open) => !open)}
-              className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 lg:hidden"
+              className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 xl:hidden"
               aria-label="Toggle menu"
             >
               {mobileOpen ? <X size={22} /> : <Menu size={22} />}
@@ -146,7 +148,7 @@ const DoctorLayout = () => {
 
         {/* Mobile menu */}
         {mobileOpen && (
-          <nav className="space-y-1 border-t border-slate-100 px-4 py-3 lg:hidden">
+          <nav className="space-y-1 border-t border-slate-100 px-4 py-3 xl:hidden">
             {navItems.map(({ label, to, icon: Icon, showDot }) => (
               <NavLink
                 key={to}
