@@ -1,7 +1,5 @@
-import React from "react";
+import ProfilePage from "../../../components/profile/ProfilePage";
 
-function NurseAccount() {
-  return <div>NurseAccount</div>;
-}
+const NurseAccount = () => <ProfilePage role="nurse" />;
 
 export default NurseAccount;

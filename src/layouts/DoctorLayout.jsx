@@ -5,6 +5,7 @@ import {
   Bell,
   ChevronRight,
   LayoutGrid,
+  LogOut,
   Menu,
   TriangleAlert,
   User,
@@ -50,11 +51,17 @@ const linkClass = ({ isActive }) =>
 const DoctorLayout = () => {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
 
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const displayName = user?.name || "Doctor";
   const displayRole = user?.specialty || user?.title || "Medical Oncologist";
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login", { replace: true });
+  };
 
   // Esc يقفل القائمة على الموبايل
   useEffect(() => {
@@ -132,6 +139,17 @@ const DoctorLayout = () => {
                 size={16}
                 className="hidden text-slate-400 sm:block"
               />
+            </button>
+
+            {/* Sign out */}
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-50 hover:text-rose-600"
+              aria-label="Sign out"
+              title="Sign out"
+            >
+              <LogOut size={20} strokeWidth={1.6} />
             </button>
 
             {/* Mobile menu button */}
