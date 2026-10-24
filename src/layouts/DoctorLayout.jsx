@@ -8,7 +8,6 @@ import {
   LogOut,
   Menu,
   TriangleAlert,
-  User,
   Users,
   X,
 } from "lucide-react";
@@ -19,14 +18,7 @@ const navItems = [
   { label: "Dashboard", to: "/doctor/dashboard", icon: LayoutGrid },
   { label: "Patients", to: "/doctor/patients", icon: Users },
   { label: "Alerts", to: "/doctor/alerts", icon: TriangleAlert },
-  {
-    label: "Notifications",
-    to: "/doctor/notifications",
-    icon: Bell,
-    showDot: true,
-  },
   { label: "Analytics", to: "/doctor/analytics", icon: BarChart3 },
-  { label: "Account", to: "/doctor/account", icon: User },
 ];
 
 // TODO: استبدلها بالحالة الحقيقية من الـ API / store لما يجهز
@@ -92,13 +84,10 @@ const DoctorLayout = () => {
 
           {/* Desktop nav (center) */}
           <nav className="hidden items-center gap-2 xl:flex">
-            {navItems.map(({ label, to, icon: Icon, showDot }) => (
+            {navItems.map(({ label, to, icon: Icon }) => (
               <NavLink key={to} to={to} className={linkClass}>
                 <Icon size={20} strokeWidth={1.6} />
                 {label}
-                {showDot && HAS_UNREAD_NOTIFICATIONS && (
-                  <span className="absolute right-2 top-1.5 h-2 w-2 rounded-full bg-rose-500" />
-                )}
               </NavLink>
             ))}
           </nav>
@@ -167,7 +156,7 @@ const DoctorLayout = () => {
         {/* Mobile menu */}
         {mobileOpen && (
           <nav className="space-y-1 border-t border-slate-100 px-4 py-3 xl:hidden">
-            {navItems.map(({ label, to, icon: Icon, showDot }) => (
+            {navItems.map(({ label, to, icon: Icon }) => (
               <NavLink
                 key={to}
                 to={to}
@@ -176,9 +165,6 @@ const DoctorLayout = () => {
               >
                 <Icon size={20} strokeWidth={1.6} />
                 {label}
-                {showDot && HAS_UNREAD_NOTIFICATIONS && (
-                  <span className="ml-auto h-2 w-2 rounded-full bg-rose-500" />
-                )}
               </NavLink>
             ))}
           </nav>
