@@ -5,13 +5,13 @@ const STYLES = {
   Stable: "bg-emerald-50 text-emerald-700",
 };
 
-const RiskBadge = ({ risk }) => (
+const RiskBadge = ({ risk, label }) => (
   <span
     className={`inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold ${
       STYLES[risk] ?? "bg-slate-100 text-slate-600"
     }`}
   >
-    {risk || "—"}
+    {label ?? (risk || "—")}
   </span>
 );
 
