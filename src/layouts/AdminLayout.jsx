@@ -22,13 +22,10 @@ const navItems = [
   { label: "Users", to: "/admin/users", icon: UserPlus },
   { label: "Patients", to: "/admin/patients", icon: Users },
   { label: "CTCAE Rules", to: "/admin/ctcae", icon: ClipboardCheck },
-  { label: "Alerts", to: "/admin/alerts", icon: Bell, badgeKey: "alerts" },
+  { label: "Alerts", to: "/admin/alerts", icon: Bell },
   { label: "Reports", to: "/admin/reports", icon: BarChart3 },
   { label: "System", to: "/admin/system", icon: Settings },
 ];
-
-// TODO: استبدلها بالعدد الحقيقي من الـ API / store لما يجهز
-const OPEN_ALERTS_COUNT = 7;
 
 const getInitials = (name = "") =>
   name
@@ -49,7 +46,6 @@ const AdminLayout = () => {
 
   const displayName = user?.name || "Hospital Admin";
   const displayRole = user?.title || "Hospital Administrator";
-  const badges = { alerts: OPEN_ALERTS_COUNT };
 
   // Ctrl/⌘ + K يفتح البحث
   useEffect(() => {
@@ -120,7 +116,7 @@ const AdminLayout = () => {
           </p>
 
           <ul className="space-y-1.5">
-            {navItems.map(({ label, to, icon: Icon, badgeKey }) => (
+            {navItems.map(({ label, to, icon: Icon }) => (
               <li key={to}>
                 <NavLink
                   to={to}
@@ -135,11 +131,6 @@ const AdminLayout = () => {
                 >
                   <Icon size={20} strokeWidth={1.6} />
                   <span className="flex-1">{label}</span>
-                  {badgeKey && badges[badgeKey] > 0 && (
-                    <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[11px] font-bold text-white">
-                      {badges[badgeKey]}
-                    </span>
-                  )}
                 </NavLink>
               </li>
             ))}
@@ -221,9 +212,6 @@ const AdminLayout = () => {
               aria-label="Open alerts"
             >
               <Bell size={22} strokeWidth={1.6} />
-              {OPEN_ALERTS_COUNT > 0 && (
-                <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
-              )}
             </button>
 
             <div className="hidden h-10 w-px bg-slate-200 sm:block" />

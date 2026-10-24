@@ -1,12 +1,23 @@
 import api from "./api";
+import { getDashboardPath } from "../utils/roles";
 
 /*
   شكل الـ response من الباك:
-  { token, expiration, userId, userName, role: "Admin", hospitalId }
+  { token, expiration, userId, userName, email, phoneNumber, hospitalId, roles: ["Admin"], patientId }
 
   بنحوّله لشكل نظيف نخزنه في الـ store:
-  { token, expiration, user: { userId, userName, name, role: "admin", hospitalId } }
+  { token, expiration, user: { userId, userName, name, email, phoneNumber, role: "admin", roles, hospitalId, patientId } }
 */
+
+// الباك بيرجّع array من الـ roles. بنختار أول role ليها داشبورد في الموقع،
+// ولو مفيش (Patient / Caregiver) بناخد أول واحد عشان الـ store يرفض الدخول برسالة واضحة.
+const pickPrimaryRole = (roles) => {
+  const normalized = (Array.isArray(roles) ? roles : [])
+    .filter(Boolean)
+    .map((role) => String(role).toLowerCase());
+  return normalized.find((role) => getDashboardPath(role)) ?? normalized[0] ?? null;
+};
+
 const mapLoginResponse = (data) => ({
   token: data.token,
   expiration: data.expiration,
@@ -15,9 +26,13 @@ const mapLoginResponse = (data) => ({
     userName: data.userName,
     // اسم العرض في الـ Layouts. حالياً = userName، ولما الباك يرجّع الاسم الكامل نغيّره هنا
     name: data.userName,
-    // الباك بيبعت "Admin"، والـ routes عندنا بحروف صغيرة
-    role: String(data.role).toLowerCase(),
+    email: data.email,
+    phoneNumber: data.phoneNumber,
+    // الـ routes عندنا بحروف صغيرة
+    role: pickPrimaryRole(data.roles),
+    roles: data.roles ?? [],
     hospitalId: data.hospitalId,
+    patientId: data.patientId,
   },
 });
 
