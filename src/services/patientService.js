@@ -27,6 +27,16 @@ const patientService = {
 
     return Array.isArray(data) ? data.map(mapPatientAssignment) : [];
   },
+
+  // POST {VITE_API_BASE_URL}/PatientAssignments  body: { patientId, userId }
+  async createAssignment({ patientId, userId }) {
+    const { data } = await api.post("/PatientAssignments", {
+      patientId,
+      userId,
+    });
+
+    return data;
+  },
 };
 
 export default patientService;

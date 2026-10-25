@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { usePatientStore } from "../../../../store/patientStore";
+import { useUserStore } from "../../../../store/userStore";
 
 const ROLES = ["doctor", "nurse", "caregiver"];
 
@@ -24,22 +25,39 @@ export default function usePatientAssignments() {
   const isLoading = usePatientStore((state) => state.isLoading);
   const error = usePatientStore((state) => state.error);
   const fetchPatients = usePatientStore((state) => state.fetchPatients);
+  const isAssigning = usePatientStore((state) => state.isAssigning);
+  const createAssignments = usePatientStore((state) => state.createAssignments);
+
+  const users = useUserStore((state) => state.users);
+  const fetchUsers = useUserStore((state) => state.fetchUsers);
 
   useEffect(() => {
     fetchPatients();
-  }, [fetchPatients]);
-
-  // patientId -> team saved locally from the Assign drawer
-  const [overrides, setOverrides] = useState({});
+    fetchUsers();
+  }, [fetchPatients, fetchUsers]);
 
   const [search, setSearch] = useState("");
   // { role: "doctor" | "nurse" | "caregiver", staffId } | { role: "unassigned" } | null
   const [staffFilter, setStaffFilter] = useState(null);
 
-  // The API has no staff list endpoint yet, so staff are the people that
-  // appear in the assignments returned for the patients.
+  // Assignable staff: active doctors/nurses/caregivers from the users list
+  // (user.id is the backend userId), plus anyone already shown in the
+  // assignments so existing names always resolve.
   const staff = useMemo(() => {
     const byId = new Map();
+
+    users.forEach((user) => {
+      const role = user.role?.toLowerCase();
+
+      if (user.isActive && ROLES.includes(role)) {
+        byId.set(user.id, {
+          id: user.id,
+          role,
+          name: user.userName,
+          detail: user.email,
+        });
+      }
+    });
 
     apiPatients.forEach((patient) => {
       ROLES.forEach((role) => {
@@ -56,7 +74,7 @@ export default function usePatientAssignments() {
     });
 
     return [...byId.values()];
-  }, [apiPatients]);
+  }, [apiPatients, users]);
 
   const patients = useMemo(
     () =>
@@ -66,13 +84,13 @@ export default function usePatientAssignments() {
         medicalRecordNumber: patient.patientCode,
         isActive: patient.status?.toLowerCase() === "active",
         risk: patient.riskLevel,
-        assigned: overrides[patient.patientId] ?? {
+        assigned: {
           doctor: patient.assignedDoctor.map((member) => member.userId),
           nurse: patient.assignedNurses.map((member) => member.userId),
           caregiver: patient.assignedCaregivers.map((member) => member.userId),
         },
       })),
-    [apiPatients, overrides],
+    [apiPatients],
   );
 
   const staffById = useMemo(
@@ -122,21 +140,27 @@ export default function usePatientAssignments() {
   }, [patients, search, staffFilter]);
 
   // team = { doctor: [staffId], nurse: [staffId], caregiver: [staffId] }
-  const assign = (patientIds, team) => {
-    // TODO: replace with API when backend is ready (save care team assignments)
-    setOverrides((current) => {
-      const next = { ...current };
+  // Creates one assignment per (patient, staff) pair that doesn't exist yet.
+  // The backend has no endpoint to remove an assignment, so staff taken off
+  // the team in the drawer are not unassigned.
+  const assign = async (patientIds, team) => {
+    const requested = ROLES.flatMap((role) => team[role]);
 
-      patientIds.forEach((id) => {
-        next[id] = {
-          doctor: [...team.doctor],
-          nurse: [...team.nurse],
-          caregiver: [...team.caregiver],
-        };
+    const pairs = patients
+      .filter((patient) => patientIds.includes(patient.id))
+      .flatMap((patient) => {
+        const existing = ROLES.flatMap((role) => patient.assigned[role]);
+
+        return requested
+          .filter((userId) => !existing.includes(userId))
+          .map((userId) => ({ patientId: patient.id, userId }));
       });
 
-      return next;
-    });
+    if (pairs.length === 0) {
+      return { succeeded: 0, errors: [], nothingToDo: true };
+    }
+
+    return createAssignments(pairs);
   };
 
   const clearFilters = () => {
@@ -154,6 +178,7 @@ export default function usePatientAssignments() {
     isLoading,
     error,
     fetchPatients,
+    isAssigning,
     search,
     setSearch,
     staffFilter,
