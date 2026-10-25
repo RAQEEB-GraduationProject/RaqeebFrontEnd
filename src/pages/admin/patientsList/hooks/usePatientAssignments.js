@@ -1,28 +1,79 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import { mockPatients } from "../../../../data/mockPatients";
-import { mockStaff } from "../../../../data/mockStaff";
+import { usePatientStore } from "../../../../store/patientStore";
 
 const ROLES = ["doctor", "nurse", "caregiver"];
+
+// API field that holds each role's assigned staff.
+const ROLE_FIELDS = {
+  doctor: "assignedDoctor",
+  nurse: "assignedNurses",
+  caregiver: "assignedCaregivers",
+};
 
 const isUnassigned = (patient) =>
   ROLES.every((role) => patient.assigned[role].length === 0);
 
 /*
-  Local-only state for the Patients & assignments page.
-  TODO: replace with API when backend is ready — swap the mock data below
-  for fetched data and make `assign` call the API.
-  The components only use what this hook returns, so they won't change.
+  Adapts GET /Patients/assignments to the shape the page components use:
+  `assigned` holds staff userIds, resolved to names through `staffById`.
+  Re-assigning is still local-only (no save endpoint yet), kept as overrides.
 */
 export default function usePatientAssignments() {
-  // TODO: replace with API when backend is ready (fetch patients)
-  const [patients, setPatients] = useState(mockPatients);
-  // TODO: replace with API when backend is ready (fetch staff)
-  const staff = mockStaff;
+  const apiPatients = usePatientStore((state) => state.patients);
+  const isLoading = usePatientStore((state) => state.isLoading);
+  const error = usePatientStore((state) => state.error);
+  const fetchPatients = usePatientStore((state) => state.fetchPatients);
+
+  useEffect(() => {
+    fetchPatients();
+  }, [fetchPatients]);
+
+  // patientId -> team saved locally from the Assign drawer
+  const [overrides, setOverrides] = useState({});
 
   const [search, setSearch] = useState("");
   // { role: "doctor" | "nurse" | "caregiver", staffId } | { role: "unassigned" } | null
   const [staffFilter, setStaffFilter] = useState(null);
+
+  // The API has no staff list endpoint yet, so staff are the people that
+  // appear in the assignments returned for the patients.
+  const staff = useMemo(() => {
+    const byId = new Map();
+
+    apiPatients.forEach((patient) => {
+      ROLES.forEach((role) => {
+        patient[ROLE_FIELDS[role]].forEach((member) => {
+          if (!byId.has(member.userId)) {
+            byId.set(member.userId, {
+              id: member.userId,
+              role,
+              name: member.name,
+            });
+          }
+        });
+      });
+    });
+
+    return [...byId.values()];
+  }, [apiPatients]);
+
+  const patients = useMemo(
+    () =>
+      apiPatients.map((patient) => ({
+        id: patient.patientId,
+        userName: patient.patientName,
+        medicalRecordNumber: patient.patientCode,
+        isActive: patient.status?.toLowerCase() === "active",
+        risk: patient.riskLevel,
+        assigned: overrides[patient.patientId] ?? {
+          doctor: patient.assignedDoctor.map((member) => member.userId),
+          nurse: patient.assignedNurses.map((member) => member.userId),
+          caregiver: patient.assignedCaregivers.map((member) => member.userId),
+        },
+      })),
+    [apiPatients, overrides],
+  );
 
   const staffById = useMemo(
     () => Object.fromEntries(staff.map((member) => [member.id, member])),
@@ -62,11 +113,10 @@ export default function usePatientAssignments() {
 
       if (!term) return true;
 
-      return [patient.userName, patient.medicalRecordNumber, patient.email].some(
-        (value) =>
-          String(value ?? "")
-            .toLowerCase()
-            .includes(term),
+      return [patient.userName, patient.medicalRecordNumber].some((value) =>
+        String(value ?? "")
+          .toLowerCase()
+          .includes(term),
       );
     });
   }, [patients, search, staffFilter]);
@@ -74,20 +124,19 @@ export default function usePatientAssignments() {
   // team = { doctor: [staffId], nurse: [staffId], caregiver: [staffId] }
   const assign = (patientIds, team) => {
     // TODO: replace with API when backend is ready (save care team assignments)
-    setPatients((current) =>
-      current.map((patient) =>
-        patientIds.includes(patient.id)
-          ? {
-              ...patient,
-              assigned: {
-                doctor: [...team.doctor],
-                nurse: [...team.nurse],
-                caregiver: [...team.caregiver],
-              },
-            }
-          : patient,
-      ),
-    );
+    setOverrides((current) => {
+      const next = { ...current };
+
+      patientIds.forEach((id) => {
+        next[id] = {
+          doctor: [...team.doctor],
+          nurse: [...team.nurse],
+          caregiver: [...team.caregiver],
+        };
+      });
+
+      return next;
+    });
   };
 
   const clearFilters = () => {
@@ -102,6 +151,9 @@ export default function usePatientAssignments() {
     staffById,
     patientCountByStaff,
     unassignedCount,
+    isLoading,
+    error,
+    fetchPatients,
     search,
     setSearch,
     staffFilter,

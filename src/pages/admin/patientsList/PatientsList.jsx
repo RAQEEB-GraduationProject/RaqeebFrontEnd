@@ -14,6 +14,9 @@ const PatientsList = () => {
     staffById,
     patientCountByStaff,
     unassignedCount,
+    isLoading,
+    error,
+    fetchPatients,
     search,
     setSearch,
     staffFilter,
@@ -86,6 +89,15 @@ const PatientsList = () => {
         </div>
       </section>
 
+      {error && patients.length > 0 && (
+        <p
+          role="alert"
+          className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600"
+        >
+          {error}
+        </p>
+      )}
+
       {/* Count + active filter chip */}
       <div className="-mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-500">
         <p>
@@ -121,6 +133,9 @@ const PatientsList = () => {
       <PatientsTable
         patients={filteredPatients}
         staffById={staffById}
+        isLoading={isLoading && patients.length === 0}
+        error={patients.length === 0 ? error : null}
+        onRetry={fetchPatients}
         hasFilters={hasFilters}
         onClearFilters={clearFilters}
         onAssign={(patient) => setDrawer({ patient })}
