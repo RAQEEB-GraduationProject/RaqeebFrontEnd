@@ -12,7 +12,9 @@ const ROLE_FIELDS = {
   caregiver: "assignedCaregivers",
 };
 
-const isUnassigned = (patient) =>
+const hasRisk = (patient) => Boolean(String(patient.risk ?? "").trim());
+
+const isUnassigned =(patient) =>
   ROLES.every((role) => patient.assigned[role].length === 0);
 
 /*
@@ -120,7 +122,7 @@ export default function usePatientAssignments() {
   const filteredPatients = useMemo(() => {
     const term = search.trim().toLowerCase();
 
-    return patients.filter((patient) => {
+    const filtered = patients.filter((patient) => {
       if (staffFilter?.role === "unassigned") {
         if (!isUnassigned(patient)) return false;
       } else if (staffFilter) {
@@ -137,6 +139,10 @@ export default function usePatientAssignments() {
           .includes(term),
       );
     });
+
+    // Patients without a risk level go last; Array.sort is stable, so the
+    // order among each group stays as the backend returned it.
+    return filtered.sort((a, b) => hasRisk(b) - hasRisk(a));
   }, [patients, search, staffFilter]);
 
   // team = { doctor: [staffId], nurse: [staffId], caregiver: [staffId] }
