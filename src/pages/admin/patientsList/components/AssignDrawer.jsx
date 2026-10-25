@@ -39,6 +39,7 @@ const AssignDrawer = ({
   patients,
   staff,
   staffById,
+  isSaving,
   onSave,
   onClose,
 }) => {
@@ -197,14 +198,14 @@ const AssignDrawer = ({
 
           <button
             type="button"
-            disabled={!canSave}
-            onClick={() => {
-              onSave(selectedIds, team);
-              onClose();
+            disabled={!canSave || isSaving}
+            onClick={async () => {
+              if (isSaving) return;
+              if (await onSave(selectedIds, team)) onClose();
             }}
             className="rounded-xl bg-[#0f3d4c] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#0b2a3d] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Save assignments
+            {isSaving ? "Saving…" : "Save assignments"}
           </button>
         </footer>
       </aside>

@@ -1,10 +1,21 @@
 import { useState } from "react";
 import { Plus, Search, X } from "lucide-react";
+import Swal from "sweetalert2";
 
 import usePatientAssignments from "./hooks/usePatientAssignments";
 import AssignDrawer from "./components/AssignDrawer";
 import PatientsTable from "./components/PatientsTable";
 import StaffFilter from "./components/StaffFilter";
+
+const notify = (icon, title) =>
+  Swal.fire({
+    toast: true,
+    position: "top-end",
+    icon,
+    title,
+    showConfirmButton: false,
+    timer: icon === "error" ? 4000 : 2500,
+  });
 
 const PatientsList = () => {
   const {
@@ -14,6 +25,10 @@ const PatientsList = () => {
     staffById,
     patientCountByStaff,
     unassignedCount,
+    isLoading,
+    error,
+    fetchPatients,
+    isAssigning,
     search,
     setSearch,
     staffFilter,
@@ -22,6 +37,30 @@ const PatientsList = () => {
     clearFilters,
     assign,
   } = usePatientAssignments();
+
+  // Resolves true when the drawer can close (everything saved, or nothing to save).
+  const handleSave = async (patientIds, team) => {
+    const { succeeded, errors, nothingToDo } = await assign(patientIds, team);
+
+    if (nothingToDo) {
+      notify("info", "No new assignments to save");
+      return true;
+    }
+
+    if (errors.length === 0) {
+      notify("success", "Care team assigned");
+      return true;
+    }
+
+    notify(
+      "error",
+      succeeded > 0
+        ? `Some assignments failed: ${errors.join(" ")}`
+        : errors.join(" "),
+    );
+
+    return false;
+  };
 
   // null = closed, { patient: null } = bulk, { patient } = locked to one row
   const [drawer, setDrawer] = useState(null);
@@ -86,6 +125,15 @@ const PatientsList = () => {
         </div>
       </section>
 
+      {error && patients.length > 0 && (
+        <p
+          role="alert"
+          className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600"
+        >
+          {error}
+        </p>
+      )}
+
       {/* Count + active filter chip */}
       <div className="-mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-500">
         <p>
@@ -121,6 +169,9 @@ const PatientsList = () => {
       <PatientsTable
         patients={filteredPatients}
         staffById={staffById}
+        isLoading={isLoading && patients.length === 0}
+        error={patients.length === 0 ? error : null}
+        onRetry={fetchPatients}
         hasFilters={hasFilters}
         onClearFilters={clearFilters}
         onAssign={(patient) => setDrawer({ patient })}
@@ -133,7 +184,8 @@ const PatientsList = () => {
           patients={patients}
           staff={staff}
           staffById={staffById}
-          onSave={assign}
+          isSaving={isAssigning}
+          onSave={handleSave}
           onClose={() => setDrawer(null)}
         />
       )}

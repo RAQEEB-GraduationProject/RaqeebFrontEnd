@@ -35,9 +35,38 @@ const Message = ({ title, text, actionLabel, onAction }) => (
   </div>
 );
 
+const SkeletonRows = () => (
+  <div aria-busy="true" aria-label="Loading patients">
+    {Array.from({ length: 5 }).map((_, index) => (
+      <div
+        key={index}
+        className={`${GRID} animate-pulse border-t border-slate-100 py-5`}
+      >
+        <div className="flex items-center gap-4">
+          <div className="h-10 w-10 rounded-xl bg-slate-100" />
+
+          <div className="space-y-2">
+            <div className="h-3 w-28 rounded bg-slate-100" />
+            <div className="h-2.5 w-20 rounded bg-slate-100" />
+          </div>
+        </div>
+
+        <div className="h-3 w-40 rounded bg-slate-100" />
+        <div className="h-5 w-16 rounded-full bg-slate-100" />
+        <div className="h-3 w-16 rounded bg-slate-100" />
+        <div className="h-3 w-10 rounded bg-slate-100" />
+        <div className="h-8 w-16 rounded-xl bg-slate-100" />
+      </div>
+    ))}
+  </div>
+);
+
 const PatientsTable = ({
   patients,
   staffById,
+  isLoading,
+  error,
+  onRetry,
   hasFilters,
   onClearFilters,
   onAssign,
@@ -56,7 +85,16 @@ const PatientsTable = ({
           <span>Assign</span>
         </div>
 
-        {patients.length === 0 ? (
+        {isLoading ? (
+          <SkeletonRows />
+        ) : error ? (
+          <Message
+            title="Couldn't load patients"
+            text={error}
+            actionLabel="Try again"
+            onAction={onRetry}
+          />
+        ) : patients.length === 0 ? (
           <Message
             title={
               hasFilters ? "No patients match your filters" : "No patients yet"
