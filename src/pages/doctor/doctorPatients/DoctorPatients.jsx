@@ -35,6 +35,9 @@ const SelectField = ({ label, value, onChange, children }) => (
 const DoctorPatients = () => {
   const {
     filteredPatients,
+    isLoading,
+    error,
+    refetch,
     cycleOptions,
     riskCounts,
     search,
@@ -161,6 +164,9 @@ const DoctorPatients = () => {
 
       <DoctorPatientsTable
         patients={filteredPatients}
+        isLoading={isLoading}
+        error={error}
+        onRetry={refetch}
         hasFilters={hasFilters}
         onClearFilters={clearFilters}
       />

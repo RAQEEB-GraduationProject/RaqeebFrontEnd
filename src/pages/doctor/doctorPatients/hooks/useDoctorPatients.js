@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { mockDoctorPatients } from "../../../../data/mockDoctorPatients";
+import { useEffect, useMemo, useState } from "react";
+import { usePatientStore } from "../../../../store/patientStore";
 
 export const RISK_FILTERS = ["Critical", "High", "Medium", "Stable"];
 
@@ -13,6 +13,13 @@ const byName = (a, b) =>
 // Priority queue: by risk, then A–Z inside each risk level.
 const byRiskThenName = (a, b) => riskRank(a.risk) - riskRank(b.risk) || byName(a, b);
 
+// Treatment arrives as free text ("Cycle 4 of 8"); the cycle filter only
+// applies to patients whose text actually contains a cycle number.
+const getCycle = (patient) => {
+  const match = /cycle\s+(\d+)/i.exec(patient.treatment ?? "");
+  return match ? Number(match[1]) : null;
+};
+
 export const TAB_PRIORITY = "priority";
 export const TAB_ALL = "all";
 
@@ -22,8 +29,14 @@ const SORTERS = {
 };
 
 const useDoctorPatients = () => {
-  // TODO: swap for API data when the backend is ready
-  const patients = mockDoctorPatients;
+  const patients = usePatientStore((state) => state.doctorPatients);
+  const isLoading = usePatientStore((state) => state.isDoctorPatientsLoading);
+  const error = usePatientStore((state) => state.doctorPatientsError);
+  const fetchPatients = usePatientStore((state) => state.fetchDoctorPatients);
+
+  useEffect(() => {
+    fetchPatients();
+  }, [fetchPatients]);
 
   const [search, setSearch] = useState("");
   const [risk, setRisk] = useState("all");
@@ -33,7 +46,7 @@ const useDoctorPatients = () => {
   const cycleOptions = useMemo(
     () =>
       [
-        ...new Set(patients.map((p) => p.treatment?.cycle).filter(Boolean)),
+        ...new Set(patients.map(getCycle).filter(Boolean)),
       ].sort((a, b) => a - b),
     [patients],
   );
@@ -41,7 +54,7 @@ const useDoctorPatients = () => {
   const riskCounts = useMemo(
     () =>
       patients.reduce((counts, p) => {
-        counts[p.risk] = (counts[p.risk] ?? 0) + 1;
+        if (p.risk) counts[p.risk] = (counts[p.risk] ?? 0) + 1;
         return counts;
       }, {}),
     [patients],
@@ -53,7 +66,7 @@ const useDoctorPatients = () => {
     return patients
       .filter((p) => {
         if (risk !== "all" && p.risk !== risk) return false;
-        if (cycle !== "all" && p.treatment?.cycle !== Number(cycle)) {
+        if (cycle !== "all" && getCycle(p) !== Number(cycle)) {
           return false;
         }
         if (!query) return true;
@@ -75,6 +88,9 @@ const useDoctorPatients = () => {
 
   return {
     filteredPatients,
+    isLoading: isLoading && patients.length === 0,
+    error: patients.length === 0 ? error : null,
+    refetch: fetchPatients,
     cycleOptions,
     riskCounts,
     search,

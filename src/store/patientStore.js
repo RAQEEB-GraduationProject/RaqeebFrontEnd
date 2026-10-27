@@ -32,6 +32,35 @@ export const usePatientStore = create((set, get) => ({
 
   isAssigning: false,
 
+  // Doctor dashboard list (GET /Patients), kept apart from the admin
+  // assignments list above. `doctorPatientsLoaded` tells "not fetched yet"
+  // apart from "fetched, empty".
+  doctorPatients: [],
+  doctorPatientsLoaded: false,
+  isDoctorPatientsLoading: false,
+  doctorPatientsError: null,
+
+  fetchDoctorPatients: async () => {
+    // One request at a time (covers StrictMode's double effect).
+    if (get().isDoctorPatientsLoading) return;
+
+    set({ isDoctorPatientsLoading: true, doctorPatientsError: null });
+
+    try {
+      const doctorPatients = await patientService.getPatients();
+      set({
+        doctorPatients,
+        doctorPatientsLoaded: true,
+        isDoctorPatientsLoading: false,
+      });
+    } catch (error) {
+      set({
+        isDoctorPatientsLoading: false,
+        doctorPatientsError: getErrorMessage(error),
+      });
+    }
+  },
+
   fetchPatients: async () => {
     set({ isLoading: true, error: null });
 
