@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
+import { useAssignmentStore } from "../../../../store/assignmentStore";
 import { usePatientStore } from "../../../../store/patientStore";
 import { useUserStore } from "../../../../store/userStore";
 
@@ -18,25 +19,32 @@ const isUnassigned =(patient) =>
   ROLES.every((role) => patient.assigned[role].length === 0);
 
 /*
-  Adapts GET /Patients/assignments to the shape the page components use:
+  Adapts assignments (assignmentStore) to the shape the page components use:
   `assigned` holds staff userIds, resolved to names through `staffById`.
-  Re-assigning is still local-only (no save endpoint yet), kept as overrides.
+  Risk and active status are patient data, so they are joined in from
+  patientStore (GET /Patients) by patientId instead of being duplicated.
 */
 export default function usePatientAssignments() {
-  const apiPatients = usePatientStore((state) => state.patients);
-  const isLoading = usePatientStore((state) => state.isLoading);
-  const error = usePatientStore((state) => state.error);
-  const fetchPatients = usePatientStore((state) => state.fetchPatients);
-  const isAssigning = usePatientStore((state) => state.isAssigning);
-  const createAssignments = usePatientStore((state) => state.createAssignments);
+  const apiPatients = useAssignmentStore((state) => state.assignments);
+  const isLoading = useAssignmentStore((state) => state.isLoading);
+  const error = useAssignmentStore((state) => state.error);
+  const fetchAssignments = useAssignmentStore((state) => state.fetchAssignments);
+  const isAssigning = useAssignmentStore((state) => state.isAssigning);
+  const saveChanges = useAssignmentStore((state) => state.saveChanges);
+
+  // Loading/error follow the assignments (the list this page is built from);
+  // a failed patient-records request only leaves risk/status blank.
+  const patientRecords = usePatientStore((state) => state.patients);
+  const fetchPatientRecords = usePatientStore((state) => state.fetchPatients);
 
   const users = useUserStore((state) => state.users);
   const fetchUsers = useUserStore((state) => state.fetchUsers);
 
   useEffect(() => {
-    fetchPatients();
+    fetchAssignments();
+    fetchPatientRecords();
     fetchUsers();
-  }, [fetchPatients, fetchUsers]);
+  }, [fetchAssignments, fetchPatientRecords, fetchUsers]);
 
   const [search, setSearch] = useState("");
   // { role: "doctor" | "nurse" | "caregiver", staffId } | { role: "unassigned" } | null
@@ -78,21 +86,40 @@ export default function usePatientAssignments() {
     return [...byId.values()];
   }, [apiPatients, users]);
 
+  const recordsById = useMemo(
+    () => new Map(patientRecords.map((record) => [record.id, record])),
+    [patientRecords],
+  );
+
   const patients = useMemo(
     () =>
-      apiPatients.map((patient) => ({
-        id: patient.patientId,
-        userName: patient.patientName,
-        medicalRecordNumber: patient.patientCode,
-        isActive: patient.status?.toLowerCase() === "active",
-        risk: patient.riskLevel,
-        assigned: {
-          doctor: patient.assignedDoctor.map((member) => member.userId),
-          nurse: patient.assignedNurses.map((member) => member.userId),
-          caregiver: patient.assignedCaregivers.map((member) => member.userId),
-        },
-      })),
-    [apiPatients],
+      apiPatients.map((patient) => {
+        const record = recordsById.get(patient.patientId);
+
+        return {
+          id: patient.patientId,
+          userName: patient.patientName,
+          medicalRecordNumber: patient.patientCode,
+          // Both endpoints only list active patients, so a missing record
+          // means "not loaded yet", not "inactive".
+          isActive: record?.isActive ?? true,
+          risk: record?.risk ?? null,
+          assigned: {
+            doctor: patient.assignedDoctor.map((member) => member.userId),
+            nurse: patient.assignedNurses.map((member) => member.userId),
+            caregiver: patient.assignedCaregivers.map((member) => member.userId),
+          },
+          // userId -> assignmentId, needed to unassign that staff member.
+          assignmentIds: Object.fromEntries(
+            [
+              ...patient.assignedDoctor,
+              ...patient.assignedNurses,
+              ...patient.assignedCaregivers,
+            ].map((member) => [member.userId, member.assignmentId]),
+          ),
+        };
+      }),
+    [apiPatients, recordsById],
   );
 
   const staffById = useMemo(
@@ -147,26 +174,34 @@ export default function usePatientAssignments() {
 
   // team = { doctor: [staffId], nurse: [staffId], caregiver: [staffId] }
   // Creates one assignment per (patient, staff) pair that doesn't exist yet.
-  // The backend has no endpoint to remove an assignment, so staff taken off
-  // the team in the drawer are not unassigned.
-  const assign = async (patientIds, team) => {
+  // With removeMissing (single-patient edit only, where the drawer starts from
+  // the current team), staff taken off the team are unassigned.
+  const assign = async (patientIds, team, { removeMissing = false } = {}) => {
     const requested = ROLES.flatMap((role) => team[role]);
+    const selected = patients.filter((patient) => patientIds.includes(patient.id));
 
-    const pairs = patients
-      .filter((patient) => patientIds.includes(patient.id))
-      .flatMap((patient) => {
-        const existing = ROLES.flatMap((role) => patient.assigned[role]);
+    const create = selected.flatMap((patient) => {
+      const existing = ROLES.flatMap((role) => patient.assigned[role]);
 
-        return requested
-          .filter((userId) => !existing.includes(userId))
-          .map((userId) => ({ patientId: patient.id, userId }));
-      });
+      return requested
+        .filter((userId) => !existing.includes(userId))
+        .map((userId) => ({ patientId: patient.id, userId }));
+    });
 
-    if (pairs.length === 0) {
+    const remove = removeMissing
+      ? selected.flatMap((patient) =>
+          ROLES.flatMap((role) => patient.assigned[role])
+            .filter((userId) => !requested.includes(userId))
+            .map((userId) => patient.assignmentIds[userId])
+            .filter(Boolean),
+        )
+      : [];
+
+    if (create.length === 0 && remove.length === 0) {
       return { succeeded: 0, errors: [], nothingToDo: true };
     }
 
-    return createAssignments(pairs);
+    return saveChanges({ create, remove });
   };
 
   const clearFilters = () => {
@@ -183,7 +218,7 @@ export default function usePatientAssignments() {
     unassignedCount,
     isLoading,
     error,
-    fetchPatients,
+    fetchPatients: fetchAssignments,
     isAssigning,
     search,
     setSearch,

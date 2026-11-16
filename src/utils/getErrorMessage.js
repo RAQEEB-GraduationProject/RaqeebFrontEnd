@@ -1,24 +1,14 @@
-import { isAxiosError } from "axios";
+import { ApiError, getFallbackMessage } from "../services/apiResponse";
 
-const DEFAULT_MESSAGE = "Something went wrong. Please try again.";
-
+/*
+  Message to show the user for any error. API failures are already normalized
+  to ApiError by the axios interceptor (backend message when usable, otherwise
+  a status-based fallback), so this only needs to read it.
+*/
 const getErrorMessage = (error) => {
-  if (!isAxiosError(error)) return error?.message || DEFAULT_MESSAGE;
+  if (error instanceof ApiError) return error.message;
 
-  if (!error.response) {
-    return "Cannot reach the server. Please check your connection.";
-  }
-
-  const { status, data } = error.response;
-
-  if (status === 403) return "You do not have permission to do this.";
-  if (status === 429) return "Too many attempts. Please try again later.";
-  if (status >= 500) return "Server error. Please try again later.";
-
-  // رسالة من الباك لو موجودة
-  if (typeof data?.message === "string") return data.message;
-
-  return DEFAULT_MESSAGE;
+  return error?.message || getFallbackMessage("unknown");
 };
 
 export default getErrorMessage;

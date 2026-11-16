@@ -29,10 +29,10 @@ const SORTERS = {
 };
 
 const useDoctorPatients = () => {
-  const patients = usePatientStore((state) => state.doctorPatients);
-  const isLoading = usePatientStore((state) => state.isDoctorPatientsLoading);
-  const error = usePatientStore((state) => state.doctorPatientsError);
-  const fetchPatients = usePatientStore((state) => state.fetchDoctorPatients);
+  const patients = usePatientStore((state) => state.patients);
+  const isLoading = usePatientStore((state) => state.isLoading);
+  const error = usePatientStore((state) => state.error);
+  const fetchPatients = usePatientStore((state) => state.fetchPatients);
 
   useEffect(() => {
     fetchPatients();

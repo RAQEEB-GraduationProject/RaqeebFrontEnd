@@ -47,12 +47,12 @@ const DoctorPatientDetails = () => {
   const { patientId } = useParams();
 
   const patient = usePatientStore((state) =>
-    state.doctorPatients.find((p) => p.id === patientId),
+    state.patients.find((p) => p.id === patientId),
   );
-  const isLoaded = usePatientStore((state) => state.doctorPatientsLoaded);
-  const isLoading = usePatientStore((state) => state.isDoctorPatientsLoading);
-  const error = usePatientStore((state) => state.doctorPatientsError);
-  const fetchPatients = usePatientStore((state) => state.fetchDoctorPatients);
+  const isLoaded = usePatientStore((state) => state.isLoaded);
+  const isLoading = usePatientStore((state) => state.isLoading);
+  const error = usePatientStore((state) => state.error);
+  const fetchPatients = usePatientStore((state) => state.fetchPatients);
 
   // Opened directly (refresh / shared link): the list was never fetched.
   useEffect(() => {

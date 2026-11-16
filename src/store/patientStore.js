@@ -1,99 +1,29 @@
-import { isAxiosError } from "axios";
 import { create } from "zustand";
 import patientService from "../services/patientService";
 import getErrorMessage from "../utils/getErrorMessage";
 
-// 400/409 responses usually explain the problem in the body, which the
-// shared getErrorMessage ignores, so read the common shapes first.
-const getAssignError = (error) => {
-  const data = isAxiosError(error) ? error.response?.data : null;
-
-  if (typeof data === "string" && data.trim()) return data;
-  if (typeof data?.message === "string") return data.message;
-
-  if (data?.errors && typeof data.errors === "object") {
-    const messages = Object.values(data.errors).flat();
-    if (messages.length) return messages.join(" ");
-  }
-
-  if (typeof data?.title === "string") return data.title;
-
-  if (isAxiosError(error) && error.response?.status === 401) {
-    return "Your session has expired. Please sign in again.";
-  }
-
-  return getErrorMessage(error);
-};
-
+/*
+  Patients only: the patient records from GET /Patients (clinical data).
+  Who is assigned to whom lives in assignmentStore.
+  `isLoaded` tells "not fetched yet" apart from "fetched, empty".
+*/
 export const usePatientStore = create((set, get) => ({
   patients: [],
+  isLoaded: false,
   isLoading: false,
   error: null,
 
-  isAssigning: false,
-
-  // Doctor dashboard list (GET /Patients), kept apart from the admin
-  // assignments list above. `doctorPatientsLoaded` tells "not fetched yet"
-  // apart from "fetched, empty".
-  doctorPatients: [],
-  doctorPatientsLoaded: false,
-  isDoctorPatientsLoading: false,
-  doctorPatientsError: null,
-
-  fetchDoctorPatients: async () => {
-    // One request at a time (covers StrictMode's double effect).
-    if (get().isDoctorPatientsLoading) return;
-
-    set({ isDoctorPatientsLoading: true, doctorPatientsError: null });
-
-    try {
-      const doctorPatients = await patientService.getPatients();
-      set({
-        doctorPatients,
-        doctorPatientsLoaded: true,
-        isDoctorPatientsLoading: false,
-      });
-    } catch (error) {
-      set({
-        isDoctorPatientsLoading: false,
-        doctorPatientsError: getErrorMessage(error),
-      });
-    }
-  },
-
   fetchPatients: async () => {
+    // One request at a time (covers StrictMode's double effect).
+    if (get().isLoading) return;
+
     set({ isLoading: true, error: null });
 
     try {
-      const patients = await patientService.getPatientAssignments();
-      set({ patients, isLoading: false });
+      const patients = await patientService.getPatients();
+      set({ patients, isLoaded: true, isLoading: false });
     } catch (error) {
       set({ isLoading: false, error: getErrorMessage(error) });
     }
-  },
-
-  // pairs = [{ patientId, userId }]. Nothing is added locally: the list is
-  // re-fetched once the backend confirmed at least one assignment.
-  createAssignments: async (pairs) => {
-    if (get().isAssigning) {
-      return { succeeded: 0, errors: ["An assignment is already in progress."] };
-    }
-
-    set({ isAssigning: true });
-
-    const results = await Promise.allSettled(
-      pairs.map((pair) => patientService.createAssignment(pair)),
-    );
-
-    const errors = results
-      .filter((result) => result.status === "rejected")
-      .map((result) => getAssignError(result.reason));
-    const succeeded = results.length - errors.length;
-
-    if (succeeded > 0) await get().fetchPatients();
-
-    set({ isAssigning: false });
-
-    return { succeeded, errors: [...new Set(errors)] };
   },
 }));

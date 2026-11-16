@@ -1,32 +1,6 @@
 import { create } from "zustand";
-import { isAxiosError } from "axios";
 import userService from "../services/userService";
 import getErrorMessage from "../utils/getErrorMessage";
-
-// Registration errors (400/409) usually carry details that the shared
-// getErrorMessage ignores, so read the common shapes before falling back to it.
-const getCreateError = (error) => {
-  const data = isAxiosError(error) ? error.response?.data : null;
-
-  if (typeof data === "string" && data.trim()) return data;
-  if (typeof data?.message === "string") return data.message;
-
-  if (Array.isArray(data) && data.length) {
-    return data
-      .map((item) => item?.description ?? item?.message ?? item)
-      .filter((item) => typeof item === "string")
-      .join(" ");
-  }
-
-  if (data?.errors && typeof data.errors === "object") {
-    const messages = Object.values(data.errors).flat();
-    if (messages.length) return messages.join(" ");
-  }
-
-  if (typeof data?.title === "string") return data.title;
-
-  return getErrorMessage(error);
-};
 
 export const useUserStore = create((set, get) => ({
   users: [],
@@ -64,7 +38,7 @@ export const useUserStore = create((set, get) => ({
 
       return true;
     } catch (error) {
-      set({ isCreating: false, createError: getCreateError(error) });
+      set({ isCreating: false, createError: getErrorMessage(error) });
       return false;
     }
   },

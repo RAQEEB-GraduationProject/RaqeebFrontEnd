@@ -7,6 +7,14 @@ import AssignDrawer from "./components/AssignDrawer";
 import PatientsTable from "./components/PatientsTable";
 import StaffFilter from "./components/StaffFilter";
 
+// Names go into the dialog's HTML, so escape them.
+const escapeHtml = (value) =>
+  String(value).replace(
+    /[&<>"']/g,
+    (char) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char],
+  );
+
 const notify = (icon, title) =>
   Swal.fire({
     toast: true,
@@ -40,22 +48,59 @@ const PatientsList = () => {
 
   // Resolves true when the drawer can close (everything saved, or nothing to save).
   const handleSave = async (patientIds, team) => {
-    const { succeeded, errors, nothingToDo } = await assign(patientIds, team);
+    const isRowEdit = Boolean(drawer?.patient);
+
+    // Taking someone off a team unassigns them, so confirm first.
+    if (isRowEdit) {
+      const removedNames = Object.entries(drawer.patient.assigned)
+        .flatMap(([role, ids]) => ids.filter((id) => !team[role].includes(id)))
+        .map((id) => staffById[id]?.name ?? "A staff member");
+
+      if (removedNames.length > 0) {
+        const { isConfirmed } = await Swal.fire({
+          icon: "warning",
+          title: "Unassign from this patient?",
+          html:
+            `<p><b>${removedNames.map(escapeHtml).join(", ")}</b> will no longer be ` +
+            `assigned to <b>${escapeHtml(drawer.patient.userName)}</b>.</p>` +
+            `<p style="margin-top:8px">Their account and their assignments to ` +
+            `other patients are not affected. This ends only this assignment.</p>`,
+          showCancelButton: true,
+          confirmButtonText: "Yes, unassign",
+        });
+
+        if (!isConfirmed) return false;
+      }
+    }
+
+    const { succeeded, errors, nothingToDo, created, removed } = await assign(
+      patientIds,
+      team,
+      { removeMissing: isRowEdit },
+    );
 
     if (nothingToDo) {
-      notify("info", "No new assignments to save");
+      notify("info", "No changes to save");
       return true;
     }
 
     if (errors.length === 0) {
-      notify("success", "Care team assigned");
+      notify(
+        "success",
+        [
+          created > 0 && `${created} assigned`,
+          removed > 0 && `${removed} unassigned`,
+        ]
+          .filter(Boolean)
+          .join(", "),
+      );
       return true;
     }
 
     notify(
       "error",
       succeeded > 0
-        ? `Some assignments failed: ${errors.join(" ")}`
+        ? `Some changes failed: ${errors.join(" ")}`
         : errors.join(" "),
     );
 

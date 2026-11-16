@@ -17,7 +17,7 @@ const isExpired = (expiration) =>
 
 // رسالة خطأ الـ login (400/401 = بيانات غلط)
 const getLoginError = (error) => {
-  const status = error?.response?.status;
+  const status = error?.status;
   if (status === 400 || status === 401) return "Invalid username or password.";
   return getErrorMessage(error);
 };

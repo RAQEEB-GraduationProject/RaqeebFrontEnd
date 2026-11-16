@@ -96,7 +96,7 @@ const AssignDrawer = ({
 
             <p className="mt-2 text-sm text-slate-500">
               {lockedPatient
-                ? "Choose the staff responsible for this patient's care."
+                ? "Staff shown are currently assigned. Removing one unassigns them from this patient only; their account is not affected."
                 : "Choose the patients and the staff responsible for their care."}
             </p>
           </div>
@@ -156,9 +156,17 @@ const AssignDrawer = ({
                     >
                       {staffById[id]?.name}
 
+                      {lockedPatient &&
+                        !lockedPatient.assigned[section.role].includes(id) && (
+                          <span className="rounded-full bg-white/70 px-1.5 text-[10px] font-bold uppercase">
+                            New
+                          </span>
+                        )}
+
                       <button
                         type="button"
-                        aria-label={`Remove ${staffById[id]?.name}`}
+                        title="Unassign from this patient"
+                        aria-label={`Unassign ${staffById[id]?.name}`}
                         onClick={() => removeStaff(section.role, id)}
                       >
                         <X size={14} />

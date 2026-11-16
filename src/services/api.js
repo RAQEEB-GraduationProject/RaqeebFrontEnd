@@ -1,4 +1,5 @@
 import axios from "axios";
+import { toApiError, unwrapResponse } from "./apiResponse";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -25,15 +26,29 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// لو الـ token بقى مش صالح (401) واليوزر داخل فعلاً → logout تلقائي
+/*
+  Response handling lives in apiResponse.js:
+    - success: the ApiResponse<T> envelope (if any) is stripped, so callers get the payload;
+    - failure: every error becomes an ApiError with a usable message.
+  401 on a logged-in session (not the login call itself) → logout تلقائي.
+*/
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    try {
+      return unwrapResponse(response);
+    } catch (error) {
+      return Promise.reject(error);
+    }
+  },
   (error) => {
+    const apiError = toApiError(error);
     const isLoginRequest = error.config?.url?.includes("/Auth/login");
-    if (error.response?.status === 401 && !isLoginRequest) {
+
+    if (apiError.status === 401 && !isLoginRequest) {
       onUnauthorized();
     }
-    return Promise.reject(error);
+
+    return Promise.reject(apiError);
   },
 );
 
