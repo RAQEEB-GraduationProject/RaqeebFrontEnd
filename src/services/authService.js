@@ -39,6 +39,7 @@ const mapLoginResponse = (data) => ({
 const authService = {
   async login({ userName, password }) {
     const { data } = await api.post("/Auth/login", { userName, password });
+    if (!data?.token) throw new Error("The server returned an empty login response.");
     return mapLoginResponse(data);
   },
 

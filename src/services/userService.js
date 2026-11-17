@@ -19,6 +19,7 @@ const userService = {
 
   async getUserById(id) {
     const { data } = await api.get(`/Users/${encodeURIComponent(id)}`);
+    if (!data) throw new Error("The requested user was not found.");
 
     return mapUser(data);
   },

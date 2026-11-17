@@ -13,6 +13,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import userService from "../../../services/userService";
+import getErrorMessage from "../../../utils/getErrorMessage";
 
 export default function UserDetails() {
   const { id } = useParams();
@@ -37,10 +38,7 @@ export default function UserDetails() {
         }
       } catch (err) {
         if (isMounted) {
-          setError(
-            err.response?.data?.message ||
-              "Unable to load user details. Please try again.",
-          );
+          setError(getErrorMessage(err));
         }
       } finally {
         if (isMounted) {

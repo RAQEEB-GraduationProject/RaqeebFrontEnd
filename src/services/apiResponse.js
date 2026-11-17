@@ -1,22 +1,20 @@
 /*
   The single place that understands backend response formats.
 
-  Two formats exist while the backend migrates endpoints:
+  Every backend endpoint returns the standard envelope ApiResponse<T>:
+    { success, data, message, errorCode, errors: [{ field, message }] }
 
-    1. Standard envelope  ApiResponse<T>:
-       { success, data, message, errorCode, errors: [{ field, message }] }
-    2. Legacy: raw body (array/object), { message }, ASP.NET ProblemDetails
-       ({ title, errors: { field: [msg] } }), Identity error arrays,
-       plain strings, or an empty body.
-
-  Both are handled by the axios interceptors in api.js, so services, stores and
+  The axios interceptors in api.js use this file, so services, stores and
   components never see the wrapper:
     - success  -> `response.data` is already the payload (`response.apiMessage`
-                  holds the backend message for the envelope format);
-    - failure  -> the promise rejects with an `ApiError` (see below).
+                  holds the backend message). `data: null` stays null;
+    - failure  -> the promise rejects with an `ApiError` (see below), including
+                  a 2xx response whose envelope says `success: false`.
 
-  Nothing here is endpoint-specific. When an endpoint starts returning the
-  envelope, no frontend change is needed.
+  Bodies that are NOT an envelope are still tolerated, because the backend
+  cannot always produce one: 204 No Content (empty body on success), the
+  framework's own 401/403 (empty body), the login 401 ({ message }), and 5xx
+  from unhandled exceptions. They are read defensively and never shown raw.
 */
 
 const FALLBACK_MESSAGES = {
