@@ -43,7 +43,11 @@ const DoctorActions = () => (
   </>
 );
 
-const DoctorPatientDetails = () => {
+// Also used by the admin route: pass the admin list path and `actions={null}`.
+const DoctorPatientDetails = ({
+  listPath = LIST_PATH,
+  actions = <DoctorActions />,
+}) => {
   const { patientId } = useParams();
 
   const patient = usePatientStore((state) =>
@@ -78,7 +82,7 @@ const DoctorPatientDetails = () => {
         </p>
         {error && <p className="mt-1 text-sm text-slate-500">{error}</p>}
         <Link
-          to={LIST_PATH}
+          to={listPath}
           className="mt-4 inline-block text-sm font-semibold text-[#3f5ea8] hover:underline"
         >
           Back to patients
@@ -91,8 +95,8 @@ const DoctorPatientDetails = () => {
     <PatientDetailsLayout
       patient={patient}
       tabs={doctorPatientTabs}
-      actions={<DoctorActions />}
-      listPath={LIST_PATH}
+      actions={actions}
+      listPath={listPath}
     />
   );
 };

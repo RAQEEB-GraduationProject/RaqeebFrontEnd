@@ -69,6 +69,7 @@ const PatientsTable = ({
   onRetry,
   hasFilters,
   onClearFilters,
+  onView,
   onAssign,
 }) => (
   <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
@@ -110,7 +111,7 @@ const PatientsTable = ({
         ) : (
           patients.map((patient) => (
             <div
-              key={patient.id}
+              key={patient.userId}
               className={`${GRID} border-t border-slate-100 py-4`}
             >
               <div className="flex min-w-0 items-center gap-4">
@@ -124,7 +125,12 @@ const PatientsTable = ({
                   </p>
 
                   <p className="truncate text-xs text-slate-400">
-                    {patient.medicalRecordNumber || "—"}
+                    {patient.medicalRecordNumber ||
+                      (patient.hasProfile
+                        ? "—"
+                        : patient.profileStatus === "inactive"
+                          ? "Inactive profile"
+                          : "No medical profile")}
                   </p>
                 </div>
               </div>
@@ -138,10 +144,16 @@ const PatientsTable = ({
 
               <StatusBadge isActive={patient.isActive} />
 
-              {/* TODO: open patient details (details UI/page not built yet) */}
               <button
                 type="button"
-                className="w-fit text-sm font-semibold text-teal-700 transition hover:text-teal-900"
+                onClick={() => onView(patient)}
+                disabled={patient.profileStatus === "inactive"}
+                title={
+                  patient.profileStatus === "inactive"
+                    ? "This patient is inactive"
+                    : undefined
+                }
+                className="w-fit text-sm font-semibold text-teal-700 transition hover:text-teal-900 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:text-teal-700"
               >
                 View
               </button>
@@ -149,7 +161,15 @@ const PatientsTable = ({
               <button
                 type="button"
                 onClick={() => onAssign(patient)}
-                className="w-fit rounded-xl border border-teal-700/40 bg-white px-4 py-2 text-sm font-semibold text-[#0f3d4c] transition hover:bg-teal-50"
+                disabled={!patient.hasProfile}
+                title={
+                  patient.hasProfile
+                    ? undefined
+                    : patient.profileStatus === "inactive"
+                      ? "This patient is inactive"
+                      : "Complete the patient account first"
+                }
+                className="w-fit rounded-xl border border-teal-700/40 bg-white px-4 py-2 text-sm font-semibold text-[#0f3d4c] transition hover:bg-teal-50 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white"
               >
                 Assign
               </button>

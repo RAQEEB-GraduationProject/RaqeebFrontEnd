@@ -4,7 +4,7 @@ import Login from "../pages/auth/Login";
 
 import ProtectedRoute from "./ProtectedRoute";
 import RoleRoute from "./RoleRoute";
-import adminRoutes from "./adminRoutes";
+import adminRoutes from "./AdminRoutes";
 import doctorRoutes from "./DoctorRoutes";
 import nurseRoutes from "./NurseRoutes";
 

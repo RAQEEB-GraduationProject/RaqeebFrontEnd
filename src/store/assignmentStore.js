@@ -85,6 +85,7 @@ export const useAssignmentStore = create((set, get) => {
 
   return {
     assignments: [],
+    isLoaded: false,
     isLoading: false,
     error: null,
 
@@ -96,7 +97,7 @@ export const useAssignmentStore = create((set, get) => {
 
       try {
         const assignments = await assignmentService.getAssignments();
-        set({ assignments, isLoading: false });
+        set({ assignments, isLoaded: true, isLoading: false });
       } catch (error) {
         set({ isLoading: false, error: getErrorMessage(error) });
       }

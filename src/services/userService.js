@@ -17,6 +17,14 @@ const userService = {
     return Array.isArray(data) ? data.map(mapUser) : [];
   },
 
+  // GET {VITE_API_BASE_URL}/Users?role=Patient  (Admin only). Every user with
+  // the Patient role, whether or not a medical profile exists for them.
+  async getPatientUsers() {
+    const { data } = await api.get("/Users", { params: { role: "Patient" } });
+
+    return Array.isArray(data) ? data.map(mapUser) : [];
+  },
+
   async getUserById(id) {
     const { data } = await api.get(`/Users/${encodeURIComponent(id)}`);
     if (!data) throw new Error("The requested user was not found.");
@@ -34,7 +42,13 @@ const userService = {
       role,
     });
 
-    return data;
+    // RegisterResponseDto: { userId, userName, email, role }
+    return {
+      userId: data?.userId ?? null,
+      userName: data?.userName ?? userName,
+      email: data?.email ?? email,
+      role: data?.role ?? role,
+    };
   },
 };
 

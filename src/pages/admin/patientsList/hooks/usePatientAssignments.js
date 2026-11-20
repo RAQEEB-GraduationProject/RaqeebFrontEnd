@@ -13,38 +13,86 @@ const ROLE_FIELDS = {
   caregiver: "assignedCaregivers",
 };
 
-const hasRisk = (patient) => Boolean(String(patient.risk ?? "").trim());
+// Risk order of the table: Critical, High, Medium, Stable. A missing or
+// unknown risk level goes after Stable.
+const RISK_ORDER = ["critical", "high", "medium", "stable"];
+
+const riskRank = (patient) => {
+  const rank = RISK_ORDER.indexOf(String(patient.risk ?? "").trim().toLowerCase());
+
+  return rank === -1 ? RISK_ORDER.length : rank;
+};
+
+// profileStatus: "active" (profile listed by GET /Patients), "inactive" (the
+// backend confirmed a profile exists but it is not listed) or "missing".
+const PROFILE_ACTIVE = "active";
+const PROFILE_INACTIVE = "inactive";
+const PROFILE_MISSING = "missing";
 
 const isUnassigned =(patient) =>
   ROLES.every((role) => patient.assigned[role].length === 0);
 
+const NO_STAFF = {
+  assignedDoctor: [],
+  assignedNurses: [],
+  assignedCaregivers: [],
+};
+
 /*
-  Adapts assignments (assignmentStore) to the shape the page components use:
-  `assigned` holds staff userIds, resolved to names through `staffById`.
-  Risk and active status are patient data, so they are joined in from
-  patientStore (GET /Patients) by patientId instead of being duplicated.
+  Builds the Patients & assignments rows. One row per user with the Patient
+  role (GET /Users?role=Patient), so users without a medical profile are
+  listed too. Two other sources are joined in, with no per-row requests:
+    - patientStore (GET /Patients): the medical profile, matched by userId.
+      No match = the user still needs "Complete patient account" (hasProfile).
+    - assignmentStore (GET /PatientAssignments/Assignments): the care team,
+      matched by the profile id (patientId). `assigned` holds staff userIds,
+      resolved to names through `staffById`.
+  Rows without a profile have `id: null`: they cannot be assigned yet.
 */
 export default function usePatientAssignments() {
   const apiPatients = useAssignmentStore((state) => state.assignments);
-  const isLoading = useAssignmentStore((state) => state.isLoading);
-  const error = useAssignmentStore((state) => state.error);
+  const isAssignmentsLoaded = useAssignmentStore((state) => state.isLoaded);
+  const isAssignmentsLoading = useAssignmentStore((state) => state.isLoading);
+  const assignmentsError = useAssignmentStore((state) => state.error);
   const fetchAssignments = useAssignmentStore((state) => state.fetchAssignments);
   const isAssigning = useAssignmentStore((state) => state.isAssigning);
   const saveChanges = useAssignmentStore((state) => state.saveChanges);
 
-  // Loading/error follow the assignments (the list this page is built from);
-  // a failed patient-records request only leaves risk/status blank.
   const patientRecords = usePatientStore((state) => state.patients);
+  const isRecordsLoaded = usePatientStore((state) => state.isLoaded);
+  const isRecordsLoading = usePatientStore((state) => state.isLoading);
+  const recordsError = usePatientStore((state) => state.error);
+  const inactiveProfileUserIds = usePatientStore((state) => state.inactiveProfileUserIds);
   const fetchPatientRecords = usePatientStore((state) => state.fetchPatients);
 
   const users = useUserStore((state) => state.users);
   const fetchUsers = useUserStore((state) => state.fetchUsers);
 
+  const patientUsers = useUserStore((state) => state.patientUsers);
+  const isPatientUsersLoaded = useUserStore((state) => state.isPatientUsersLoaded);
+  const isPatientUsersLoading = useUserStore((state) => state.isLoadingPatientUsers);
+  const patientUsersError = useUserStore((state) => state.patientUsersError);
+  const fetchPatientUsers = useUserStore((state) => state.fetchPatientUsers);
+
   useEffect(() => {
+    fetchPatientUsers();
     fetchAssignments();
     fetchPatientRecords();
     fetchUsers();
-  }, [fetchAssignments, fetchPatientRecords, fetchUsers]);
+  }, [fetchPatientUsers, fetchAssignments, fetchPatientRecords, fetchUsers]);
+
+  // Rows are only built once all three sources arrived: without the profiles
+  // every user would briefly look like "no medical profile".
+  const isReady = isPatientUsersLoaded && isRecordsLoaded && isAssignmentsLoaded;
+  const error = patientUsersError ?? recordsError ?? assignmentsError;
+  const isLoading =
+    !error && (isPatientUsersLoading || isRecordsLoading || isAssignmentsLoading || !isReady);
+
+  const fetchAll = () => {
+    fetchPatientUsers();
+    fetchAssignments();
+    fetchPatientRecords();
+  };
 
   const [search, setSearch] = useState("");
   // { role: "doctor" | "nurse" | "caregiver", staffId } | { role: "unassigned" } | null
@@ -86,40 +134,66 @@ export default function usePatientAssignments() {
     return [...byId.values()];
   }, [apiPatients, users]);
 
-  const recordsById = useMemo(
-    () => new Map(patientRecords.map((record) => [record.id, record])),
+  const recordsByUserId = useMemo(
+    () => new Map(patientRecords.map((record) => [record.userId, record])),
     [patientRecords],
   );
 
-  const patients = useMemo(
-    () =>
-      apiPatients.map((patient) => {
-        const record = recordsById.get(patient.patientId);
+  const assignmentsByPatientId = useMemo(
+    () => new Map(apiPatients.map((assignment) => [assignment.patientId, assignment])),
+    [apiPatients],
+  );
 
-        return {
-          id: patient.patientId,
-          userName: patient.patientName,
-          medicalRecordNumber: patient.patientCode,
-          // Both endpoints only list active patients, so a missing record
-          // means "not loaded yet", not "inactive".
-          isActive: record?.isActive ?? true,
-          risk: record?.risk ?? null,
-          assigned: {
-            doctor: patient.assignedDoctor.map((member) => member.userId),
-            nurse: patient.assignedNurses.map((member) => member.userId),
-            caregiver: patient.assignedCaregivers.map((member) => member.userId),
-          },
-          // userId -> assignmentId, needed to unassign that staff member.
-          assignmentIds: Object.fromEntries(
-            [
-              ...patient.assignedDoctor,
-              ...patient.assignedNurses,
-              ...patient.assignedCaregivers,
-            ].map((member) => [member.userId, member.assignmentId]),
-          ),
-        };
-      }),
-    [apiPatients, recordsById],
+  const patients = useMemo(() => {
+    if (!isReady) return [];
+
+    return patientUsers.map((user) => {
+      const record = recordsByUserId.get(user.id);
+      const team = (record && assignmentsByPatientId.get(record.id)) || NO_STAFF;
+
+      const profileStatus = record
+        ? PROFILE_ACTIVE
+        : inactiveProfileUserIds.includes(user.id)
+          ? PROFILE_INACTIVE
+          : PROFILE_MISSING;
+
+      return {
+        id: record?.id ?? null,
+        userId: user.id,
+        profileStatus,
+        hasProfile: Boolean(record),
+        userName: user.userName,
+        medicalRecordNumber: record?.medicalRecordNumber ?? null,
+        // An inactive profile is Inactive; without any profile the account's
+        // own status is shown, as before.
+        isActive:
+          profileStatus === PROFILE_INACTIVE
+            ? false
+            : record
+              ? record.isActive
+              : user.isActive,
+        risk: record?.risk ?? null,
+        assigned: {
+          doctor: team.assignedDoctor.map((member) => member.userId),
+          nurse: team.assignedNurses.map((member) => member.userId),
+          caregiver: team.assignedCaregivers.map((member) => member.userId),
+        },
+        // userId -> assignmentId, needed to unassign that staff member.
+        assignmentIds: Object.fromEntries(
+          [
+            ...team.assignedDoctor,
+            ...team.assignedNurses,
+            ...team.assignedCaregivers,
+          ].map((member) => [member.userId, member.assignmentId]),
+        ),
+      };
+    });
+  }, [isReady, patientUsers, recordsByUserId, assignmentsByPatientId, inactiveProfileUserIds]);
+
+  // Only users with a medical profile can receive a care team.
+  const assignablePatients = useMemo(
+    () => patients.filter((patient) => patient.hasProfile),
+    [patients],
   );
 
   const staffById = useMemo(
@@ -167,9 +241,12 @@ export default function usePatientAssignments() {
       );
     });
 
-    // Patients without a risk level go last; Array.sort is stable, so the
-    // order among each group stays as the backend returned it.
-    return filtered.sort((a, b) => hasRisk(b) - hasRisk(a));
+    // Inactive patients always go last. Then by risk (Critical, High, Medium,
+    // Stable, no risk); Array.sort is stable, so patients with the same risk
+    // keep the order the backend returned.
+    return filtered.sort(
+      (a, b) => Number(!a.isActive) - Number(!b.isActive) || riskRank(a) - riskRank(b),
+    );
   }, [patients, search, staffFilter]);
 
   // team = { doctor: [staffId], nurse: [staffId], caregiver: [staffId] }
@@ -178,7 +255,9 @@ export default function usePatientAssignments() {
   // the current team), staff taken off the team are unassigned.
   const assign = async (patientIds, team, { removeMissing = false } = {}) => {
     const requested = ROLES.flatMap((role) => team[role]);
-    const selected = patients.filter((patient) => patientIds.includes(patient.id));
+    const selected = assignablePatients.filter((patient) =>
+      patientIds.includes(patient.id),
+    );
 
     const create = selected.flatMap((patient) => {
       const existing = ROLES.flatMap((role) => patient.assigned[role]);
@@ -211,6 +290,7 @@ export default function usePatientAssignments() {
 
   return {
     patients,
+    assignablePatients,
     filteredPatients,
     staff,
     staffById,
@@ -218,7 +298,7 @@ export default function usePatientAssignments() {
     unassignedCount,
     isLoading,
     error,
-    fetchPatients: fetchAssignments,
+    fetchPatients: fetchAll,
     isAssigning,
     search,
     setSearch,

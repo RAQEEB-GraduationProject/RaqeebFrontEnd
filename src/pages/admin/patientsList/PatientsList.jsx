@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Plus, Search, X } from "lucide-react";
 import Swal from "sweetalert2";
 
@@ -6,6 +7,8 @@ import usePatientAssignments from "./hooks/usePatientAssignments";
 import AssignDrawer from "./components/AssignDrawer";
 import PatientsTable from "./components/PatientsTable";
 import StaffFilter from "./components/StaffFilter";
+import notify from "./notify";
+import { patientUserPath } from "./patientPaths";
 
 // Names go into the dialog's HTML, so escape them.
 const escapeHtml = (value) =>
@@ -15,19 +18,12 @@ const escapeHtml = (value) =>
       ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char],
   );
 
-const notify = (icon, title) =>
-  Swal.fire({
-    toast: true,
-    position: "top-end",
-    icon,
-    title,
-    showConfirmButton: false,
-    timer: icon === "error" ? 4000 : 2500,
-  });
-
 const PatientsList = () => {
+  const navigate = useNavigate();
+
   const {
     patients,
+    assignablePatients,
     filteredPatients,
     staff,
     staffById,
@@ -109,6 +105,16 @@ const PatientsList = () => {
 
   // null = closed, { patient: null } = bulk, { patient } = locked to one row
   const [drawer, setDrawer] = useState(null);
+
+  // With a profile: open its details. Without one: the "complete patient
+  // account" page (the form is a separate page, see CompletePatientAccount).
+  const handleView = (patient) => {
+    navigate(
+      patient.hasProfile
+        ? `/admin/patients/${patient.id}`
+        : patientUserPath(patient.userId),
+    );
+  };
 
   const filterLabel = !staffFilter
     ? null
@@ -219,6 +225,7 @@ const PatientsList = () => {
         onRetry={fetchPatients}
         hasFilters={hasFilters}
         onClearFilters={clearFilters}
+        onView={handleView}
         onAssign={(patient) => setDrawer({ patient })}
       />
 
@@ -226,7 +233,7 @@ const PatientsList = () => {
         <AssignDrawer
           key={drawer.patient?.id ?? "bulk"}
           lockedPatient={drawer.patient}
-          patients={patients}
+          patients={assignablePatients}
           staff={staff}
           staffById={staffById}
           isSaving={isAssigning}

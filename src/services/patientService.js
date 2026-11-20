@@ -48,6 +48,35 @@ const patientService = {
 
     return Array.isArray(data) ? data.map(mapPatient) : [];
   },
+
+  // POST {VITE_API_BASE_URL}/Patients  (Admin only). Creates the medical
+  // profile of an existing user that has the Patient role. Only the fields
+  // the form collected are sent; blank optional fields go as null.
+  async createPatient({
+    userId,
+    dateOfBirth,
+    gender,
+    medicalRecordNumber,
+    diagnosis,
+    stage,
+    treatment,
+    protocol,
+    riskLevel,
+  }) {
+    const { data } = await api.post("/Patients", {
+      userId,
+      dateOfBirth,
+      gender: textOrNull(gender),
+      medicalRecordNumber: textOrNull(medicalRecordNumber),
+      diagnosis: textOrNull(diagnosis),
+      stage: textOrNull(stage),
+      treatment: textOrNull(treatment),
+      protocol: textOrNull(protocol),
+      riskLevel: textOrNull(riskLevel),
+    });
+
+    return data;
+  },
 };
 
 export default patientService;

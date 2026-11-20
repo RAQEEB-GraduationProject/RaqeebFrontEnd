@@ -7,6 +7,12 @@ export const useUserStore = create((set, get) => ({
   isLoading: false,
   error: null,
 
+  // Users with the Patient role (GET /Users?role=Patient).
+  patientUsers: [],
+  isPatientUsersLoaded: false,
+  isLoadingPatientUsers: false,
+  patientUsersError: null,
+
   isCreating: false,
   createError: null,
 
@@ -21,25 +27,40 @@ export const useUserStore = create((set, get) => ({
     }
   },
 
-  // Returns true only when the backend confirmed success, false otherwise
-  // (the message is stored in createError).
+  fetchPatientUsers: async () => {
+    // One request at a time (covers StrictMode's double effect).
+    if (get().isLoadingPatientUsers) return;
+
+    set({ isLoadingPatientUsers: true, patientUsersError: null });
+
+    try {
+      const patientUsers = await userService.getPatientUsers();
+      set({ patientUsers, isPatientUsersLoaded: true, isLoadingPatientUsers: false });
+    } catch (error) {
+      set({ isLoadingPatientUsers: false, patientUsersError: getErrorMessage(error) });
+    }
+  },
+
+  // Returns the created user ({ userId, userName, email, role }) when the
+  // backend confirmed success, or null otherwise (the message is stored in
+  // createError).
   addUser: async (payload) => {
-    if (get().isCreating) return false;
+    if (get().isCreating) return null;
 
     set({ isCreating: true, createError: null });
 
     try {
-      await userService.register(payload);
+      const createdUser = await userService.register(payload);
       set({ isCreating: false });
 
-      // The register response shape isn't documented, so refresh the list
-      // through the existing GET flow instead of inserting a guessed object.
+      // Refresh the list through the existing GET flow instead of inserting
+      // a locally built object.
       get().fetchUsers();
 
-      return true;
+      return createdUser;
     } catch (error) {
       set({ isCreating: false, createError: getErrorMessage(error) });
-      return false;
+      return null;
     }
   },
 
