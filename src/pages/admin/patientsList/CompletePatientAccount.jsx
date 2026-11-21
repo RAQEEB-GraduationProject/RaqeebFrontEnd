@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { LoaderCircle } from "lucide-react";
 
 import PatientProfileFields from "../../../components/patients/PatientProfileFields";
+import MedicalHistoryStep from "../../../components/patients/medicalHistory/MedicalHistoryStep";
 import {
   INITIAL_PROFILE_VALUES,
   toProfilePayload,
@@ -18,7 +19,13 @@ import { PATIENTS_PATH, patientUserPath } from "./patientPaths";
   from the URL (the selected user), never from the form. Saving sends
   POST /Patients; on failure the entered values stay so the admin can retry.
 */
-const CompletePatientForm = ({ user }) => {
+// The table reloads its data when it opens and shows the completed profile.
+const finishCompletion = (navigate, userName) => {
+  notify("success", `${userName}'s patient account was completed`);
+  navigate(PATIENTS_PATH);
+};
+
+const CompletePatientForm = ({ user, onCreated }) => {
   const navigate = useNavigate();
 
   const createPatientProfile = usePatientStore((state) => state.createPatientProfile);
@@ -57,12 +64,13 @@ const CompletePatientForm = ({ user }) => {
 
     if (Object.keys(nextErrors).length > 0) return;
 
-    const success = await createPatientProfile(toProfilePayload(user.id, values));
+    const created = await createPatientProfile(toProfilePayload(user.id, values));
 
-    if (success) {
-      // The table reloads its data when it opens and shows the completed profile.
-      notify("success", `${user.userName}'s patient account was completed`);
-      navigate(PATIENTS_PATH);
+    if (created?.id) {
+      // Optional medical history step for the new patientId.
+      onCreated({ patientId: created.id, userName: user.userName });
+    } else if (created) {
+      finishCompletion(navigate, user.userName);
     } else if (usePatientStore.getState().inactiveProfileUserIds.includes(user.id)) {
       // The user already has a profile (inactive): nothing to complete.
       notify("info", `${user.userName} already has a patient profile, which is inactive`);
@@ -101,7 +109,7 @@ const CompletePatientForm = ({ user }) => {
         </h2>
 
         <p className="mt-1 text-xs text-slate-400">
-          Date of birth, gender and medical record number are required.
+          Date of birth and gender are required.
         </p>
 
         <div className="mt-6">
@@ -139,10 +147,32 @@ const CompletePatientForm = ({ user }) => {
 
 const CompletePatientAccount = () => {
   const { userId } = useParams();
+  const navigate = useNavigate();
+
+  // { patientId, userName } once POST /Patients succeeded. Kept here, above
+  // the gate: the gate redirects users that have an active profile, which is
+  // exactly what this user becomes after saving.
+  const [created, setCreated] = useState(null);
+
+  if (created) {
+    return (
+      <div className="mx-auto max-w-[1160px] space-y-6">
+        <h1 className="text-4xl font-medium text-[#0b2a3d]">
+          Complete patient account
+        </h1>
+
+        <MedicalHistoryStep
+          patientId={created.patientId}
+          patientName={created.userName}
+          onDone={() => finishCompletion(navigate, created.userName)}
+        />
+      </div>
+    );
+  }
 
   return (
     <PatientUserGate userId={userId} current="Complete account">
-      {(user) => <CompletePatientForm user={user} />}
+      {(user) => <CompletePatientForm user={user} onCreated={setCreated} />}
     </PatientUserGate>
   );
 };

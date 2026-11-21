@@ -53,32 +53,33 @@ export const usePatientStore = create((set, get) => {
       }
     },
 
-    // Creates the medical profile of an existing Patient user. Returns true only
-    // when the backend confirmed it (the message is stored in createProfileError).
+    // Creates the medical profile of an existing Patient user. Returns the
+    // created profile (its `id` is the new patientId) only when the backend
+    // confirmed it; otherwise null (the message is stored in createProfileError).
     createPatientProfile: async (profile) => {
-      if (get().isCreatingProfile) return false;
+      if (get().isCreatingProfile) return null;
 
       const requestGeneration = generation;
       set({ isCreatingProfile: true, createProfileError: null });
 
       try {
-        await patientService.createPatient(profile);
-        if (!isCurrent(requestGeneration)) return true;
+        const created = await patientService.createPatient(profile);
+        if (!isCurrent(requestGeneration)) return created;
         set({ isCreatingProfile: false });
 
         // Refresh the list so the new profile is picked up everywhere.
         get().fetchPatients();
 
-        return true;
+        return created;
       } catch (error) {
-        if (!isCurrent(requestGeneration)) return false;
+        if (!isCurrent(requestGeneration)) return null;
         set({ isCreatingProfile: false, createProfileError: getErrorMessage(error) });
 
         if (error?.errorCode === PROFILE_EXISTS) {
           await get().markIfProfileInactive(profile.userId);
         }
 
-        return false;
+        return null;
       }
     },
 

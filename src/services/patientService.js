@@ -31,6 +31,7 @@ const mapPatient = (data) => ({
   dateOfBirth: data.dateOfBirth ?? null,
   age: getAge(data.dateOfBirth),
   gender: textOrNull(data.gender),
+  bloodGroup: textOrNull(data.bloodGroup),
   medicalRecordNumber: textOrNull(data.medicalRecordNumber),
   diagnosis: textOrNull(data.diagnosis),
   stage: textOrNull(data.stage),
@@ -82,6 +83,39 @@ const mapOverview = (data) => {
   };
 };
 
+// One medical history record. `date` stays the backend's "yyyy-MM-dd" text
+// (a date without time zone), or null.
+const mapHistoryItem = (item) => ({
+  id: item.id,
+  name: textOrNull(item.name) ?? "Unnamed record",
+  date: textOrNull(item.date),
+  notes: textOrNull(item.notes),
+});
+
+const mapHistoryList = (list) => (Array.isArray(list) ? list.map(mapHistoryItem) : []);
+
+// GET /Patients/{patientId}/medical-history -> the four categories (always
+// arrays) + totalCount = active records across ALL four categories.
+const mapMedicalHistory = (data) => {
+  const history = {
+    diseases: mapHistoryList(data.diseases),
+    allergies: mapHistoryList(data.allergies),
+    surgeries: mapHistoryList(data.surgeries),
+    familyHistory: mapHistoryList(data.familyHistory),
+  };
+
+  const countedHere =
+    history.diseases.length +
+    history.allergies.length +
+    history.surgeries.length +
+    history.familyHistory.length;
+
+  return {
+    ...history,
+    totalCount: numberOrNull(data.totalCount) ?? countedHere,
+  };
+};
+
 const patientService = {
   // GET {VITE_API_BASE_URL}/Patients  -> direct JSON array
   async getPatients() {
@@ -103,12 +137,15 @@ const patientService = {
 
   // POST {VITE_API_BASE_URL}/Patients  (Admin only). Creates the medical
   // profile of an existing user that has the Patient role. Only the fields
-  // the form collected are sent; blank optional fields go as null.
+  // the form collected are sent; blank optional fields go as null. The
+  // medical record number is not collected (and so never sent).
+  // Returns the created profile (mapPatient shape); its `id` is the patientId
+  // used by the patient's other endpoints (e.g. medical history).
   async createPatient({
     userId,
     dateOfBirth,
     gender,
-    medicalRecordNumber,
+    bloodGroup,
     diagnosis,
     stage,
     treatment,
@@ -119,7 +156,7 @@ const patientService = {
       userId,
       dateOfBirth,
       gender: textOrNull(gender),
-      medicalRecordNumber: textOrNull(medicalRecordNumber),
+      bloodGroup: textOrNull(bloodGroup),
       diagnosis: textOrNull(diagnosis),
       stage: textOrNull(stage),
       treatment: textOrNull(treatment),
@@ -127,7 +164,34 @@ const patientService = {
       riskLevel: textOrNull(riskLevel),
     });
 
-    return data;
+    return data ? mapPatient(data) : null;
+  },
+
+  // GET {VITE_API_BASE_URL}/Patients/{patientId}/medical-history  (any role
+  // with access to the patient; 404 otherwise).
+  async getMedicalHistory(patientId) {
+    const { data } = await api.get(
+      `/Patients/${encodeURIComponent(patientId)}/medical-history`,
+    );
+
+    return data ? mapMedicalHistory(data) : null;
+  },
+
+  // POST {VITE_API_BASE_URL}/Patients/{patientId}/medical-history
+  // (Admin; Doctor for assigned patients). 201 -> the created record.
+  // body: { type, name, date: "yyyy-MM-dd" | null, notes | null }
+  async addMedicalHistoryEntry(patientId, { type, name, date, notes }) {
+    const { data } = await api.post(
+      `/Patients/${encodeURIComponent(patientId)}/medical-history`,
+      {
+        type,
+        name: name.trim(),
+        date: textOrNull(date),
+        notes: textOrNull(notes),
+      },
+    );
+
+    return data ? { ...mapHistoryItem(data), type: data.type } : null;
   },
 };
 

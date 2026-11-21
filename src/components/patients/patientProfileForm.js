@@ -6,10 +6,15 @@ export const GENDER_OPTIONS = ["Female", "Male"];
 // The risk levels the app already styles (riskStyles.js).
 export const RISK_LEVEL_OPTIONS = ["Critical", "High", "Medium", "Stable"];
 
+// Values accepted by the backend (CreatePatientDto: ^(A|B|AB|O)[+-]$).
+export const BLOOD_GROUP_OPTIONS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+
+// No medical record number: it is not collected by this form (and so never
+// sent to POST /Patients).
 export const INITIAL_PROFILE_VALUES = {
   dateOfBirth: "",
   gender: "",
-  medicalRecordNumber: "",
+  bloodGroup: "",
   diagnosis: "",
   stage: "",
   treatment: "",
@@ -32,8 +37,9 @@ export const validateProfile = (values) => {
     errors.gender = "Gender is required.";
   }
 
-  if (!values.medicalRecordNumber.trim()) {
-    errors.medicalRecordNumber = "Medical record number is required.";
+  // Optional; when chosen it must be one of the listed groups.
+  if (values.bloodGroup && !BLOOD_GROUP_OPTIONS.includes(values.bloodGroup)) {
+    errors.bloodGroup = "Select a valid blood group.";
   }
 
   return errors;

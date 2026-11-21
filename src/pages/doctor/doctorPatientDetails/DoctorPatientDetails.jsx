@@ -1,7 +1,9 @@
+import { useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { CalendarDays, ClipboardPlus, MessageSquare } from "lucide-react";
 import PatientDetailsLayout from "../../../components/patientDetails/PatientDetailsLayout";
 import usePatientOverview from "../../../components/patientDetails/usePatientOverview";
+import { usePatientMedicalHistoryStore } from "../../../store/patientMedicalHistoryStore";
 import { doctorPatientTabs } from "./doctorPatientTabs";
 
 const LIST_PATH = "/doctor/patients";
@@ -53,6 +55,12 @@ const DoctorPatientDetails = ({
   // The only overview request of the page: this shell stays mounted while the
   // user switches tabs, so the header and every tab share one response.
   const { overview, isLoading, error, retry } = usePatientOverview(patientId);
+
+  // The medical history (loaded by its section) is kept while the user moves
+  // around this patient's details and dropped when another patient is opened
+  // or the details page is left, so a later visit shows fresh records.
+  const resetMedicalHistory = usePatientMedicalHistoryStore((state) => state.reset);
+  useEffect(() => () => resetMedicalHistory(), [patientId, resetMedicalHistory]);
 
   if (!overview && !error && isLoading) {
     return (

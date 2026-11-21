@@ -13,3 +13,9 @@ const DASHBOARD_PATHS = {
 
 // بترجّع مسار داشبورد الـ role، أو null لو الـ role ملهوش داشبورد (زي Patient / Caregiver)
 export const getDashboardPath = (role) => DASHBOARD_PATHS[role] ?? null;
+
+// POST /Patients/{id}/medical-history is [Authorize(Roles = "Admin,Doctor")]
+// (a doctor only for assigned patients). This only hides the action; the
+// backend still decides (403 / 404).
+export const canAddMedicalHistory = (role) =>
+  role === ROLES.ADMIN || role === ROLES.DOCTOR;

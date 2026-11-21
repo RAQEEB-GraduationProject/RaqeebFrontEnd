@@ -1,19 +1,58 @@
-import { useOutletContext } from "react-router-dom";
+import { Link, useOutletContext, useSearchParams } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
+
+import MedicalHistorySection from "./MedicalHistorySection";
 
 /*
   Patient Overview tab, shared by the Admin, Doctor and Nurse patient details
-  routes. It does not fetch: the details shell (DoctorPatientDetails) loads
-  GET /Patients/{patientId}/overview once, shows loading / error itself, and
-  passes the result down through the outlet context (see PatientDetailsLayout).
-  Only what the API returns is shown; a field the backend left empty reads
-  "Not recorded" instead of a made-up value.
+  routes, with two sections (reference screenshots 095520 / 095535):
+    Summary          GET /Patients/{patientId}/overview. Not fetched here: the
+                     details shell (DoctorPatientDetails) loads it once and
+                     passes it through the outlet context.
+    Medical History  GET /Patients/{patientId}/medical-history (own section).
+  The section is kept in the URL (?section=medical-history), so it survives a
+  refresh and the browser's back button. Only what the API returns is shown;
+  an empty field reads "Not recorded" instead of a made-up value.
 */
 
-const Card = ({ title, subtitle, className = "", children }) => (
+const SECTION_PARAM = "section";
+const MEDICAL_HISTORY = "medical-history";
+
+const SECTIONS = [
+  { key: "summary", label: "Summary", search: "" },
+  { key: MEDICAL_HISTORY, label: "Medical History", search: `?${SECTION_PARAM}=${MEDICAL_HISTORY}` },
+];
+
+const SectionTabs = ({ active }) => (
+  <nav aria-label="Patient overview sections" className="flex flex-wrap gap-3">
+    {SECTIONS.map(({ key, label, search }) => {
+      const isActive = key === active;
+      return (
+        <Link
+          key={key}
+          to={{ search }}
+          aria-current={isActive ? "page" : undefined}
+          className={`rounded-xl border px-4 py-2.5 text-xs font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3f5ea8]/40 ${
+            isActive
+              ? "border-[#3f5ea8]/30 bg-[#eef3fc] text-[#3f5ea8]"
+              : "border-slate-200 bg-white text-slate-600 hover:text-slate-900"
+          }`}
+        >
+          {label}
+        </Link>
+      );
+    })}
+  </nav>
+);
+
+const Card = ({ title, subtitle, action, className = "", children }) => (
   <section
     className={`rounded-2xl border border-slate-100 bg-white p-6 shadow-sm ${className}`}
   >
-    <h2 className="text-lg font-medium text-slate-900">{title}</h2>
+    <div className="flex items-start justify-between gap-4">
+      <h2 className="text-lg font-medium text-slate-900">{title}</h2>
+      {action}
+    </div>
     {subtitle && <p className="mt-1 text-sm text-slate-400">{subtitle}</p>}
     <dl className="mt-6 grid gap-x-8 gap-y-5 sm:grid-cols-2">{children}</dl>
   </section>
@@ -46,8 +85,7 @@ const formatCycle = ({ currentCycle, totalCycles, currentDay }) => {
     .join(" · ");
 };
 
-const PatientOverview = () => {
-  const { overview } = useOutletContext();
+const Summary = ({ overview }) => {
   const { clinical, personal } = overview;
 
   return (
@@ -73,10 +111,41 @@ const PatientOverview = () => {
         <Field label="Current cycle" value={formatCycle(clinical)} />
       </Card>
 
-      <Card title="Personal info">
+      <Card
+        title="Personal info"
+        action={
+          <Link
+            to={{ search: SECTIONS[1].search }}
+            className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-[#3f5ea8] hover:underline"
+          >
+            Medical history
+            <ArrowRight size={16} aria-hidden="true" />
+          </Link>
+        }
+      >
         <Field label="Phone" value={personal.phone} />
         <Field label="Primary caregiver" value={personal.primaryCaregiver} />
       </Card>
+    </div>
+  );
+};
+
+const PatientOverview = () => {
+  const { overview, patient } = useOutletContext();
+  const [searchParams] = useSearchParams();
+
+  const section =
+    searchParams.get(SECTION_PARAM) === MEDICAL_HISTORY ? MEDICAL_HISTORY : "summary";
+
+  return (
+    <div className="space-y-6">
+      <SectionTabs active={section} />
+
+      {section === MEDICAL_HISTORY ? (
+        <MedicalHistorySection patientName={patient.name} />
+      ) : (
+        <Summary overview={overview} />
+      )}
     </div>
   );
 };

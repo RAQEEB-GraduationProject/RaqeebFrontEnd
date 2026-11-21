@@ -5,6 +5,7 @@ import { ChevronDown, ChevronLeft, CircleCheck, LoaderCircle } from "lucide-reac
 import FormField from "../../../components/forms/FormField";
 import inputClass from "../../../components/forms/inputClass";
 import PatientProfileFields from "../../../components/patients/PatientProfileFields";
+import MedicalHistoryStep from "../../../components/patients/medicalHistory/MedicalHistoryStep";
 import {
   INITIAL_PROFILE_VALUES,
   toProfilePayload,
@@ -20,8 +21,13 @@ const ROLE_OPTIONS = ["Admin", "Doctor", "Nurse", "Caregiver", "Patient"];
 
 const PATIENT_ROLE = "Patient";
 
+// Patients registered here are always Female (fixed, not editable).
+const PATIENT_GENDER = "Female";
+const INITIAL_PATIENT_PROFILE = { ...INITIAL_PROFILE_VALUES, gender: PATIENT_GENDER };
+
 const INITIAL_VALUES = {
   userName: "",
+  fullName: "",
   email: "",
   phoneNumber: "",
   password: "",
@@ -30,16 +36,20 @@ const INITIAL_VALUES = {
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_PATTERN = /^\+?[0-9\s-]{7,15}$/;
+// ASP.NET Identity's default allowed user name characters (no spaces).
+const USERNAME_PATTERN = /^[A-Za-z0-9\-._@+]+$/;
 
 const validate = (values) => {
   const errors = {};
 
   if (!values.userName.trim()) {
-    errors.userName = "Full name is required.";
+    errors.userName = "Username is required.";
+  } else if (!USERNAME_PATTERN.test(values.userName.trim())) {
+    errors.userName = "Use letters, numbers and - . _ @ + only (no spaces).";
   }
 
   if (!values.email.trim()) {
-    errors.email = "Hospital email is required.";
+    errors.email = "Email is required.";
   } else if (!EMAIL_PATTERN.test(values.email.trim())) {
     errors.email = "Enter a valid email address.";
   }
@@ -84,8 +94,12 @@ const AddUser = () => {
   // the account fields are locked and the medical profile section is shown;
   // it is kept after a failed profile save so the user can retry.
   const [pendingPatient, setPendingPatient] = useState(null);
-  const [profileValues, setProfileValues] = useState(INITIAL_PROFILE_VALUES);
+  const [profileValues, setProfileValues] = useState(INITIAL_PATIENT_PROFILE);
   const [profileErrors, setProfileErrors] = useState({});
+
+  // Set once the medical profile exists: { patientId, userName }. Shows the
+  // optional medical history step for that patientId (from POST /Patients).
+  const [historyPatient, setHistoryPatient] = useState(null);
 
   const isBusy = isCreating || isCreatingProfile;
 
@@ -125,6 +139,7 @@ const AddUser = () => {
 
     const newUser = await addUser({
       userName: values.userName.trim(),
+      fullName: values.fullName,
       email: values.email.trim(),
       phoneNumber: values.phoneNumber.trim(),
       password: values.password,
@@ -156,18 +171,30 @@ const AddUser = () => {
 
     if (Object.keys(nextErrors).length > 0) return;
 
-    const success = await createPatientProfile(
-      toProfilePayload(pendingPatient.userId, profileValues),
+    const created = await createPatientProfile(
+      toProfilePayload(pendingPatient.userId, { ...profileValues, gender: PATIENT_GENDER }),
     );
 
     // On failure pendingPatient stays, so the user can retry without
     // registering the account again.
-    if (!success) return;
+    if (!created) return;
 
-    setCreatedUser(pendingPatient.userName);
+    // Step 3 (optional): medical history, now that the patientId exists.
+    if (created.id) {
+      setHistoryPatient({ patientId: created.id, userName: pendingPatient.userName });
+      return;
+    }
+
+    finishRegistration(pendingPatient.userName);
+  };
+
+  // Ends the flow (after the profile, or after / skipping medical history).
+  const finishRegistration = (userName) => {
+    setCreatedUser(userName);
     setPendingPatient(null);
+    setHistoryPatient(null);
     setValues(INITIAL_VALUES);
-    setProfileValues(INITIAL_PROFILE_VALUES);
+    setProfileValues(INITIAL_PATIENT_PROFILE);
   };
 
   const handleSubmit = async (e) => {
@@ -235,13 +262,28 @@ const AddUser = () => {
         >
           <CircleCheck size={18} className="mt-0.5 shrink-0" />
 
-          <p>
-            The account for <strong>{pendingPatient.userName}</strong> was
-            created. Complete the patient medical profile below.
-          </p>
+          {historyPatient ? (
+            <p>
+              The patient profile for <strong>{historyPatient.userName}</strong> was
+              created. You can add medical history now or skip this step.
+            </p>
+          ) : (
+            <p>
+              The account for <strong>{pendingPatient.userName}</strong> was
+              created. Complete the patient medical profile below.
+            </p>
+          )}
         </div>
       )}
 
+      {historyPatient ? (
+        <MedicalHistoryStep
+          patientId={historyPatient.patientId}
+          patientName={historyPatient.userName}
+          onDone={() => finishRegistration(historyPatient.userName)}
+        />
+      ) : (
+      <>
       {(createError || createProfileError) && (
         <p
           role="alert"
@@ -265,22 +307,32 @@ const AddUser = () => {
         </p>
 
         <div className="mt-6 grid gap-x-5 gap-y-5 md:grid-cols-2">
-          <FormField id="userName" label="Full name" error={errors.userName}>
+          <FormField id="userName" label="Username" error={errors.userName}>
             <input
               {...fieldProps("userName")}
               type="text"
               autoComplete="off"
-              placeholder="Enter full name"
+              placeholder="Enter username (used to sign in)"
               className={inputClass(errors.userName)}
             />
           </FormField>
 
-          <FormField id="email" label="Hospital email" error={errors.email}>
+          <FormField id="fullName" label="Full name (optional)" error={errors.fullName}>
+            <input
+              {...fieldProps("fullName")}
+              type="text"
+              autoComplete="off"
+              placeholder="Enter full name"
+              className={inputClass(errors.fullName)}
+            />
+          </FormField>
+
+          <FormField id="email" label="Email" error={errors.email}>
             <input
               {...fieldProps("email")}
               type="email"
               autoComplete="off"
-              placeholder="Enter hospital email"
+              placeholder="Enter email"
               className={inputClass(errors.email)}
             />
           </FormField>
@@ -333,7 +385,7 @@ const AddUser = () => {
             </h2>
 
             <p className="mt-1 text-xs text-slate-400">
-              Date of birth, gender and medical record number are required.
+              Date of birth is required. Gender is fixed to Female.
             </p>
 
             <div className="mt-6">
@@ -342,6 +394,7 @@ const AddUser = () => {
                 errors={profileErrors}
                 onChange={handleProfileChange}
                 disabled={isBusy}
+                fixedGender={PATIENT_GENDER}
               />
             </div>
           </div>
@@ -367,6 +420,8 @@ const AddUser = () => {
           </button>
         </div>
       </form>
+      </>
+      )}
     </div>
   );
 };

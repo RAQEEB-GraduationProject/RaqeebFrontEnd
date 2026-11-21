@@ -5,6 +5,7 @@ import { configureApi } from "../services/api";
 import getErrorMessage from "../utils/getErrorMessage";
 import { getDashboardPath } from "../utils/roles";
 import { usePatientOverviewStore } from "./patientOverviewStore";
+import { usePatientMedicalHistoryStore } from "./patientMedicalHistoryStore";
 import { usePatientStore } from "./patientStore";
 import { useUserStore } from "./userStore";
 import { useAssignmentStore } from "./assignmentStore";
@@ -13,6 +14,7 @@ import { useAssignmentStore } from "./assignmentStore";
 // reset() also makes requests started before logout ignore their answers.
 const SESSION_STORES = [
   usePatientOverviewStore,
+  usePatientMedicalHistoryStore,
   usePatientStore,
   useUserStore,
   useAssignmentStore,

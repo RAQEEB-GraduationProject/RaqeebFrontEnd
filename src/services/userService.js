@@ -33,16 +33,19 @@ const userService = {
   },
 
   // POST {VITE_API_BASE_URL}/Auth/register  (base URL already ends with /api)
-  async register({ userName, email, phoneNumber, password, role }) {
+  // `userName` is the login name; `fullName` is the optional display name
+  // (sent as null when blank).
+  async register({ userName, fullName, email, phoneNumber, password, role }) {
     const { data } = await api.post("/Auth/register", {
       userName,
+      fullName: typeof fullName === "string" && fullName.trim() ? fullName.trim() : null,
       email,
       phoneNumber,
       password,
       role,
     });
 
-    // RegisterResponseDto: { userId, userName, email, role }
+    // RegisterResponseDto: { userId, userName, email, role } (no fullName)
     return {
       userId: data?.userId ?? null,
       userName: data?.userName ?? userName,
