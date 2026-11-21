@@ -4,6 +4,19 @@ import authService from "../services/authService";
 import { configureApi } from "../services/api";
 import getErrorMessage from "../utils/getErrorMessage";
 import { getDashboardPath } from "../utils/roles";
+import { usePatientOverviewStore } from "./patientOverviewStore";
+import { usePatientStore } from "./patientStore";
+import { useUserStore } from "./userStore";
+import { useAssignmentStore } from "./assignmentStore";
+
+// Stores holding data of the signed-in session (role/hospital scoped). Each
+// reset() also makes requests started before logout ignore their answers.
+const SESSION_STORES = [
+  usePatientOverviewStore,
+  usePatientStore,
+  useUserStore,
+  useAssignmentStore,
+];
 
 const emptySession = {
   user: null, // { userId, userName, name, role, hospitalId }
@@ -49,7 +62,12 @@ export const useAuthStore = create(
         }
       },
 
-      logout: () => set({ ...emptySession, error: null }),
+      // Every logout path ends here (layout buttons, 401 from api.js, expired
+      // token on reload), so every store's session data is cleared here too.
+      logout: () => {
+        SESSION_STORES.forEach((store) => store.getState().reset());
+        set({ ...emptySession, error: null });
+      },
 
       // لتعديل بيانات اليوزر محلياً (مثلاً من صفحة Profile)
       updateUser: (updates) =>

@@ -2,7 +2,12 @@ import { create } from "zustand";
 import userService from "../services/userService";
 import getErrorMessage from "../utils/getErrorMessage";
 
-export const useUserStore = create((set, get) => ({
+/*
+  Admin screens: the hospital's users (GET /Users) and Patient users
+  (GET /Users?role=Patient). Hospital-scoped data of the signed-in admin, so
+  it is cleared on logout (see authStore).
+*/
+const initialState = {
   users: [],
   isLoading: false,
   error: null,
@@ -15,54 +20,80 @@ export const useUserStore = create((set, get) => ({
 
   isCreating: false,
   createError: null,
+};
 
-  fetchUsers: async () => {
-    set({ isLoading: true, error: null });
+export const useUserStore = create((set, get) => {
+  // Bumped by reset() (logout). A request started before it must not write
+  // its answer, or trigger follow-up requests, into the next session.
+  let generation = 0;
+  const isCurrent = (requestGeneration) => requestGeneration === generation;
 
-    try {
-      const users = await userService.getUsers();
-      set({ users, isLoading: false });
-    } catch (error) {
-      set({ isLoading: false, error: getErrorMessage(error) });
-    }
-  },
+  return {
+    ...initialState,
 
-  fetchPatientUsers: async () => {
-    // One request at a time (covers StrictMode's double effect).
-    if (get().isLoadingPatientUsers) return;
+    fetchUsers: async () => {
+      const requestGeneration = generation;
+      set({ isLoading: true, error: null });
 
-    set({ isLoadingPatientUsers: true, patientUsersError: null });
+      try {
+        const users = await userService.getUsers();
+        if (!isCurrent(requestGeneration)) return;
+        set({ users, isLoading: false });
+      } catch (error) {
+        if (!isCurrent(requestGeneration)) return;
+        set({ isLoading: false, error: getErrorMessage(error) });
+      }
+    },
 
-    try {
-      const patientUsers = await userService.getPatientUsers();
-      set({ patientUsers, isPatientUsersLoaded: true, isLoadingPatientUsers: false });
-    } catch (error) {
-      set({ isLoadingPatientUsers: false, patientUsersError: getErrorMessage(error) });
-    }
-  },
+    fetchPatientUsers: async () => {
+      // One request at a time (covers StrictMode's double effect).
+      if (get().isLoadingPatientUsers) return;
 
-  // Returns the created user ({ userId, userName, email, role }) when the
-  // backend confirmed success, or null otherwise (the message is stored in
-  // createError).
-  addUser: async (payload) => {
-    if (get().isCreating) return null;
+      const requestGeneration = generation;
+      set({ isLoadingPatientUsers: true, patientUsersError: null });
 
-    set({ isCreating: true, createError: null });
+      try {
+        const patientUsers = await userService.getPatientUsers();
+        if (!isCurrent(requestGeneration)) return;
+        set({ patientUsers, isPatientUsersLoaded: true, isLoadingPatientUsers: false });
+      } catch (error) {
+        if (!isCurrent(requestGeneration)) return;
+        set({ isLoadingPatientUsers: false, patientUsersError: getErrorMessage(error) });
+      }
+    },
 
-    try {
-      const createdUser = await userService.register(payload);
-      set({ isCreating: false });
+    // Returns the created user ({ userId, userName, email, role }) when the
+    // backend confirmed success, or null otherwise (the message is stored in
+    // createError).
+    addUser: async (payload) => {
+      if (get().isCreating) return null;
 
-      // Refresh the list through the existing GET flow instead of inserting
-      // a locally built object.
-      get().fetchUsers();
+      const requestGeneration = generation;
+      set({ isCreating: true, createError: null });
 
-      return createdUser;
-    } catch (error) {
-      set({ isCreating: false, createError: getErrorMessage(error) });
-      return null;
-    }
-  },
+      try {
+        const createdUser = await userService.register(payload);
+        if (!isCurrent(requestGeneration)) return createdUser;
+        set({ isCreating: false });
 
-  clearCreateError: () => set({ createError: null }),
-}));
+        // Refresh the list through the existing GET flow instead of inserting
+        // a locally built object.
+        get().fetchUsers();
+
+        return createdUser;
+      } catch (error) {
+        if (!isCurrent(requestGeneration)) return null;
+        set({ isCreating: false, createError: getErrorMessage(error) });
+        return null;
+      }
+    },
+
+    clearCreateError: () => set({ createError: null }),
+
+    // Logout: drop the hospital's users and ignore pending answers.
+    reset: () => {
+      generation += 1;
+      set(initialState);
+    },
+  };
+});
