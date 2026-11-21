@@ -32,7 +32,10 @@ const SelectField = ({ label, value, onChange, children }) => (
   </div>
 );
 
-const DoctorPatients = () => {
+// Clinical patient list (GET /Patients: the backend returns only the patients
+// assigned to the signed-in doctor or nurse). Also used by the nurse route:
+// pass `patientsPath="/nurse/patients"` so rows open the nurse's details page.
+const DoctorPatients = ({ patientsPath = "/doctor/patients" }) => {
   const {
     filteredPatients,
     isLoading,
@@ -169,6 +172,7 @@ const DoctorPatients = () => {
         onRetry={refetch}
         hasFilters={hasFilters}
         onClearFilters={clearFilters}
+        patientsPath={patientsPath}
       />
     </div>
   );

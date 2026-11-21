@@ -1,6 +1,7 @@
-import PatientTabPlaceholder from "../../../../components/patientDetails/PatientTabPlaceholder";
+import PatientOverview from "../../../../components/patientDetails/overview/PatientOverview";
 
-// TODO: build the Patient Overview tab.
-const PatientOverviewTab = () => <PatientTabPlaceholder title="Patient Overview" />;
+// Route entry of the "overview" tab for every role (Admin, Doctor, Nurse).
+// The UI and data loading are role-agnostic and live in components/patientDetails.
+const PatientOverviewTab = () => <PatientOverview />;
 
 export default PatientOverviewTab;

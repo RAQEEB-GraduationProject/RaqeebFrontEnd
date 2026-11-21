@@ -31,6 +31,7 @@ const SkeletonRows = () => (
   </div>
 );
 
+// `patientsPath`: the role's patients route; rows open `${patientsPath}/:id`.
 const DoctorPatientsTable = ({
   patients,
   isLoading,
@@ -38,9 +39,10 @@ const DoctorPatientsTable = ({
   onRetry,
   hasFilters,
   onClearFilters,
+  patientsPath = "/doctor/patients",
 }) => {
   const navigate = useNavigate();
-  const openPatient = (patient) => navigate(`/doctor/patients/${patient.id}`);
+  const openPatient = (patient) => navigate(`${patientsPath}/${patient.id}`);
 
   return (
     <section className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">

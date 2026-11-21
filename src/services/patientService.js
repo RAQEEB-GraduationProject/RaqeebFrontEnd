@@ -41,12 +41,64 @@ const mapPatient = (data) => ({
   createdAt: data.createdAt ?? null,
 });
 
+const numberOrNull = (value) => (Number.isFinite(value) ? value : null);
+
+// GET /Patients/{patientId}/overview -> data of the whole patient details page:
+//   header   -> shared patient header (same field names as mapPatient, so
+//               PatientDetailsHeader reads both shapes; patientCode is the
+//               backend's MedicalRecordNumber)
+//   clinical / personal -> Patient Overview tab
+// Missing values stay null (treatment status and cycle fields are null until
+// the backend's chemotherapy module fills them; no default risk level).
+const mapOverview = (data) => {
+  const header = data.patientHeader ?? {};
+  const clinical = data.clinicalOverview ?? {};
+  const personal = data.personalInfo ?? {};
+
+  return {
+    header: {
+      id: header.patientId,
+      name: textOrNull(header.fullName) ?? "Unknown patient",
+      medicalRecordNumber: textOrNull(header.patientCode),
+      age: numberOrNull(header.age),
+      gender: textOrNull(header.gender),
+      bloodGroup: textOrNull(header.bloodGroup),
+      risk: textOrNull(header.riskLevel),
+    },
+    clinical: {
+      cancerType: textOrNull(clinical.cancerType),
+      stage: textOrNull(clinical.stage),
+      treatingDoctor: textOrNull(clinical.treatingDoctor?.name),
+      treatmentStatus: textOrNull(clinical.treatmentStatus),
+      protocol: textOrNull(clinical.protocol),
+      currentCycle: numberOrNull(clinical.currentCycle),
+      totalCycles: numberOrNull(clinical.totalCycles),
+      currentDay: numberOrNull(clinical.currentDay),
+    },
+    personal: {
+      phone: textOrNull(personal.phone),
+      primaryCaregiver: textOrNull(personal.primaryCaregiver),
+    },
+  };
+};
+
 const patientService = {
   // GET {VITE_API_BASE_URL}/Patients  -> direct JSON array
   async getPatients() {
     const { data } = await api.get("/Patients");
 
     return Array.isArray(data) ? data.map(mapPatient) : [];
+  },
+
+  // GET {VITE_API_BASE_URL}/Patients/{patientId}/overview  (Admin, Doctor,
+  // Nurse; the backend limits non-admins to their assigned patients and
+  // answers 404 otherwise). Returns null when the payload is empty.
+  async getPatientOverview(patientId) {
+    const { data } = await api.get(
+      `/Patients/${encodeURIComponent(patientId)}/overview`,
+    );
+
+    return data ? mapOverview(data) : null;
   },
 
   // POST {VITE_API_BASE_URL}/Patients  (Admin only). Creates the medical
