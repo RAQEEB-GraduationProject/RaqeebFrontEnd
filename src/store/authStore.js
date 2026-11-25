@@ -6,6 +6,7 @@ import getErrorMessage from "../utils/getErrorMessage";
 import { getDashboardPath } from "../utils/roles";
 import { usePatientOverviewStore } from "./patientOverviewStore";
 import { usePatientMedicalHistoryStore } from "./patientMedicalHistoryStore";
+import { usePatientCareStore } from "./patientCareStore";
 import { usePatientStore } from "./patientStore";
 import { useUserStore } from "./userStore";
 import { useAssignmentStore } from "./assignmentStore";
@@ -15,6 +16,7 @@ import { useAssignmentStore } from "./assignmentStore";
 const SESSION_STORES = [
   usePatientOverviewStore,
   usePatientMedicalHistoryStore,
+  usePatientCareStore,
   usePatientStore,
   useUserStore,
   useAssignmentStore,

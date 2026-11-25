@@ -4,6 +4,7 @@ import { CalendarDays, ClipboardPlus, MessageSquare } from "lucide-react";
 import PatientDetailsLayout from "../../../components/patientDetails/PatientDetailsLayout";
 import usePatientOverview from "../../../components/patientDetails/usePatientOverview";
 import { usePatientMedicalHistoryStore } from "../../../store/patientMedicalHistoryStore";
+import { usePatientCareStore } from "../../../store/patientCareStore";
 import { doctorPatientTabs } from "./doctorPatientTabs";
 
 const LIST_PATH = "/doctor/patients";
@@ -61,6 +62,10 @@ const DoctorPatientDetails = ({
   // or the details page is left, so a later visit shows fresh records.
   const resetMedicalHistory = usePatientMedicalHistoryStore((state) => state.reset);
   useEffect(() => () => resetMedicalHistory(), [patientId, resetMedicalHistory]);
+
+  // Same for the Patient Care journal and appointments.
+  const resetPatientCare = usePatientCareStore((state) => state.reset);
+  useEffect(() => () => resetPatientCare(), [patientId, resetPatientCare]);
 
   if (!overview && !error && isLoading) {
     return (

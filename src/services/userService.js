@@ -25,6 +25,14 @@ const userService = {
     return Array.isArray(data) ? data.map(mapUser) : [];
   },
 
+  // GET {VITE_API_BASE_URL}/Users?role=Doctor  (Admin only). Used to pick the
+  // provider of a patient's appointment.
+  async getDoctorUsers() {
+    const { data } = await api.get("/Users", { params: { role: "Doctor" } });
+
+    return Array.isArray(data) ? data.map(mapUser) : [];
+  },
+
   async getUserById(id) {
     const { data } = await api.get(`/Users/${encodeURIComponent(id)}`);
     if (!data) throw new Error("The requested user was not found.");
