@@ -1,23 +1,20 @@
 import { Link, useOutletContext, useSearchParams } from "react-router-dom";
 
 import AppointmentsSection from "./AppointmentsSection";
-import JournalSection from "./JournalSection";
 
 /*
   Patient Care tab, shared by the Admin, Doctor and Nurse patient details
-  routes, with three sections (reference screenshots 095728 / 095741):
-    Journal       GET/POST /Patients/{patientId}/journal
+  routes, with two sections (reference screenshot 095741):
     Appointments  GET/POST /Patients/{patientId}/appointments
     Questions     placeholder only: no request is made (waiting for the app)
-  The section is kept in the URL (?section=appointments), so it survives a
+  The section is kept in the URL (?section=questions), so it survives a
   refresh and the browser's back button.
 */
 
 const SECTION_PARAM = "section";
 
 const SECTIONS = [
-  { key: "journal", label: "Journal", search: "" },
-  { key: "appointments", label: "Appointments", search: `?${SECTION_PARAM}=appointments` },
+  { key: "appointments", label: "Appointments", search: "" },
   { key: "questions", label: "Questions", search: `?${SECTION_PARAM}=questions` },
 ];
 
@@ -63,7 +60,7 @@ const PatientCare = () => {
   const [searchParams] = useSearchParams();
 
   const requested = searchParams.get(SECTION_PARAM);
-  const section = SECTIONS.some(({ key }) => key === requested) ? requested : "journal";
+  const section = SECTIONS.some(({ key }) => key === requested) ? requested : "appointments";
 
   return (
     <div className="space-y-6">
@@ -71,7 +68,6 @@ const PatientCare = () => {
 
       {section === "appointments" && <AppointmentsSection patientName={patient.name} />}
       {section === "questions" && <QuestionsPlaceholder patientName={patient.name} />}
-      {section === "journal" && <JournalSection patientName={patient.name} />}
     </div>
   );
 };

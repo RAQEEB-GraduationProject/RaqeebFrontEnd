@@ -5,8 +5,6 @@ import getErrorMessage from "../utils/getErrorMessage";
 
 /*
   Patient Care of ONE patient at a time:
-    GET  /Patients/{patientId}/journal        -> `journal`
-    POST /Patients/{patientId}/journal        -> addJournalEntry()
     GET  /Patients/{patientId}/appointments   -> `appointments`
     POST /Patients/{patientId}/appointments   -> addAppointment()
     GET  /Users?role=Doctor (Admin only)      -> `doctors` (appointment provider)
@@ -18,7 +16,6 @@ import getErrorMessage from "../utils/getErrorMessage";
 const emptyList = { patientId: null, items: null, totalCount: 0, isLoading: false, error: null };
 
 const initialState = {
-  journal: emptyList,
   appointments: emptyList,
   doctors: { items: null, isLoading: false, error: null },
 
@@ -29,14 +26,13 @@ const initialState = {
 const BUSY_ERROR = new Error("A record is already being added.");
 
 const LISTS = {
-  journal: { load: patientService.getJournal, add: patientService.addJournalEntry },
   appointments: { load: patientService.getAppointments, add: patientService.addAppointment },
 };
 
 export const usePatientCareStore = create((set, get) => {
   // Latest GET per list / reset() generation: only the latest request may
   // write its answer (another patient opened meanwhile, or reset()).
-  const latestRequest = { journal: 0, appointments: 0, doctors: 0 };
+  const latestRequest = { appointments: 0, doctors: 0 };
   let generation = 0;
 
   const patchList = (kind, patch) => set((state) => ({ [kind]: { ...state[kind], ...patch } }));
@@ -105,9 +101,7 @@ export const usePatientCareStore = create((set, get) => {
   return {
     ...initialState,
 
-    fetchJournal: (patientId) => fetchList("journal", patientId),
     fetchAppointments: (patientId) => fetchList("appointments", patientId),
-    addJournalEntry: (patientId, values) => addRecord("journal", patientId, values),
     addAppointment: (patientId, values) => addRecord("appointments", patientId, values),
 
     // Active doctors of the hospital (Admin only), for the provider picker.

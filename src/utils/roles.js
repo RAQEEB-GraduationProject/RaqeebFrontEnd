@@ -20,7 +20,7 @@ export const getDashboardPath = (role) => DASHBOARD_PATHS[role] ?? null;
 export const canAddMedicalHistory = (role) =>
   role === ROLES.ADMIN || role === ROLES.DOCTOR;
 
-// POST /Patients/{id}/journal and /appointments are [Authorize(Roles =
-// "Admin,Doctor")] too (a doctor only for assigned patients). Hides the action
-// only; the backend still decides.
+// POST /Patients/{id}/appointments is [Authorize(Roles = "Admin,Doctor")] too
+// (a doctor only for assigned patients). Hides the action only; the backend
+// still decides.
 export const canAddPatientCare = canAddMedicalHistory;

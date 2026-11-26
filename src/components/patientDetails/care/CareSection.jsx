@@ -52,9 +52,9 @@ const Row = ({ row, isOpen, onToggle }) => {
 };
 
 /*
-  Layout shared by the Journal and Appointments sections (reference
-  screenshots 095728 / 095741): heading + "Add entry", the records card with
-  expandable rows, and the "At a glance" card with the backend's totalCount.
+  Layout of a Patient Care records section (reference screenshot 095741):
+  heading + "Add entry", the records card with expandable rows, and the
+  "At a glance" card with the backend's totalCount.
   `list` comes from usePatientCareList; `rows` are { id, title, subtitle,
   badge, details }. Export / Open care plan are not shown: no backend.
 */

@@ -63,7 +63,7 @@ const DoctorPatientDetails = ({
   const resetMedicalHistory = usePatientMedicalHistoryStore((state) => state.reset);
   useEffect(() => () => resetMedicalHistory(), [patientId, resetMedicalHistory]);
 
-  // Same for the Patient Care journal and appointments.
+  // Same for the Patient Care appointments.
   const resetPatientCare = usePatientCareStore((state) => state.reset);
   useEffect(() => () => resetPatientCare(), [patientId, resetPatientCare]);
 

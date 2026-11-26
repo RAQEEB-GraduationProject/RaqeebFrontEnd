@@ -116,23 +116,6 @@ const mapMedicalHistory = (data) => {
   };
 };
 
-// One journal entry. `createdAt` is the backend's UTC ISO timestamp.
-const mapJournalEntry = (item) => ({
-  id: item.entryId,
-  type: textOrNull(item.entryType) ?? "Note",
-  content: textOrNull(item.content) ?? "",
-  authorName: textOrNull(item.author?.name) ?? "Unknown author",
-  authorRole: textOrNull(item.author?.role),
-  createdAt: textOrNull(item.createdAt),
-});
-
-// GET /Patients/{patientId}/journal -> { entries (newest first), totalCount }.
-const mapJournal = (data) => {
-  const entries = Array.isArray(data.entries) ? data.entries.map(mapJournalEntry) : [];
-
-  return { items: entries, totalCount: numberOrNull(data.totalCount) ?? entries.length };
-};
-
 // One appointment. `date` stays "yyyy-MM-dd" and `time` becomes "HH:mm" (both
 // are local clinic values without a time zone, see the backend report).
 const mapAppointment = (item) => ({
@@ -233,26 +216,6 @@ const patientService = {
     );
 
     return data ? { ...mapHistoryItem(data), type: data.type } : null;
-  },
-
-  // GET {VITE_API_BASE_URL}/Patients/{patientId}/journal (any role with
-  // access to the patient; 404 otherwise).
-  async getJournal(patientId) {
-    const { data } = await api.get(`/Patients/${encodeURIComponent(patientId)}/journal`);
-
-    return data ? mapJournal(data) : null;
-  },
-
-  // POST {VITE_API_BASE_URL}/Patients/{patientId}/journal (Admin; Doctor for
-  // assigned patients). 201 -> the created entry.
-  // body: { entryType: "Note" | "Reminder" | "Instruction", content }
-  async addJournalEntry(patientId, { type, content }) {
-    const { data } = await api.post(`/Patients/${encodeURIComponent(patientId)}/journal`, {
-      entryType: type,
-      content: content.trim(),
-    });
-
-    return data ? mapJournalEntry(data) : null;
   },
 
   // GET {VITE_API_BASE_URL}/Patients/{patientId}/appointments (any role with

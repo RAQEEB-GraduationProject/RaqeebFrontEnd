@@ -40,7 +40,7 @@ const toRow = (appointment) => ({
 const AppointmentsSection = ({ patientName }) => {
   const { patientId } = useParams();
   const role = useAuthStore((state) => state.user?.role);
-  const list = usePatientCareList("appointments", patientId);
+  const list = usePatientCareList(patientId);
   const [isAdding, setIsAdding] = useState(false);
 
   const canAdd = canAddPatientCare(role);

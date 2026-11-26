@@ -2,17 +2,14 @@ import { useEffect } from "react";
 import { usePatientCareStore } from "../../../store/patientCareStore";
 
 /*
-  Journal / appointments of the patient in the URL. Requested the first time
-  the section is shown for this patient, then kept while the user moves
-  between sections / tabs of the same patient (the details page drops it when
-  left, see DoctorPatientDetails). A result of another patient is never
-  returned.
+  Appointments of the patient in the URL. Requested the first time the section
+  is shown for this patient, then kept while the user moves between sections /
+  tabs of the same patient (the details page drops it when left, see
+  DoctorPatientDetails). A result of another patient is never returned.
 */
-export default function usePatientCareList(kind, patientId) {
-  const list = usePatientCareStore((state) => state[kind]);
-  const fetchList = usePatientCareStore((state) =>
-    kind === "journal" ? state.fetchJournal : state.fetchAppointments,
-  );
+export default function usePatientCareList(patientId) {
+  const list = usePatientCareStore((state) => state.appointments);
+  const fetchList = usePatientCareStore((state) => state.fetchAppointments);
 
   const isCurrent = list.patientId === patientId;
 
