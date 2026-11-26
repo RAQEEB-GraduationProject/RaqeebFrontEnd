@@ -5,10 +5,10 @@ import usePatientUser from "../hooks/usePatientUser";
 import { PATIENTS_PATH, patientUserPath } from "../patientPaths";
 
 const Panel = ({ title, text, children }) => (
-  <div className="rounded-2xl border border-slate-100 bg-white px-6 py-14 text-center shadow-sm">
-    <p className="text-sm font-semibold text-slate-800">{title}</p>
+  <div className="rounded-2xl border border-line-soft bg-white px-6 py-14 text-center shadow-sm">
+    <p className="text-sm font-semibold text-ink">{title}</p>
 
-    {text && <p className="mt-1 text-sm text-slate-500">{text}</p>}
+    {text && <p className="mt-1 text-sm text-muted-strong">{text}</p>}
 
     {children}
   </div>
@@ -17,7 +17,7 @@ const Panel = ({ title, text, children }) => (
 const BackLink = () => (
   <Link
     to={PATIENTS_PATH}
-    className="mt-4 inline-block text-sm font-semibold text-[#3f5ea8] hover:underline"
+    className="mt-4 inline-block text-sm font-semibold text-accent hover:underline"
   >
     Back to patients
   </Link>
@@ -40,7 +40,7 @@ const PatientUserGate = ({ userId, current, children }) => {
     return (
       <div
         aria-busy="true"
-        className="rounded-2xl border border-slate-100 bg-white px-6 py-14 text-center text-sm text-slate-500 shadow-sm"
+        className="rounded-2xl border border-line-soft bg-white px-6 py-14 text-center text-sm text-muted-strong shadow-sm"
       >
         Loading patient…
       </div>
@@ -53,7 +53,7 @@ const PatientUserGate = ({ userId, current, children }) => {
         <button
           type="button"
           onClick={retry}
-          className="mt-4 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-[#0f3d4c] transition hover:bg-slate-50"
+          className="mt-4 rounded-xl border border-line bg-white px-4 py-2 text-sm font-semibold text-ink transition hover:bg-surface-soft"
         >
           Try again
         </button>
@@ -76,21 +76,21 @@ const PatientUserGate = ({ userId, current, children }) => {
   return (
     <div className="mx-auto max-w-[1160px] space-y-6">
       <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs">
-        <Link to={PATIENTS_PATH} className="text-[#3f5ea8] hover:underline">
+        <Link to={PATIENTS_PATH} className="text-accent hover:underline">
           Patients
         </Link>
-        <ChevronRight size={12} className="text-slate-400" aria-hidden="true" />
+        <ChevronRight size={12} className="text-muted" aria-hidden="true" />
 
         {current ? (
           <>
-            <Link to={patientUserPath(userId)} className="text-[#3f5ea8] hover:underline">
+            <Link to={patientUserPath(userId)} className="text-accent hover:underline">
               {user.userName}
             </Link>
-            <ChevronRight size={12} className="text-slate-400" aria-hidden="true" />
-            <span className="text-slate-500">{current}</span>
+            <ChevronRight size={12} className="text-muted" aria-hidden="true" />
+            <span className="text-muted-strong">{current}</span>
           </>
         ) : (
-          <span className="text-slate-500">{user.userName}</span>
+          <span className="text-muted-strong">{user.userName}</span>
         )}
       </nav>
 

@@ -11,19 +11,19 @@ const SECTIONS = [
     title: "Doctor",
     hint: "Select one primary doctor",
     single: true,
-    chip: "bg-sky-50 text-sky-900",
+    chip: "bg-doctor-bg text-doctor-text",
   },
   {
     role: "nurse",
     title: "Nurse",
     hint: "Select one or more nurses",
-    chip: "bg-emerald-50 text-emerald-900",
+    chip: "bg-nurse-bg text-nurse-text",
   },
   {
     role: "caregiver",
     title: "Caregiver",
     hint: "Select one or more caregivers",
-    chip: "bg-violet-50 text-violet-900",
+    chip: "bg-caregiver-bg text-caregiver-text",
   },
 ];
 
@@ -73,7 +73,7 @@ const AssignDrawer = ({
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
       <div
-        className="absolute inset-0 bg-slate-900/40"
+        className="absolute inset-0 bg-overlay/40"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -84,17 +84,17 @@ const AssignDrawer = ({
         aria-label="Assign care team"
         className="relative flex h-full w-full max-w-[520px] flex-col bg-white shadow-xl"
       >
-        <header className="flex items-start justify-between border-b border-slate-100 px-7 py-6">
+        <header className="flex items-start justify-between border-b border-line-soft px-7 py-6">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-teal-700">
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-accent">
               Care assignment
             </p>
 
-            <h2 className="mt-2 text-3xl font-medium text-[#0b2a3d]">
+            <h2 className="mt-2 text-3xl font-medium text-ink">
               Assign Care Team
             </h2>
 
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-muted-strong">
               {lockedPatient
                 ? "Staff shown are currently assigned. Removing one unassigns them from this patient only; their account is not affected."
                 : "Choose the patients and the staff responsible for their care."}
@@ -105,7 +105,7 @@ const AssignDrawer = ({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="rounded-xl border border-slate-200 p-2.5 text-slate-600 transition hover:bg-slate-50"
+            className="rounded-xl border border-line p-2.5 text-ink-soft transition hover:bg-surface-soft"
           >
             <X size={18} />
           </button>
@@ -113,16 +113,16 @@ const AssignDrawer = ({
 
         <div className="flex-1 space-y-7 overflow-y-auto px-7 py-6">
           {lockedPatient ? (
-            <div className="flex items-center gap-4 rounded-2xl border border-slate-200 p-4">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-teal-50 text-xs font-bold text-teal-800">
+            <div className="flex items-center gap-4 rounded-2xl border border-line p-4">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-avatar text-xs font-bold text-on-avatar">
                 {getInitials(lockedPatient.userName)}
               </div>
 
               <div>
-                <p className="text-base font-semibold text-[#0b2a3d]">
+                <p className="text-base font-semibold text-ink">
                   {lockedPatient.userName}
                 </p>
-                <p className="text-sm text-slate-400">
+                <p className="text-sm text-muted">
                   {lockedPatient.medicalRecordNumber}
                 </p>
               </div>
@@ -138,13 +138,13 @@ const AssignDrawer = ({
           {SECTIONS.map((section) => (
             <section
               key={section.role}
-              className="space-y-3 border-t border-slate-100 pt-6"
+              className="space-y-3 border-t border-line-soft pt-6"
             >
               <div>
-                <h3 className="text-base font-semibold text-[#0b2a3d]">
+                <h3 className="text-base font-semibold text-ink">
                   {section.title}
                 </h3>
-                <p className="text-sm text-slate-500">{section.hint}</p>
+                <p className="text-sm text-muted-strong">{section.hint}</p>
               </div>
 
               {team[section.role].length > 0 && (
@@ -195,11 +195,11 @@ const AssignDrawer = ({
           ))}
         </div>
 
-        <footer className="flex justify-end gap-3 border-t border-slate-100 px-7 py-5">
+        <footer className="flex justify-end gap-3 border-t border-line-soft px-7 py-5">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-[#0f3d4c] transition hover:bg-slate-50"
+            className="rounded-xl border border-line bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:bg-surface-soft"
           >
             Cancel
           </button>
@@ -211,7 +211,7 @@ const AssignDrawer = ({
               if (isSaving) return;
               if (await onSave(selectedIds, team)) onClose();
             }}
-            className="rounded-xl bg-[#0f3d4c] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#0b2a3d] disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-on-primary transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:bg-disabled disabled:text-on-disabled disabled:shadow-none"
           >
             {isSaving ? "Saving…" : "Save assignments"}
           </button>

@@ -6,12 +6,12 @@ import { HomeBadge, PediatricBadge } from "./badges";
 const GRADES = ["grade1", "grade2", "grade3", "grade4", "grade5"];
 
 const Section = ({ title, children }) => (
-  <section className="space-y-2 border-t border-slate-100 pt-5">
-    <h3 className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
+  <section className="space-y-2 border-t border-line-soft pt-5">
+    <h3 className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-strong">
       {title}
     </h3>
 
-    <div className="text-sm leading-relaxed text-[#0b2a3d]">{children}</div>
+    <div className="text-sm leading-relaxed text-ink">{children}</div>
   </section>
 );
 
@@ -25,7 +25,7 @@ const RuleDetailsDrawer = ({ rule, onEdit, onClose }) => {
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
       <div
-        className="absolute inset-0 bg-slate-900/40"
+        className="absolute inset-0 bg-overlay/40"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -36,13 +36,13 @@ const RuleDetailsDrawer = ({ rule, onEdit, onClose }) => {
         aria-label={`${rule.adverseEvent} details`}
         className="relative flex h-full w-full max-w-[560px] flex-col bg-white shadow-xl"
       >
-        <header className="flex items-start justify-between border-b border-slate-100 px-7 py-6">
+        <header className="flex items-start justify-between border-b border-line-soft px-7 py-6">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-teal-700">
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-accent">
               {rule.category}
             </p>
 
-            <h2 className="mt-2 text-3xl font-medium text-[#0b2a3d]">
+            <h2 className="mt-2 text-3xl font-medium text-ink">
               {rule.adverseEvent}
             </h2>
 
@@ -56,7 +56,7 @@ const RuleDetailsDrawer = ({ rule, onEdit, onClose }) => {
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="rounded-xl border border-slate-200 p-2.5 text-slate-600 transition hover:bg-slate-50"
+            className="rounded-xl border border-line p-2.5 text-ink-soft transition hover:bg-surface-soft"
           >
             <X size={18} />
           </button>
@@ -74,11 +74,11 @@ const RuleDetailsDrawer = ({ rule, onEdit, onClose }) => {
           <Section title="Pediatric notes">{rule.pediatricNotes || "—"}</Section>
         </div>
 
-        <footer className="flex justify-end gap-3 border-t border-slate-100 px-7 py-5">
+        <footer className="flex justify-end gap-3 border-t border-line-soft px-7 py-5">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-[#0f3d4c] transition hover:bg-slate-50"
+            className="rounded-xl border border-line bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:bg-surface-soft"
           >
             Close
           </button>
@@ -86,7 +86,7 @@ const RuleDetailsDrawer = ({ rule, onEdit, onClose }) => {
           <button
             type="button"
             onClick={() => onEdit(rule)}
-            className="flex items-center gap-2 rounded-xl bg-[#0f3d4c] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#0b2a3d]"
+            className="flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-on-primary transition hover:bg-primary-hover"
           >
             <Pencil size={14} />
             Edit rule

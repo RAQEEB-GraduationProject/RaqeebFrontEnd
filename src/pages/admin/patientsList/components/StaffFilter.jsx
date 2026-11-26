@@ -63,7 +63,7 @@ const StaffFilter = ({
         type="button"
         onClick={() => setOpen((current) => !current)}
         aria-expanded={open}
-        className="flex w-full items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 sm:w-[190px]"
+        className="flex w-full items-center justify-between gap-3 rounded-xl border border-line bg-white px-5 py-3 text-sm font-semibold text-ink-soft transition hover:bg-surface-soft sm:w-[190px]"
       >
         <span className="flex items-center gap-2">
           <Filter size={16} />
@@ -74,12 +74,12 @@ const StaffFilter = ({
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full z-30 mt-3 w-[min(400px,calc(100vw-2rem))] rounded-2xl border border-slate-200 bg-white p-5 shadow-xl">
-          <h3 className="text-base font-semibold text-[#0b2a3d]">
+        <div className="absolute right-0 top-full z-30 mt-3 w-[min(400px,calc(100vw-2rem))] rounded-2xl border border-line bg-white p-5 shadow-xl">
+          <h3 className="text-base font-semibold text-ink">
             Filter patients by care staff
           </h3>
 
-          <div className="mt-4 grid grid-cols-4 gap-1 rounded-xl bg-slate-100 p-1">
+          <div className="mt-4 grid grid-cols-4 gap-1 rounded-xl bg-surface-muted p-1">
             {TABS.map((tab) => (
               <button
                 key={tab.value}
@@ -87,8 +87,8 @@ const StaffFilter = ({
                 onClick={() => selectTab(tab.value)}
                 className={`rounded-lg px-2 py-2 text-sm font-semibold transition ${
                   role === tab.value
-                    ? "bg-white text-teal-800 shadow-sm"
-                    : "text-slate-500 hover:text-slate-700"
+                    ? "bg-white text-accent shadow-sm"
+                    : "text-muted-strong hover:text-ink-soft"
                 }`}
               >
                 {tab.label}
@@ -97,7 +97,7 @@ const StaffFilter = ({
           </div>
 
           {role === "unassigned" ? (
-            <p className="px-1 py-6 text-center text-sm text-slate-500">
+            <p className="px-1 py-6 text-center text-sm text-muted-strong">
               {unassignedCount} patients without a care team
             </p>
           ) : (
@@ -105,7 +105,7 @@ const StaffFilter = ({
               <div className="relative mt-4">
                 <Search
                   size={16}
-                  className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                  className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted"
                 />
 
                 <input
@@ -114,37 +114,37 @@ const StaffFilter = ({
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Search staff by name…"
                   aria-label="Search staff"
-                  className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-[15px] outline-none transition placeholder:text-slate-400 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20"
+                  className="w-full rounded-xl border border-field bg-white py-2.5 pl-10 pr-4 text-[15px] outline-none transition placeholder:text-muted focus:border-focus focus:ring-2 focus:ring-focus/25"
                 />
               </div>
 
               <ul className="mt-3 max-h-64 overflow-y-auto">
                 {members.length === 0 ? (
-                  <li className="px-3 py-6 text-center text-sm text-slate-400">
+                  <li className="px-3 py-6 text-center text-sm text-muted">
                     No staff found
                   </li>
                 ) : (
                   members.map((member) => (
-                    <li key={member.id} className="border-t border-slate-100">
+                    <li key={member.id} className="border-t border-line-soft">
                       <button
                         type="button"
                         onClick={() => selectStaff(member)}
-                        className="flex w-full items-center gap-3 px-1 py-3 text-left transition hover:bg-slate-50"
+                        className="flex w-full items-center gap-3 px-1 py-3 text-left transition hover:bg-surface-soft"
                       >
-                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-xs font-bold text-teal-800">
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-avatar text-xs font-bold text-on-avatar">
                           {getInitials(member.name)}
                         </span>
 
                         <span className="min-w-0 flex-1">
-                          <span className="block truncate text-[15px] font-semibold text-[#0b2a3d]">
+                          <span className="block truncate text-[15px] font-semibold text-ink">
                             {member.name}
                           </span>
-                          <span className="block truncate text-xs text-slate-500">
+                          <span className="block truncate text-xs text-muted-strong">
                             {member.detail}
                           </span>
                         </span>
 
-                        <span className="text-sm text-slate-500">
+                        <span className="text-sm text-muted-strong">
                           {patientCountByStaff[member.id] ?? 0}
                         </span>
                       </button>

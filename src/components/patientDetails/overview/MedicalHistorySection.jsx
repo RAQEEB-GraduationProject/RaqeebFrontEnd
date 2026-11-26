@@ -20,9 +20,9 @@ import usePatientMedicalHistory from "./usePatientMedicalHistory";
 */
 
 const Panel = ({ title, text, children }) => (
-  <div className="rounded-2xl border border-slate-100 bg-white px-6 py-14 text-center shadow-sm">
-    <p className="text-sm font-semibold text-slate-800">{title}</p>
-    {text && <p className="mt-1 text-sm text-slate-500">{text}</p>}
+  <div className="rounded-2xl border border-line-soft bg-white px-6 py-14 text-center shadow-sm">
+    <p className="text-sm font-semibold text-ink">{title}</p>
+    {text && <p className="mt-1 text-sm text-muted-strong">{text}</p>}
     {children}
   </div>
 );
@@ -49,11 +49,11 @@ const CategoryRow = ({ category, entries, isOpen, onToggle }) => {
         disabled={isEmpty}
         aria-expanded={isOpen}
         aria-controls={panelId}
-        className="flex w-full items-center justify-between gap-4 px-0.5 py-5 text-left transition enabled:hover:bg-slate-50/60 disabled:cursor-default"
+        className="flex w-full items-center justify-between gap-4 px-0.5 py-5 text-left transition enabled:hover:bg-surface-soft/60 disabled:cursor-default"
       >
         <span className="min-w-0">
-          <span className="block text-sm font-semibold text-slate-900">{category.label}</span>
-          <span className="mt-1 block truncate text-xs text-slate-400">
+          <span className="block text-sm font-semibold text-ink">{category.label}</span>
+          <span className="mt-1 block truncate text-xs text-muted">
             {summarize(entries)}
           </span>
         </span>
@@ -61,24 +61,24 @@ const CategoryRow = ({ category, entries, isOpen, onToggle }) => {
           <ChevronRight
             size={18}
             aria-hidden="true"
-            className={`shrink-0 text-slate-500 transition ${isOpen ? "rotate-90" : ""}`}
+            className={`shrink-0 text-muted-strong transition ${isOpen ? "rotate-90" : ""}`}
           />
         )}
       </button>
 
       {isOpen && (
-        <ul id={panelId} className="mb-5 space-y-3 rounded-xl bg-slate-50 px-4 py-4">
+        <ul id={panelId} className="mb-5 space-y-3 rounded-xl bg-surface-soft px-4 py-4">
           {entries.map((entry) => (
             <li key={entry.id} className="min-w-0">
-              <p className="text-sm font-medium text-slate-800">
+              <p className="text-sm font-medium text-ink">
                 {entry.name}
-                <span className="font-normal text-slate-400">
+                <span className="font-normal text-muted">
                   {" · "}
                   {formatHistoryDate(entry.date) ?? "No date"}
                 </span>
               </p>
               {entry.notes && (
-                <p className="mt-0.5 whitespace-pre-line break-words text-xs text-slate-500">
+                <p className="mt-0.5 whitespace-pre-line break-words text-xs text-muted-strong">
                   {entry.notes}
                 </p>
               )}
@@ -107,7 +107,7 @@ const MedicalHistorySection = ({ patientName }) => {
         <button
           type="button"
           onClick={retry}
-          className="mt-4 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-[#3f5ea8] transition hover:bg-slate-50"
+          className="mt-4 rounded-xl border border-line bg-white px-4 py-2 text-sm font-semibold text-accent transition hover:bg-surface-soft"
         >
           Try again
         </button>
@@ -117,7 +117,7 @@ const MedicalHistorySection = ({ patientName }) => {
     body = (
       <div
         aria-busy="true"
-        className="rounded-2xl border border-slate-100 bg-white px-6 py-14 text-center text-sm text-slate-500 shadow-sm"
+        className="rounded-2xl border border-line-soft bg-white px-6 py-14 text-center text-sm text-muted-strong shadow-sm"
       >
         Loading medical history…
       </div>
@@ -127,11 +127,11 @@ const MedicalHistorySection = ({ patientName }) => {
   } else {
     body = (
       <div className="grid items-start gap-6 lg:grid-cols-3">
-        <section className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm lg:col-span-2">
-          <h3 className="text-lg font-medium text-slate-900">Medical History records</h3>
-          <p className="mt-1 text-sm text-slate-400">Most recent clinical information</p>
+        <section className="rounded-2xl border border-line-soft bg-white p-6 shadow-sm lg:col-span-2">
+          <h3 className="text-lg font-medium text-ink">Medical History records</h3>
+          <p className="mt-1 text-sm text-muted">Most recent clinical information</p>
 
-          <ul className="mt-6 divide-y divide-slate-100 border-t border-slate-100">
+          <ul className="mt-6 divide-y divide-line-soft border-t border-line-soft">
             {MEDICAL_HISTORY_CATEGORIES.map((category) => (
               <CategoryRow
                 key={category.key}
@@ -146,13 +146,13 @@ const MedicalHistorySection = ({ patientName }) => {
           </ul>
         </section>
 
-        <section className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-          <h3 className="text-lg font-medium text-slate-900">At a glance</h3>
-          <p className="mt-1 text-sm text-slate-400">Current medical history summary</p>
+        <section className="rounded-2xl border border-line-soft bg-white p-6 shadow-sm">
+          <h3 className="text-lg font-medium text-ink">At a glance</h3>
+          <p className="mt-1 text-sm text-muted">Current medical history summary</p>
 
           <div className="py-12 text-center">
-            <p className="text-4xl font-semibold text-slate-900">{history.totalCount}</p>
-            <p className="mt-2 text-xs text-slate-500">
+            <p className="text-4xl font-semibold text-ink">{history.totalCount}</p>
+            <p className="mt-2 text-xs text-muted-strong">
               {history.totalCount === 1 ? "active record" : "active records"}
             </p>
           </div>
@@ -165,8 +165,8 @@ const MedicalHistorySection = ({ patientName }) => {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="text-4xl font-medium text-slate-900">Medical History</h2>
-          <p className="mt-2 text-base text-slate-500">
+          <h2 className="text-4xl font-medium text-ink">Medical History</h2>
+          <p className="mt-2 text-base text-muted-strong">
             Patient Overview · {patientName} clinical record
           </p>
         </div>
@@ -175,7 +175,7 @@ const MedicalHistorySection = ({ patientName }) => {
           <button
             type="button"
             onClick={() => setIsAdding(true)}
-            className="inline-flex items-center gap-2 rounded-xl bg-[#6f8fd6] px-6 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#5f80c9]"
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-on-primary shadow-sm transition hover:bg-primary-hover"
           >
             <Plus size={18} />
             Add entry

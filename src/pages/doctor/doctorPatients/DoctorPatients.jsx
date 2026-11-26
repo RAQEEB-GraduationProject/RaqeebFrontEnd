@@ -13,7 +13,7 @@ const TABS = [
 ];
 
 const selectClass =
-  "w-full appearance-none rounded-xl border border-slate-200 bg-white py-3 pl-4 pr-10 text-sm font-medium text-slate-700 outline-none transition focus:border-[#3f5ea8] focus:ring-2 focus:ring-[#3f5ea8]/20";
+  "w-full appearance-none rounded-xl border border-field bg-white py-3 pl-4 pr-10 text-sm font-medium text-ink-soft outline-none transition focus:border-focus focus:ring-2 focus:ring-focus/25";
 
 const SelectField = ({ label, value, onChange, children }) => (
   <div className="relative sm:w-44">
@@ -27,7 +27,7 @@ const SelectField = ({ label, value, onChange, children }) => (
     </select>
     <ChevronDown
       size={16}
-      className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+      className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-muted"
     />
   </div>
 );
@@ -61,7 +61,7 @@ const DoctorPatients = ({ patientsPath = "/doctor/patients" }) => {
   return (
     <div className="space-y-8">
       {/* Tabs */}
-      <div role="tablist" className="flex gap-8 border-b border-slate-200">
+      <div role="tablist" className="flex gap-8 border-b border-line">
         {TABS.map(({ key, label }) => {
           const active = key === tab;
           return (
@@ -73,8 +73,8 @@ const DoctorPatients = ({ patientsPath = "/doctor/patients" }) => {
               onClick={() => setTab(key)}
               className={`-mb-px border-b-2 pb-3 text-sm font-medium transition ${
                 active
-                  ? "border-[#3f5ea8] text-[#3f5ea8]"
-                  : "border-transparent text-slate-500 hover:text-slate-800"
+                  ? "border-accent text-accent"
+                  : "border-transparent text-muted-strong hover:text-ink"
               }`}
             >
               {label}
@@ -89,12 +89,12 @@ const DoctorPatients = ({ patientsPath = "/doctor/patients" }) => {
       />
 
       {/* Search + filters */}
-      <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+      <section className="rounded-2xl border border-line-soft bg-white p-4 shadow-sm">
         <div className="flex flex-col gap-3 sm:flex-row">
           <div className="relative flex-1">
             <Search
               size={18}
-              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted"
             />
             <input
               type="search"
@@ -102,7 +102,7 @@ const DoctorPatients = ({ patientsPath = "/doctor/patients" }) => {
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by patient name or ID…"
               aria-label="Search patients"
-              className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#3f5ea8] focus:ring-2 focus:ring-[#3f5ea8]/20"
+              className="w-full rounded-xl border border-field bg-white py-3 pl-11 pr-4 text-sm outline-none transition placeholder:text-muted focus:border-focus focus:ring-2 focus:ring-focus/25"
             />
           </div>
 
@@ -132,8 +132,8 @@ const DoctorPatients = ({ patientsPath = "/doctor/patients" }) => {
 
       {/* Summary */}
       <div className="-mt-3 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-slate-500">
-          <span className="font-semibold text-slate-900">{listTitle}</span> ·{" "}
+        <p className="text-sm text-muted-strong">
+          <span className="font-semibold text-ink">{listTitle}</span> ·{" "}
           {count} patient {count === 1 ? "record" : "records"} shown
         </p>
 
@@ -146,8 +146,8 @@ const DoctorPatients = ({ patientsPath = "/doctor/patients" }) => {
               aria-pressed={risk === level}
               className={`rounded-full px-3 py-1 transition ${
                 level === "Critical"
-                  ? "bg-rose-50 text-rose-700"
-                  : "bg-orange-50 text-orange-700"
+                  ? "bg-risk-critical-bg text-risk-critical-text"
+                  : "bg-risk-high-bg text-risk-high-text"
               } ${risk === level ? "ring-2 ring-current/30" : ""}`}
             >
               {riskCounts[level] ?? 0} {level}
@@ -157,7 +157,7 @@ const DoctorPatients = ({ patientsPath = "/doctor/patients" }) => {
             <button
               type="button"
               onClick={clearFilters}
-              className="rounded-full bg-emerald-50 px-3 py-1 text-emerald-700"
+              className="rounded-full bg-accent-soft px-3 py-1 text-accent-strong"
             >
               Clear filter
             </button>

@@ -36,14 +36,14 @@ const ProfilePage = ({ role }) => {
     <div className="mx-auto max-w-4xl space-y-6">
       <PageHeading title={title} description={description} />
 
-      <div className="flex items-center gap-5 rounded-3xl border border-slate-100 bg-white p-6 shadow-sm">
+      <div className="flex items-center gap-5 rounded-3xl border border-line-soft bg-white p-6 shadow-sm">
         <div
           className={`flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-2xl text-lg font-semibold ${theme.avatar}`}
         >
           {getInitials(username)}
         </div>
         <div className="min-w-0">
-          <h2 className="truncate text-lg font-medium text-slate-900">
+          <h2 className="truncate text-lg font-medium text-ink">
             {username}
           </h2>
           <span
@@ -59,10 +59,10 @@ const ProfilePage = ({ role }) => {
           {rows.map(({ label, value }) => (
             <div
               key={label}
-              className="flex items-center justify-between gap-4 border-t border-slate-100 py-4 text-sm"
+              className="flex items-center justify-between gap-4 border-t border-line-soft py-4 text-sm"
             >
-              <dt className="text-slate-500">{label}</dt>
-              <dd className="break-all text-right font-semibold text-slate-900">
+              <dt className="text-muted-strong">{label}</dt>
+              <dd className="break-all text-right font-semibold text-ink">
                 {value}
               </dd>
             </div>

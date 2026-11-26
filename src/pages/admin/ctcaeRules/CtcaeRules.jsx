@@ -35,7 +35,7 @@ const FilterSelect = ({ label, value, onChange, allLabel, options }) => (
       aria-label={label}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full appearance-none rounded-xl border border-slate-200 bg-white py-3 pl-4 pr-10 text-sm text-slate-600 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20"
+      className="w-full appearance-none rounded-xl border border-field bg-white py-3 pl-4 pr-10 text-sm text-ink-soft outline-none transition focus:border-focus focus:ring-2 focus:ring-focus/25"
     >
       <option value="all">{allLabel}</option>
 
@@ -48,7 +48,7 @@ const FilterSelect = ({ label, value, onChange, allLabel, options }) => (
 
     <ChevronDown
       size={16}
-      className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-500"
+      className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-muted-strong"
     />
   </div>
 );
@@ -61,8 +61,8 @@ const GradeChips = ({ rule }) => (
         title={`Grade ${index + 1}: ${rule[grade]}`}
         className={`flex h-6 w-6 items-center justify-center rounded-md text-[10px] font-bold ${
           isDefined(rule[grade])
-            ? "bg-teal-50 text-teal-900"
-            : "bg-slate-100 text-slate-300"
+            ? "bg-accent-soft text-accent-strong"
+            : "bg-surface-muted text-disabled-text"
         }`}
       >
         {index + 1}
@@ -72,16 +72,16 @@ const GradeChips = ({ rule }) => (
 );
 
 const Message = ({ title, text, actionLabel, onAction }) => (
-  <div className="border-t border-slate-100 px-6 py-14 text-center">
-    <p className="text-sm font-semibold text-[#0b2a3d]">{title}</p>
+  <div className="border-t border-line-soft px-6 py-14 text-center">
+    <p className="text-sm font-semibold text-ink">{title}</p>
 
-    {text && <p className="mt-1 text-sm text-slate-500">{text}</p>}
+    {text && <p className="mt-1 text-sm text-muted-strong">{text}</p>}
 
     {actionLabel && (
       <button
         type="button"
         onClick={onAction}
-        className="mt-5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-[#0f3d4c] transition hover:bg-slate-50"
+        className="mt-5 rounded-xl border border-line bg-white px-4 py-2 text-sm font-semibold text-ink transition hover:bg-surface-soft"
       >
         {actionLabel}
       </button>
@@ -194,7 +194,7 @@ const CtcaeRules = () => {
       icon: "warning",
       showCancelButton: true,
       confirmButtonText: "Delete",
-      confirmButtonColor: "#e11d48",
+      customClass: { confirmButton: "swal-danger" },
       cancelButtonText: "Cancel",
     });
 
@@ -212,9 +212,9 @@ const CtcaeRules = () => {
       {/* Heading */}
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-medium text-[#0b2a3d]">CTCAE rules</h1>
+          <h1 className="text-4xl font-medium text-ink">CTCAE rules</h1>
 
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-muted-strong">
             Configure grading thresholds used by the hospital monitoring engine.
           </p>
         </div>
@@ -222,7 +222,7 @@ const CtcaeRules = () => {
         <button
           type="button"
           onClick={() => setForm({ rule: null })}
-          className="flex items-center gap-3 rounded-xl bg-[#0f3d4c] px-6 py-4 text-sm font-bold text-white shadow-sm transition hover:bg-[#0b3240]"
+          className="flex items-center gap-3 rounded-xl bg-primary px-6 py-4 text-sm font-bold text-on-primary shadow-sm transition hover:bg-primary-hover"
         >
           <Plus size={18} />
           Add rule
@@ -230,7 +230,7 @@ const CtcaeRules = () => {
       </header>
 
       {/* Tabs */}
-      <div className="flex gap-6 border-b border-slate-200" role="tablist">
+      <div className="flex gap-6 border-b border-line" role="tablist">
         {TABS.map((item) => (
           <button
             key={item.value}
@@ -240,8 +240,8 @@ const CtcaeRules = () => {
             onClick={() => withReset(setTab)(item.value)}
             className={`-mb-px border-b-2 px-1 pb-3 text-xs font-semibold transition ${
               tab === item.value
-                ? "border-teal-700 text-teal-800"
-                : "border-transparent text-slate-500 hover:text-[#0b2a3d]"
+                ? "border-accent text-accent"
+                : "border-transparent text-muted-strong hover:text-ink"
             }`}
           >
             {item.label}
@@ -250,11 +250,11 @@ const CtcaeRules = () => {
       </div>
 
       {/* Search and filters */}
-      <section className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 sm:flex-row">
+      <section className="flex flex-col gap-3 rounded-2xl border border-line bg-white p-4 sm:flex-row">
         <div className="relative flex-1">
           <Search
             size={18}
-            className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+            className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted"
           />
 
           <input
@@ -263,7 +263,7 @@ const CtcaeRules = () => {
             onChange={(e) => withReset(setSearch)(e.target.value)}
             placeholder="Search by adverse event, category, grade or notes…"
             aria-label="Search CTCAE rules"
-            className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20"
+            className="w-full rounded-xl border border-field bg-white py-3 pl-11 pr-4 text-sm outline-none transition placeholder:text-muted focus:border-focus focus:ring-2 focus:ring-focus/25"
           />
         </div>
 
@@ -285,11 +285,11 @@ const CtcaeRules = () => {
       </section>
 
       {/* Rules table */}
-      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+      <section className="overflow-hidden rounded-2xl border border-line bg-white">
         <div className="overflow-x-auto">
           <div className="min-w-[960px]">
             <div
-              className={`${GRID} py-4 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500`}
+              className={`${GRID} py-4 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-strong`}
             >
               <span>Adverse event</span>
               <span>Category</span>
@@ -316,19 +316,19 @@ const CtcaeRules = () => {
               shownRules.map((rule) => (
                 <div
                   key={rule.id}
-                  className={`${GRID} border-t border-slate-100 py-4 transition hover:bg-slate-50/70`}
+                  className={`${GRID} border-t border-line-soft py-4 transition hover:bg-surface-soft/70`}
                 >
                   <button
                     type="button"
                     onClick={() => setDetails(rule)}
                     aria-label={`View grading criteria for ${rule.adverseEvent}`}
-                    className="min-w-0 rounded text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600"
+                    className="min-w-0 rounded text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
                   >
-                    <p className="truncate text-sm font-semibold text-[#0b2a3d]">
+                    <p className="truncate text-sm font-semibold text-ink">
                       {rule.adverseEvent}
                     </p>
 
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-muted">
                       View grading criteria
                     </p>
                   </button>
@@ -346,7 +346,7 @@ const CtcaeRules = () => {
                       type="button"
                       onClick={() => setForm({ rule })}
                       aria-label={`Edit ${rule.adverseEvent}`}
-                      className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-[#0b2a3d]"
+                      className="rounded-lg p-2 text-muted-strong transition hover:bg-surface-muted hover:text-ink"
                     >
                       <Pencil size={18} />
                     </button>
@@ -355,7 +355,7 @@ const CtcaeRules = () => {
                       type="button"
                       onClick={() => handleDelete(rule)}
                       aria-label={`Delete ${rule.adverseEvent}`}
-                      className="rounded-lg p-2 text-slate-500 transition hover:bg-rose-50 hover:text-rose-600"
+                      className="rounded-lg p-2 text-muted-strong transition hover:bg-danger-bg hover:text-danger-text"
                     >
                       <Trash2 size={18} />
                     </button>
@@ -370,7 +370,7 @@ const CtcaeRules = () => {
       {/* Count */}
       {rules.length > 0 && (
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-strong">
             Showing {shownRules.length} of {filteredRules.length} matching rules
             ({rules.length} total)
           </p>
@@ -379,7 +379,7 @@ const CtcaeRules = () => {
             <button
               type="button"
               onClick={() => setVisible((count) => count + PAGE_SIZE)}
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-[#0f3d4c] transition hover:bg-slate-50"
+              className="rounded-xl border border-line bg-white px-4 py-2 text-xs font-semibold text-ink transition hover:bg-surface-soft"
             >
               Show more
             </button>

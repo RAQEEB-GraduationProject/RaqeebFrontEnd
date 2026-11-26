@@ -1,11 +1,11 @@
 const HOME_STYLES = {
-  Yes: "bg-emerald-50 text-emerald-800",
-  Partial: "bg-amber-50 text-amber-800",
-  No: "bg-rose-50 text-rose-800",
+  Yes: "bg-success-bg text-success-text",
+  Partial: "bg-warning-bg text-warning-text",
+  No: "bg-danger-bg text-danger-text",
 };
 
 export const CategoryBadge = ({ value }) => (
-  <span className="inline-flex w-fit max-w-full rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-900">
+  <span className="inline-flex w-fit max-w-full rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold text-accent-strong">
     <span className="truncate">{value}</span>
   </span>
 );
@@ -13,7 +13,7 @@ export const CategoryBadge = ({ value }) => (
 export const HomeBadge = ({ value }) => (
   <span
     className={`inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold ${
-      HOME_STYLES[value] ?? "bg-slate-100 text-slate-700"
+      HOME_STYLES[value] ?? "bg-surface-muted text-ink-soft"
     }`}
   >
     {value}
@@ -24,8 +24,8 @@ export const PediatricBadge = ({ value }) => (
   <span
     className={`inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold ${
       value === "Pediatric-specific"
-        ? "bg-sky-50 text-sky-900"
-        : "bg-slate-100 text-slate-700"
+        ? "bg-info-bg text-info-text"
+        : "bg-surface-muted text-ink-soft"
     }`}
   >
     {value}

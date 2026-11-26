@@ -79,7 +79,7 @@ const MedicalHistoryEntryForm = ({ patientId, onAdded, onCancel, cancelLabel = "
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-5">
       {formError && (
-        <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
+        <p role="alert" className="rounded-xl bg-danger-bg px-4 py-3 text-sm text-danger-text">
           {formError}
         </p>
       )}
@@ -100,7 +100,7 @@ const MedicalHistoryEntryForm = ({ patientId, onAdded, onCancel, cancelLabel = "
             </select>
             <ChevronDown
               size={16}
-              className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#0b2a3d]"
+              className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-ink"
             />
           </div>
         </FormField>
@@ -129,7 +129,7 @@ const MedicalHistoryEntryForm = ({ patientId, onAdded, onCancel, cancelLabel = "
           placeholder="e.g. Left breast, no complications"
           className={`${inputClass(errors.notes)} resize-y`}
         />
-        <p className="mt-1 text-right text-[11px] text-slate-400">
+        <p className="mt-1 text-right text-[11px] text-muted">
           {values.notes.length}/{NOTES_MAX_LENGTH}
         </p>
       </FormField>
@@ -140,7 +140,7 @@ const MedicalHistoryEntryForm = ({ patientId, onAdded, onCancel, cancelLabel = "
             type="button"
             onClick={onCancel}
             disabled={isAdding}
-            className="rounded-xl border border-slate-200 bg-white px-6 py-3.5 text-xs font-bold text-[#0b2a3d] transition hover:bg-slate-50 disabled:opacity-60"
+            className="rounded-xl border border-line bg-white px-6 py-3.5 text-xs font-bold text-ink transition hover:bg-surface-soft disabled:cursor-not-allowed disabled:border-disabled disabled:text-disabled-text disabled:hover:bg-white"
           >
             {cancelLabel}
           </button>
@@ -149,7 +149,7 @@ const MedicalHistoryEntryForm = ({ patientId, onAdded, onCancel, cancelLabel = "
         <button
           type="submit"
           disabled={isAdding}
-          className="flex items-center gap-2 rounded-xl bg-[#0f3d4c] px-6 py-3.5 text-xs font-bold text-white shadow-sm transition hover:bg-[#0b3240] disabled:opacity-70"
+          className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-xs font-bold text-on-primary shadow-sm transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:bg-disabled disabled:text-on-disabled disabled:shadow-none"
         >
           {isAdding ? (
             <LoaderCircle size={14} className="animate-spin" />

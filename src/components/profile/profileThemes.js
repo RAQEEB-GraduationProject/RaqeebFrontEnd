@@ -1,17 +1,14 @@
-// Tailwind needs full class names, so each dashboard accent is spelled out.
+// Every role uses the same class names; the colors behind them come from the
+// active dashboard theme (data-theme on the layout, defined in index.css).
+const dashboardTheme = {
+  avatar: "bg-avatar text-on-avatar",
+  badge: "bg-accent-muted text-accent-strong",
+};
+
 const profileThemes = {
-  admin: {
-    avatar: "bg-[#e3f3ee] text-[#2f7f73]",
-    badge: "bg-[#e3f3ee] text-[#2f7f73]",
-  },
-  doctor: {
-    avatar: "bg-[#e9f0fc] text-[#3f5ea8]",
-    badge: "bg-[#e9f0fc] text-[#3f5ea8]",
-  },
-  nurse: {
-    avatar: "bg-[#e3f3ee] text-[#2f7f73]",
-    badge: "bg-[#e3f3ee] text-[#2f7f73]",
-  },
+  admin: dashboardTheme,
+  doctor: dashboardTheme,
+  nurse: dashboardTheme,
 };
 
 export default profileThemes;

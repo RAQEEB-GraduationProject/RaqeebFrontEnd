@@ -13,23 +13,23 @@ const PatientProfileMissing = () => {
   return (
     <PatientUserGate userId={userId}>
       {(user) => (
-        <div className="rounded-3xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-50 text-base font-bold text-teal-800">
+        <div className="rounded-3xl border border-line bg-white px-6 py-16 text-center shadow-sm">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-avatar text-base font-bold text-on-avatar">
             {getInitials(user.userName)}
           </div>
 
-          <h1 className="mt-5 text-3xl font-medium text-[#0b2a3d]">
+          <h1 className="mt-5 text-3xl font-medium text-ink">
             {user.userName}
           </h1>
 
-          <p className="mx-auto mt-3 max-w-md text-sm text-slate-500">
+          <p className="mx-auto mt-3 max-w-md text-sm text-muted-strong">
             Patient has no medical profile yet. Please complete patient account.
           </p>
 
           <button
             type="button"
             onClick={() => navigate(completePatientPath(userId))}
-            className="mt-8 rounded-xl bg-[#0f3d4c] px-6 py-4 text-xs font-bold text-white shadow-sm transition hover:bg-[#0b3240]"
+            className="mt-8 rounded-xl bg-primary px-6 py-4 text-xs font-bold text-on-primary shadow-sm transition hover:bg-primary-hover"
           >
             Complete Patient Account
           </button>

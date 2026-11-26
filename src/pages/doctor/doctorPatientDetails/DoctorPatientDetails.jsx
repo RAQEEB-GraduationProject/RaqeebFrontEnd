@@ -11,7 +11,7 @@ const LIST_PATH = "/doctor/patients";
 
 // TODO: wire these up when messaging, scheduling and clinical notes exist.
 const actionClass =
-  "inline-flex items-center gap-2 rounded-xl border px-5 py-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex items-center gap-2 rounded-xl border px-5 py-3 text-sm font-semibold disabled:cursor-not-allowed";
 
 const DoctorActions = () => (
   <>
@@ -19,7 +19,7 @@ const DoctorActions = () => (
       type="button"
       disabled
       title="Coming soon"
-      className={`${actionClass} border-slate-200 bg-white text-slate-800`}
+      className={`${actionClass} border-line bg-white text-ink disabled:border-disabled disabled:text-disabled-text`}
     >
       <MessageSquare size={18} />
       Message
@@ -28,7 +28,7 @@ const DoctorActions = () => (
       type="button"
       disabled
       title="Coming soon"
-      className={`${actionClass} border-slate-200 bg-white text-slate-800`}
+      className={`${actionClass} border-line bg-white text-ink disabled:border-disabled disabled:text-disabled-text`}
     >
       <CalendarDays size={18} />
       Schedule
@@ -37,7 +37,7 @@ const DoctorActions = () => (
       type="button"
       disabled
       title="Coming soon"
-      className={`${actionClass} border-transparent bg-[#6f8fd6] text-white`}
+      className={`${actionClass} border-transparent bg-primary text-on-primary disabled:bg-disabled disabled:text-on-disabled`}
     >
       <ClipboardPlus size={18} />
       Add clinical note
@@ -71,7 +71,7 @@ const DoctorPatientDetails = ({
     return (
       <div
         aria-busy="true"
-        className="rounded-2xl border border-slate-100 bg-white px-6 py-14 text-center text-sm text-slate-500 shadow-sm"
+        className="rounded-2xl border border-line-soft bg-white px-6 py-14 text-center text-sm text-muted-strong shadow-sm"
       >
         Loading patient…
       </div>
@@ -82,24 +82,24 @@ const DoctorPatientDetails = ({
   // backend's message) or an empty payload.
   if (error || !overview) {
     return (
-      <div className="rounded-2xl border border-slate-100 bg-white px-6 py-14 text-center shadow-sm">
-        <p className="text-sm font-semibold text-slate-800">
+      <div className="rounded-2xl border border-line-soft bg-white px-6 py-14 text-center shadow-sm">
+        <p className="text-sm font-semibold text-ink">
           {error ? "Couldn't load patient" : "Patient not found"}
         </p>
-        {error && <p className="mt-1 text-sm text-slate-500">{error}</p>}
+        {error && <p className="mt-1 text-sm text-muted-strong">{error}</p>}
         <div className="mt-4 flex items-center justify-center gap-4">
           {error && (
             <button
               type="button"
               onClick={retry}
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-[#3f5ea8] transition hover:bg-slate-50"
+              className="rounded-xl border border-line bg-white px-4 py-2 text-sm font-semibold text-accent transition hover:bg-surface-soft"
             >
               Try again
             </button>
           )}
           <Link
             to={listPath}
-            className="text-sm font-semibold text-[#3f5ea8] hover:underline"
+            className="text-sm font-semibold text-accent hover:underline"
           >
             Back to patients
           </Link>

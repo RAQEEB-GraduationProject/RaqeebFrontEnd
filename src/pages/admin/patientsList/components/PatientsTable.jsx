@@ -6,10 +6,10 @@ const GRID =
   "grid grid-cols-[minmax(220px,2fr)_minmax(220px,2.2fr)_minmax(90px,0.8fr)_minmax(100px,0.8fr)_minmax(90px,0.7fr)_minmax(90px,0.7fr)] items-center gap-4 px-6";
 
 const StatusBadge = ({ isActive }) => (
-  <span className="inline-flex items-center gap-2 text-xs text-slate-600">
+  <span className="inline-flex items-center gap-2 text-xs text-ink-soft">
     <span
       className={`h-2 w-2 rounded-full ${
-        isActive ? "bg-emerald-500" : "bg-rose-500"
+        isActive ? "bg-success" : "bg-danger"
       }`}
     />
 
@@ -18,16 +18,16 @@ const StatusBadge = ({ isActive }) => (
 );
 
 const Message = ({ title, text, actionLabel, onAction }) => (
-  <div className="border-t border-slate-100 px-6 py-14 text-center">
-    <p className="text-sm font-semibold text-[#0b2a3d]">{title}</p>
+  <div className="border-t border-line-soft px-6 py-14 text-center">
+    <p className="text-sm font-semibold text-ink">{title}</p>
 
-    {text && <p className="mt-1 text-sm text-slate-500">{text}</p>}
+    {text && <p className="mt-1 text-sm text-muted-strong">{text}</p>}
 
     {actionLabel && (
       <button
         type="button"
         onClick={onAction}
-        className="mt-5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-[#0f3d4c] transition hover:bg-slate-50"
+        className="mt-5 rounded-xl border border-line bg-white px-4 py-2 text-sm font-semibold text-ink transition hover:bg-surface-soft"
       >
         {actionLabel}
       </button>
@@ -40,22 +40,22 @@ const SkeletonRows = () => (
     {Array.from({ length: 5 }).map((_, index) => (
       <div
         key={index}
-        className={`${GRID} animate-pulse border-t border-slate-100 py-5`}
+        className={`${GRID} animate-pulse border-t border-line-soft py-5`}
       >
         <div className="flex items-center gap-4">
-          <div className="h-10 w-10 rounded-xl bg-slate-100" />
+          <div className="h-10 w-10 rounded-xl bg-surface-muted" />
 
           <div className="space-y-2">
-            <div className="h-3 w-28 rounded bg-slate-100" />
-            <div className="h-2.5 w-20 rounded bg-slate-100" />
+            <div className="h-3 w-28 rounded bg-surface-muted" />
+            <div className="h-2.5 w-20 rounded bg-surface-muted" />
           </div>
         </div>
 
-        <div className="h-3 w-40 rounded bg-slate-100" />
-        <div className="h-5 w-16 rounded-full bg-slate-100" />
-        <div className="h-3 w-16 rounded bg-slate-100" />
-        <div className="h-3 w-10 rounded bg-slate-100" />
-        <div className="h-8 w-16 rounded-xl bg-slate-100" />
+        <div className="h-3 w-40 rounded bg-surface-muted" />
+        <div className="h-5 w-16 rounded-full bg-surface-muted" />
+        <div className="h-3 w-16 rounded bg-surface-muted" />
+        <div className="h-3 w-10 rounded bg-surface-muted" />
+        <div className="h-8 w-16 rounded-xl bg-surface-muted" />
       </div>
     ))}
   </div>
@@ -72,11 +72,11 @@ const PatientsTable = ({
   onView,
   onAssign,
 }) => (
-  <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+  <section className="overflow-hidden rounded-2xl border border-line bg-white">
     <div className="overflow-x-auto">
       <div className="min-w-[960px]">
         <div
-          className={`${GRID} py-4 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500`}
+          className={`${GRID} py-4 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-strong`}
         >
           <span>Patient</span>
           <span>Assigned to</span>
@@ -112,19 +112,19 @@ const PatientsTable = ({
           patients.map((patient) => (
             <div
               key={patient.userId}
-              className={`${GRID} border-t border-slate-100 py-4`}
+              className={`${GRID} border-t border-line-soft py-4`}
             >
               <div className="flex min-w-0 items-center gap-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-xs font-bold text-teal-800">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-avatar text-xs font-bold text-on-avatar">
                   {getInitials(patient.userName)}
                 </div>
 
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-[#0b2a3d]">
+                  <p className="truncate text-sm font-semibold text-ink">
                     {patient.userName || "—"}
                   </p>
 
-                  <p className="truncate text-xs text-slate-400">
+                  <p className="truncate text-xs text-muted">
                     {patient.medicalRecordNumber ||
                       (patient.hasProfile
                         ? "—"
@@ -153,7 +153,7 @@ const PatientsTable = ({
                     ? "This patient is inactive"
                     : undefined
                 }
-                className="w-fit text-sm font-semibold text-teal-700 transition hover:text-teal-900 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:text-teal-700"
+                className="w-fit text-sm font-semibold text-accent transition hover:text-accent-strong disabled:cursor-not-allowed disabled:text-disabled-text disabled:hover:text-disabled-text"
               >
                 View
               </button>
@@ -169,7 +169,7 @@ const PatientsTable = ({
                       ? "This patient is inactive"
                       : "Complete the patient account first"
                 }
-                className="w-fit rounded-xl border border-teal-700/40 bg-white px-4 py-2 text-sm font-semibold text-[#0f3d4c] transition hover:bg-teal-50 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white"
+                className="w-fit rounded-xl border border-accent/40 bg-white px-4 py-2 text-sm font-semibold text-ink transition hover:bg-accent-soft disabled:cursor-not-allowed disabled:border-disabled disabled:text-disabled-text disabled:hover:bg-white"
               >
                 Assign
               </button>

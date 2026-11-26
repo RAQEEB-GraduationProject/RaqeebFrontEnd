@@ -30,10 +30,10 @@ const SectionTabs = ({ active }) => (
           key={key}
           to={{ search }}
           aria-current={isActive ? "page" : undefined}
-          className={`rounded-xl border px-4 py-2.5 text-xs font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3f5ea8]/40 ${
+          className={`rounded-xl border px-4 py-2.5 text-xs font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-focus/60 ${
             isActive
-              ? "border-[#3f5ea8]/30 bg-[#eef3fc] text-[#3f5ea8]"
-              : "border-slate-200 bg-white text-slate-600 hover:text-slate-900"
+              ? "border-accent/30 bg-accent-soft text-accent"
+              : "border-line bg-white text-ink-soft hover:text-ink"
           }`}
         >
           {label}
@@ -46,14 +46,14 @@ const SectionTabs = ({ active }) => (
 const QuestionsPlaceholder = ({ patientName }) => (
   <div className="space-y-6">
     <div>
-      <h2 className="text-4xl font-medium text-slate-900">Questions</h2>
-      <p className="mt-2 text-base text-slate-500">
+      <h2 className="text-4xl font-medium text-ink">Questions</h2>
+      <p className="mt-2 text-base text-muted-strong">
         Patient Care · {patientName} clinical record
       </p>
     </div>
 
-    <div className="rounded-2xl border border-slate-100 bg-white px-6 py-14 text-center shadow-sm">
-      <p className="text-sm font-semibold text-slate-800">Waiting for application</p>
+    <div className="rounded-2xl border border-line-soft bg-white px-6 py-14 text-center shadow-sm">
+      <p className="text-sm font-semibold text-ink">Waiting for application</p>
     </div>
   </div>
 );

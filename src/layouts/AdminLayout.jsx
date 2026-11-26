@@ -16,6 +16,7 @@ import {
   X,
 } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
+import Logo from "../components/brand/Logo";
 
 const navItems = [
   { label: "Dashboard", to: "/admin/dashboard", icon: LayoutGrid },
@@ -71,30 +72,28 @@ const AdminLayout = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen bg-[#f3f6f6] text-slate-800">
+    <div data-theme="admin" className="min-h-screen bg-page text-ink">
       {/* overlay للموبايل */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-30 bg-black/40 lg:hidden"
+          className="fixed inset-0 z-30 bg-overlay/40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* ================= Sidebar ================= */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-[298px] flex-col bg-gradient-to-b from-[#08263a] via-[#0a2f45] to-[#0b3a4a] text-white transition-transform duration-200 lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 flex w-[298px] flex-col border-r border-line bg-gradient-to-b from-panel-from via-panel-via to-panel-to text-ink transition-transform duration-200 lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Logo */}
-        <div className="flex items-center justify-between px-9 pb-6 pt-9">
-          <div className="flex items-center gap-4">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-teal-300 to-teal-500 text-base font-bold text-[#08263a]">
-              R
-            </div>
-            <div>
+        <div className="flex items-center justify-between px-7 pb-6 pt-9">
+          <div className="flex items-center gap-3">
+            <Logo className="h-10" />
+            <div className="border-l border-line pl-3">
               <h2 className="text-lg font-bold tracking-[0.2em]">RAQEEB</h2>
-              <p className="text-[11px] font-semibold tracking-[0.12em] text-teal-100/70">
+              <p className="text-[11px] font-semibold tracking-[0.12em] text-ink-soft">
                 ADMIN PORTAL
               </p>
             </div>
@@ -102,7 +101,7 @@ const AdminLayout = () => {
           <button
             type="button"
             onClick={() => setSidebarOpen(false)}
-            className="rounded-lg p-1 text-white/70 hover:bg-white/10 lg:hidden"
+            className="rounded-lg p-1 text-ink-soft hover:bg-nav-hover lg:hidden"
             aria-label="Close menu"
           >
             <X size={20} />
@@ -111,7 +110,7 @@ const AdminLayout = () => {
 
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto px-6 pt-6">
-          <p className="mb-4 px-3 text-[10px] font-bold tracking-[0.18em] text-teal-100/50">
+          <p className="mb-4 px-3 text-[10px] font-bold tracking-[0.18em] text-ink-soft">
             HOSPITAL OPERATIONS
           </p>
 
@@ -124,8 +123,8 @@ const AdminLayout = () => {
                   className={({ isActive }) =>
                     `flex items-center gap-4 rounded-xl border px-4 py-3.5 text-sm font-medium transition ${
                       isActive
-                        ? "border-white/90 bg-white/10 text-white"
-                        : "border-transparent text-teal-50/80 hover:bg-white/5 hover:text-white"
+                        ? "border-nav-indicator/40 bg-nav-active text-on-nav-active"
+                        : "border-transparent text-ink-soft hover:bg-nav-hover/70 hover:text-ink"
                     }`
                   }
                 >
@@ -138,25 +137,25 @@ const AdminLayout = () => {
         </nav>
 
         {/* Footer */}
-        <div className="mx-6 border-t border-white/10 py-5">
+        <div className="mx-6 border-t border-white py-5">
           <NavLink
             to="/admin/profile"
             onClick={() => setSidebarOpen(false)}
             className="flex items-center gap-3 px-1"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-xs font-bold">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-xs font-bold text-on-avatar">
               RH
             </div>
             <div>
               <p className="text-xs font-bold">RAQEEB Hospital</p>
-              <p className="text-[11px] text-teal-100/60">Single facility</p>
+              <p className="text-[11px] text-ink-soft">Single facility</p>
             </div>
           </NavLink>
 
           <button
             type="button"
             onClick={handleLogout}
-            className="mt-5 flex w-full items-center gap-3 rounded-lg px-1 py-2 text-sm text-teal-50/80 transition hover:text-white"
+            className="mt-5 flex w-full items-center gap-3 rounded-lg px-1 py-2 text-sm text-ink-soft transition hover:text-ink"
           >
             <LogOut size={20} strokeWidth={1.6} />
             Sign out
@@ -167,21 +166,26 @@ const AdminLayout = () => {
       {/* ================= Main ================= */}
       <div className="lg:pl-[298px]">
         {/* Header */}
-        <header className="sticky top-0 z-20 flex h-[90px] items-center gap-4 border-b border-slate-200 bg-white px-6 lg:px-11">
+        <header className="sticky top-0 z-20 flex h-[90px] items-center gap-4 border-b border-line bg-white px-6 lg:px-11">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-[3px] bg-theme-strip"
+          />
+
           <button
             type="button"
             onClick={() => setSidebarOpen(true)}
-            className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 lg:hidden"
+            className="rounded-lg p-2 text-ink-soft hover:bg-surface-muted lg:hidden"
             aria-label="Open menu"
           >
             <Menu size={22} />
           </button>
 
           <div className="shrink-0">
-            <p className="text-[10px] font-bold tracking-[0.18em] text-teal-700">
+            <p className="text-[10px] font-bold tracking-[0.18em] text-accent">
               RAQEEB CANCER CENTER
             </p>
-            <h1 className="text-base font-bold text-[#0b2a3d]">
+            <h1 className="text-base font-bold text-ink">
               Hospital Administration
             </h1>
           </div>
@@ -190,15 +194,15 @@ const AdminLayout = () => {
           <div className="relative mx-auto hidden w-full max-w-[640px] md:block">
             <Search
               size={18}
-              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted"
             />
             <input
               ref={searchRef}
               type="search"
               placeholder="Search users, patients or alerts…"
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-16 text-sm outline-none transition placeholder:text-slate-400 focus:border-teal-600 focus:bg-white focus:ring-2 focus:ring-teal-600/20"
+              className="w-full rounded-xl border border-field bg-surface-soft py-3 pl-11 pr-16 text-sm outline-none transition placeholder:text-muted focus:border-focus focus:bg-white focus:ring-2 focus:ring-focus/25"
             />
-            <kbd className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-400">
+            <kbd className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded-md border border-line bg-white px-2 py-0.5 text-[10px] font-semibold text-muted">
               ⌘ K
             </kbd>
           </div>
@@ -208,32 +212,32 @@ const AdminLayout = () => {
             <button
               type="button"
               onClick={() => navigate("/admin/alerts")}
-              className="relative rounded-lg p-2 text-slate-600 transition hover:bg-slate-100"
+              className="relative rounded-lg p-2 text-ink-soft transition hover:bg-surface-muted"
               aria-label="Open alerts"
             >
               <Bell size={22} strokeWidth={1.6} />
             </button>
 
-            <div className="hidden h-10 w-px bg-slate-200 sm:block" />
+            <div className="hidden h-10 w-px bg-line sm:block" />
 
             {/* Profile */}
             <button
               type="button"
               onClick={() => navigate("/admin/profile")}
-              className="flex items-center gap-3 rounded-xl p-1 text-left transition hover:bg-slate-50"
+              className="flex items-center gap-3 rounded-xl p-1 text-left transition hover:bg-surface-soft"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-xs font-bold text-teal-800">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-avatar text-xs font-bold text-on-avatar">
                 {getInitials(displayName)}
               </div>
               <div className="hidden sm:block">
-                <p className="text-xs font-bold text-[#0b2a3d]">
+                <p className="text-xs font-bold text-ink">
                   {displayName}
                 </p>
-                <p className="text-[11px] text-slate-500">{displayRole}</p>
+                <p className="text-[11px] text-muted-strong">{displayRole}</p>
               </div>
               <ChevronRight
                 size={16}
-                className="hidden text-slate-400 sm:block"
+                className="hidden text-muted sm:block"
               />
             </button>
           </div>

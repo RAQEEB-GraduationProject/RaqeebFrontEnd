@@ -17,9 +17,9 @@ import usePatientCareList from "./usePatientCareList";
 */
 const Detail = ({ label, value }) => (
   <div className="min-w-0">
-    <dt className="text-xs text-slate-400">{label}</dt>
-    <dd className="mt-0.5 break-words text-sm font-medium text-slate-800">
-      {value ?? <span className="font-normal text-slate-400">Not recorded</span>}
+    <dt className="text-xs text-muted">{label}</dt>
+    <dd className="mt-0.5 break-words text-sm font-medium text-ink">
+      {value ?? <span className="font-normal text-muted">Not recorded</span>}
     </dd>
   </div>
 );

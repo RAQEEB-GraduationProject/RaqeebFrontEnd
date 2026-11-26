@@ -227,17 +227,17 @@ const AddUser = () => {
         <button
           type="button"
           onClick={goBack}
-          className="flex items-center gap-1 text-xs font-medium text-teal-800 transition hover:text-[#0f3d4c]"
+          className="flex items-center gap-1 text-xs font-medium text-accent transition hover:text-accent-strong"
         >
           <ChevronLeft size={14} />
           Back
         </button>
 
-        <h1 className="mt-6 text-4xl font-medium text-[#0b2a3d]">
+        <h1 className="mt-6 text-4xl font-medium text-ink">
           Add hospital user
         </h1>
 
-        <p className="mt-3 text-sm text-slate-500">
+        <p className="mt-3 text-sm text-muted-strong">
           Create account access and assign an operational role.
         </p>
       </div>
@@ -245,7 +245,7 @@ const AddUser = () => {
       {createdUser && (
         <div
           role="status"
-          className="flex items-start gap-3 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
+          className="flex items-start gap-3 rounded-xl bg-success-bg px-4 py-3 text-sm text-success-text"
         >
           <CircleCheck size={18} className="mt-0.5 shrink-0" />
 
@@ -258,7 +258,7 @@ const AddUser = () => {
       {pendingPatient && (
         <div
           role="status"
-          className="flex items-start gap-3 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
+          className="flex items-start gap-3 rounded-xl bg-success-bg px-4 py-3 text-sm text-success-text"
         >
           <CircleCheck size={18} className="mt-0.5 shrink-0" />
 
@@ -287,7 +287,7 @@ const AddUser = () => {
       {(createError || createProfileError) && (
         <p
           role="alert"
-          className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600"
+          className="rounded-xl bg-danger-bg px-4 py-3 text-sm text-danger-text"
         >
           {createError || createProfileError}
         </p>
@@ -296,13 +296,13 @@ const AddUser = () => {
       <form
         onSubmit={handleSubmit}
         noValidate
-        className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7"
+        className="rounded-3xl border border-line bg-white p-6 shadow-sm sm:p-7"
       >
-        <h2 className="text-base font-medium text-[#0b2a3d]">
+        <h2 className="text-base font-medium text-ink">
           Account information
         </h2>
 
-        <p className="mt-1 text-xs text-slate-400">
+        <p className="mt-1 text-xs text-muted">
           All fields marked required must be completed.
         </p>
 
@@ -372,19 +372,19 @@ const AddUser = () => {
 
               <ChevronDown
                 size={16}
-                className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#0b2a3d]"
+                className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-ink"
               />
             </div>
           </FormField>
         </div>
 
         {pendingPatient && (
-          <div className="mt-8 border-t border-slate-200 pt-6">
-            <h2 className="text-base font-medium text-[#0b2a3d]">
+          <div className="mt-8 border-t border-line pt-6">
+            <h2 className="text-base font-medium text-ink">
               Patient medical profile
             </h2>
 
-            <p className="mt-1 text-xs text-slate-400">
+            <p className="mt-1 text-xs text-muted">
               Date of birth is required. Gender is fixed to Female.
             </p>
 
@@ -400,12 +400,12 @@ const AddUser = () => {
           </div>
         )}
 
-        <div className="mt-8 flex justify-end gap-3 border-t border-slate-200 pt-6">
+        <div className="mt-8 flex justify-end gap-3 border-t border-line pt-6">
           <button
             type="button"
             onClick={goBack}
             disabled={isBusy}
-            className="rounded-xl border border-slate-200 bg-white px-6 py-4 text-xs font-bold text-[#0b2a3d] transition hover:bg-slate-50 disabled:opacity-60"
+            className="rounded-xl border border-line bg-white px-6 py-4 text-xs font-bold text-ink transition hover:bg-surface-soft disabled:cursor-not-allowed disabled:border-disabled disabled:text-disabled-text disabled:hover:bg-white"
           >
             Cancel
           </button>
@@ -413,7 +413,7 @@ const AddUser = () => {
           <button
             type="submit"
             disabled={isBusy}
-            className="flex items-center gap-2 rounded-xl bg-[#0f3d4c] px-6 py-4 text-xs font-bold text-white shadow-sm transition hover:bg-[#0b3240] disabled:opacity-70"
+            className="flex items-center gap-2 rounded-xl bg-primary px-6 py-4 text-xs font-bold text-on-primary shadow-sm transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:bg-disabled disabled:text-on-disabled disabled:shadow-none"
           >
             {isBusy && <LoaderCircle size={14} className="animate-spin" />}
             {isBusy ? "Saving..." : "Save changes"}

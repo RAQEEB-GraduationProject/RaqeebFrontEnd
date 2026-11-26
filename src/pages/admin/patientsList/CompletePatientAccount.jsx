@@ -81,11 +81,11 @@ const CompletePatientForm = ({ user, onCreated }) => {
   return (
     <>
       <div>
-        <h1 className="text-4xl font-medium text-[#0b2a3d]">
+        <h1 className="text-4xl font-medium text-ink">
           Complete patient account
         </h1>
 
-        <p className="mt-3 text-sm text-slate-500">
+        <p className="mt-3 text-sm text-muted-strong">
           Enter the medical information for <strong>{user.userName}</strong>.
         </p>
       </div>
@@ -93,7 +93,7 @@ const CompletePatientForm = ({ user, onCreated }) => {
       {error && (
         <p
           role="alert"
-          className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600"
+          className="rounded-xl bg-danger-bg px-4 py-3 text-sm text-danger-text"
         >
           {error}
         </p>
@@ -102,13 +102,13 @@ const CompletePatientForm = ({ user, onCreated }) => {
       <form
         onSubmit={handleSubmit}
         noValidate
-        className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7"
+        className="rounded-3xl border border-line bg-white p-6 shadow-sm sm:p-7"
       >
-        <h2 className="text-base font-medium text-[#0b2a3d]">
+        <h2 className="text-base font-medium text-ink">
           Patient medical profile
         </h2>
 
-        <p className="mt-1 text-xs text-slate-400">
+        <p className="mt-1 text-xs text-muted">
           Date of birth and gender are required.
         </p>
 
@@ -121,12 +121,12 @@ const CompletePatientForm = ({ user, onCreated }) => {
           />
         </div>
 
-        <div className="mt-8 flex justify-end gap-3 border-t border-slate-200 pt-6">
+        <div className="mt-8 flex justify-end gap-3 border-t border-line pt-6">
           <button
             type="button"
             onClick={() => navigate(patientUserPath(user.id))}
             disabled={isSaving}
-            className="rounded-xl border border-slate-200 bg-white px-6 py-4 text-xs font-bold text-[#0b2a3d] transition hover:bg-slate-50 disabled:opacity-60"
+            className="rounded-xl border border-line bg-white px-6 py-4 text-xs font-bold text-ink transition hover:bg-surface-soft disabled:cursor-not-allowed disabled:border-disabled disabled:text-disabled-text disabled:hover:bg-white"
           >
             Cancel
           </button>
@@ -134,7 +134,7 @@ const CompletePatientForm = ({ user, onCreated }) => {
           <button
             type="submit"
             disabled={isSaving}
-            className="flex items-center gap-2 rounded-xl bg-[#0f3d4c] px-6 py-4 text-xs font-bold text-white shadow-sm transition hover:bg-[#0b3240] disabled:opacity-70"
+            className="flex items-center gap-2 rounded-xl bg-primary px-6 py-4 text-xs font-bold text-on-primary shadow-sm transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:bg-disabled disabled:text-on-disabled disabled:shadow-none"
           >
             {isSaving && <LoaderCircle size={14} className="animate-spin" />}
             {isSaving ? "Saving..." : "Save patient profile"}
@@ -157,7 +157,7 @@ const CompletePatientAccount = () => {
   if (created) {
     return (
       <div className="mx-auto max-w-[1160px] space-y-6">
-        <h1 className="text-4xl font-medium text-[#0b2a3d]">
+        <h1 className="text-4xl font-medium text-ink">
           Complete patient account
         </h1>
 

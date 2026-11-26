@@ -17,11 +17,11 @@ const PatientDetailsLayout = ({
 }) => (
   <div className="space-y-6">
     <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs">
-      <Link to={listPath} className="text-[#3f5ea8] hover:underline">
+      <Link to={listPath} className="text-accent hover:underline">
         {listLabel}
       </Link>
-      <ChevronRight size={12} className="text-slate-400" aria-hidden="true" />
-      <span className="text-slate-500">{patient.name}</span>
+      <ChevronRight size={12} className="text-muted" aria-hidden="true" />
+      <span className="text-muted-strong">{patient.name}</span>
     </nav>
 
     <PatientDetailsHeader patient={patient} actions={actions} />

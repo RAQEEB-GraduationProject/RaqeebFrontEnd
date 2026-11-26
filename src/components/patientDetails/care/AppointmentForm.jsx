@@ -108,7 +108,7 @@ const AppointmentForm = ({ patientId, onAdded, onCancel }) => {
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-5">
       {formError && (
-        <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
+        <p role="alert" className="rounded-xl bg-danger-bg px-4 py-3 text-sm text-danger-text">
           {formError}
         </p>
       )}
@@ -153,11 +153,11 @@ const AppointmentForm = ({ patientId, onAdded, onCancel }) => {
             </select>
             <ChevronDown
               size={16}
-              className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#0b2a3d]"
+              className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-ink"
             />
           </div>
           {doctors.error && (
-            <p role="alert" className="mt-1.5 text-xs text-red-600">
+            <p role="alert" className="mt-1.5 text-xs text-danger-text">
               Couldn&apos;t load doctors: {doctors.error}{" "}
               <button type="button" onClick={fetchDoctors} className="font-semibold underline">
                 Try again

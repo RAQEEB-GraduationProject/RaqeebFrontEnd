@@ -48,7 +48,6 @@ export const useLocalAlerts = () => {
         icon: "question",
         showCancelButton: true,
         confirmButtonText: "Resolve",
-        confirmButtonColor: "#0f3d4c",
       });
 
       if (!isConfirmed) return;

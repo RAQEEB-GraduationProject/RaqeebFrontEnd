@@ -18,7 +18,7 @@ const PatientDetailsHeader = ({ patient, actions }) => (
     <div className="flex min-w-0 items-center gap-5">
       <div
         className={`flex h-[62px] w-[62px] shrink-0 items-center justify-center rounded-2xl text-lg font-semibold ${
-          RISK_AVATAR_STYLES[patient.risk] ?? "bg-slate-100 text-slate-600"
+          RISK_AVATAR_STYLES[patient.risk] ?? "bg-surface-muted text-ink-soft"
         }`}
       >
         {getInitials(patient.name)}
@@ -26,14 +26,14 @@ const PatientDetailsHeader = ({ patient, actions }) => (
 
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-3">
-          <h1 className="truncate text-3xl font-medium text-slate-900">
+          <h1 className="truncate text-3xl font-medium text-ink">
             {patient.name}
           </h1>
           {patient.risk && (
             <RiskBadge risk={patient.risk} label={`${patient.risk} risk`} />
           )}
         </div>
-        <p className="mt-1 text-sm text-slate-500">{buildSubline(patient)}</p>
+        <p className="mt-1 text-sm text-muted-strong">{buildSubline(patient)}</p>
       </div>
     </div>
 

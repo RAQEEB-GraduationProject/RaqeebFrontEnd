@@ -6,8 +6,8 @@ import { formatGenerated, formatResponse } from "./alertHelpers";
 
 const Detail = ({ label, children }) => (
   <div>
-    <p className="text-xs text-slate-400">{label}</p>
-    <p className="mt-2 text-sm font-semibold text-[#0b2a3d]">{children}</p>
+    <p className="text-xs text-muted">{label}</p>
+    <p className="mt-2 text-sm font-semibold text-ink">{children}</p>
   </div>
 );
 
@@ -41,7 +41,7 @@ const AlertDetails = ({
         <button
           type="button"
           onClick={onBack}
-          className="flex items-center gap-1 text-xs font-medium text-teal-800 transition hover:text-[#0f3d4c]"
+          className="flex items-center gap-1 text-xs font-medium text-accent transition hover:text-accent-strong"
         >
           <ChevronLeft size={14} />
           Back to alerts
@@ -49,11 +49,11 @@ const AlertDetails = ({
 
         <div className="mt-6 flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-medium text-[#0b2a3d]">
+            <h1 className="text-4xl font-medium text-ink">
               {alert.id} · {alert.event}
             </h1>
 
-            <p className="mt-3 text-sm text-slate-500">
+            <p className="mt-3 text-sm text-muted-strong">
               {alert.patientName} · Assigned to {alert.doctorName}
             </p>
           </div>
@@ -64,7 +64,7 @@ const AlertDetails = ({
                 type="button"
                 onClick={() => onReview(alert)}
                 disabled={isReviewed}
-                className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-6 py-4 text-sm font-bold text-[#0b2a3d] shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex items-center gap-3 rounded-xl border border-line bg-white px-6 py-4 text-sm font-bold text-ink shadow-sm transition hover:bg-surface-soft disabled:cursor-not-allowed disabled:border-disabled disabled:text-disabled-text disabled:hover:bg-white"
               >
                 <Eye size={18} />
                 {isReviewed ? "Reviewed" : "Mark as reviewed"}
@@ -76,7 +76,7 @@ const AlertDetails = ({
                 type="button"
                 onClick={() => onResolve(alert)}
                 disabled={isResolved}
-                className="flex items-center gap-3 rounded-xl bg-[#0f3d4c] px-6 py-4 text-sm font-bold text-white shadow-sm transition hover:bg-[#0b3240] disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex items-center gap-3 rounded-xl bg-primary px-6 py-4 text-sm font-bold text-on-primary shadow-sm transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:bg-disabled disabled:text-on-disabled disabled:shadow-none"
               >
                 <Check size={18} />
                 {isResolved ? "Resolved" : "Resolve alert"}
@@ -89,10 +89,10 @@ const AlertDetails = ({
       {devNotice && <DevNotice text={devNotice} />}
 
       <div className="grid items-start gap-6 lg:grid-cols-[1.9fr_1fr]">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
-          <h2 className="text-base font-medium text-[#0b2a3d]">Alert details</h2>
+        <section className="rounded-3xl border border-line bg-white p-6 shadow-sm sm:p-7">
+          <h2 className="text-base font-medium text-ink">Alert details</h2>
 
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="mt-1 text-xs text-muted">
             Clinical event and response information
           </p>
 
@@ -116,7 +116,7 @@ const AlertDetails = ({
             <form onSubmit={submitNote} className="mt-8">
               <label
                 htmlFor="internal-note"
-                className="block text-xs text-slate-500"
+                className="block text-xs text-muted-strong"
               >
                 Internal note
               </label>
@@ -127,13 +127,13 @@ const AlertDetails = ({
                 onChange={(e) => setNote(e.target.value)}
                 rows={4}
                 placeholder="Add a note for the care team…"
-                className="mt-3 w-full resize-y rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm text-[#0b2a3d] outline-none transition placeholder:text-slate-400 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20"
+                className="mt-3 w-full resize-y rounded-2xl border border-field bg-white px-4 py-4 text-sm text-ink outline-none transition placeholder:text-muted focus:border-focus focus:ring-2 focus:ring-focus/25"
               />
 
               <button
                 type="submit"
                 disabled={!note.trim()}
-                className="mt-5 rounded-xl bg-[#0f3d4c] px-6 py-4 text-xs font-bold text-white shadow-sm transition hover:bg-[#0b3240] disabled:cursor-not-allowed disabled:opacity-50"
+                className="mt-5 rounded-xl bg-primary px-6 py-4 text-xs font-bold text-on-primary shadow-sm transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:bg-disabled disabled:text-on-disabled disabled:shadow-none"
               >
                 Add note
               </button>
@@ -141,14 +141,14 @@ const AlertDetails = ({
           )}
 
           {alert.notes.length > 0 && (
-            <ul className="mt-8 space-y-3 border-t border-slate-100 pt-6">
+            <ul className="mt-8 space-y-3 border-t border-line-soft pt-6">
               {alert.notes.map((item, index) => (
-                <li key={index} className="rounded-xl bg-slate-50 px-4 py-3">
-                  <p className="whitespace-pre-wrap break-words text-sm text-[#0b2a3d]">
+                <li key={index} className="rounded-xl bg-surface-soft px-4 py-3">
+                  <p className="whitespace-pre-wrap break-words text-sm text-ink">
                     {item.text}
                   </p>
 
-                  <p className="mt-1 text-xs text-slate-400">
+                  <p className="mt-1 text-xs text-muted">
                     {item.author ? `${item.author} · ` : ""}
                     {item.time}
                   </p>
@@ -158,8 +158,8 @@ const AlertDetails = ({
           )}
         </section>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
-          <h2 className="border-b border-slate-200 pb-2 text-base font-medium text-[#0b2a3d]">
+        <section className="rounded-3xl border border-line bg-white p-6 shadow-sm sm:p-7">
+          <h2 className="border-b border-line pb-2 text-base font-medium text-ink">
             Escalation timeline
           </h2>
 
@@ -167,24 +167,24 @@ const AlertDetails = ({
             {alert.timeline.map((step, index) => (
               <li
                 key={index}
-                className="flex items-start gap-3 border-b border-slate-100 py-5 last:border-b-0"
+                className="flex items-start gap-3 border-b border-line-soft py-5 last:border-b-0"
               >
                 <span
                   className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${
-                    step.tone === "alert" ? "bg-rose-500" : "bg-emerald-500"
+                    step.tone === "alert" ? "bg-danger" : "bg-success"
                   }`}
                 />
 
-                <span className="w-11 shrink-0 text-xs text-slate-400">
+                <span className="w-11 shrink-0 text-xs text-muted">
                   {step.time}
                 </span>
 
                 <div>
-                  <p className="text-sm font-semibold text-[#0b2a3d]">
+                  <p className="text-sm font-semibold text-ink">
                     {step.title}
                   </p>
 
-                  <p className="mt-1 text-xs text-slate-400">{step.detail}</p>
+                  <p className="mt-1 text-xs text-muted">{step.detail}</p>
                 </div>
               </li>
             ))}

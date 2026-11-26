@@ -37,7 +37,7 @@ const FilterSelect = ({ label, value, onChange, allLabel, options }) => (
       aria-label={label}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full appearance-none rounded-xl border border-slate-200 bg-white py-3 pl-4 pr-10 text-sm text-slate-600 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20"
+      className="w-full appearance-none rounded-xl border border-field bg-white py-3 pl-4 pr-10 text-sm text-ink-soft outline-none transition focus:border-focus focus:ring-2 focus:ring-focus/25"
     >
       <option value="all">{allLabel}</option>
 
@@ -50,22 +50,22 @@ const FilterSelect = ({ label, value, onChange, allLabel, options }) => (
 
     <ChevronDown
       size={16}
-      className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-500"
+      className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-muted-strong"
     />
   </div>
 );
 
 const RoleBadge = ({ role }) => (
-  <span className="inline-flex w-fit rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-900">
+  <span className="inline-flex w-fit rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold text-accent-strong">
     {role || "—"}
   </span>
 );
 
 const StatusBadge = ({ isActive }) => (
-  <span className="inline-flex items-center gap-2 text-xs text-slate-600">
+  <span className="inline-flex items-center gap-2 text-xs text-ink-soft">
     <span
       className={`h-2 w-2 rounded-full ${
-        isActive ? "bg-emerald-500" : "bg-rose-500"
+        isActive ? "bg-success" : "bg-danger"
       }`}
     />
 
@@ -78,20 +78,20 @@ const SkeletonRows = () => (
     {Array.from({ length: 5 }).map((_, index) => (
       <div
         key={index}
-        className={`${GRID} animate-pulse border-t border-slate-100 py-5`}
+        className={`${GRID} animate-pulse border-t border-line-soft py-5`}
       >
         <div className="flex items-center gap-4">
-          <div className="h-10 w-10 rounded-xl bg-slate-100" />
+          <div className="h-10 w-10 rounded-xl bg-surface-muted" />
 
           <div className="space-y-2">
-            <div className="h-3 w-28 rounded bg-slate-100" />
-            <div className="h-2.5 w-40 rounded bg-slate-100" />
+            <div className="h-3 w-28 rounded bg-surface-muted" />
+            <div className="h-2.5 w-40 rounded bg-surface-muted" />
           </div>
         </div>
 
-        <div className="h-5 w-16 rounded-full bg-slate-100" />
-        <div className="h-3 w-24 rounded bg-slate-100" />
-        <div className="h-3 w-16 rounded bg-slate-100" />
+        <div className="h-5 w-16 rounded-full bg-surface-muted" />
+        <div className="h-3 w-24 rounded bg-surface-muted" />
+        <div className="h-3 w-16 rounded bg-surface-muted" />
         <div />
       </div>
     ))}
@@ -99,16 +99,16 @@ const SkeletonRows = () => (
 );
 
 const Message = ({ title, text, actionLabel, onAction }) => (
-  <div className="border-t border-slate-100 px-6 py-14 text-center">
-    <p className="text-sm font-semibold text-[#0b2a3d]">{title}</p>
+  <div className="border-t border-line-soft px-6 py-14 text-center">
+    <p className="text-sm font-semibold text-ink">{title}</p>
 
-    {text && <p className="mt-1 text-sm text-slate-500">{text}</p>}
+    {text && <p className="mt-1 text-sm text-muted-strong">{text}</p>}
 
     {actionLabel && (
       <button
         type="button"
         onClick={onAction}
-        className="mt-5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-[#0f3d4c] transition hover:bg-slate-50"
+        className="mt-5 rounded-xl border border-line bg-white px-4 py-2 text-sm font-semibold text-ink transition hover:bg-surface-soft"
       >
         {actionLabel}
       </button>
@@ -185,9 +185,9 @@ const UsersList = () => {
       {/* Heading */}
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-medium text-[#0b2a3d]">Users</h1>
+          <h1 className="text-4xl font-medium text-ink">Users</h1>
 
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-muted-strong">
             Manage hospital staff, patient, and caregiver access.
           </p>
         </div>
@@ -195,7 +195,7 @@ const UsersList = () => {
         <button
           type="button"
           onClick={() => navigate("/admin/users/new")}
-          className="flex items-center gap-3 rounded-xl bg-[#0f3d4c] px-6 py-4 text-sm font-bold text-white shadow-sm transition hover:bg-[#0b3240]"
+          className="flex items-center gap-3 rounded-xl bg-primary px-6 py-4 text-sm font-bold text-on-primary shadow-sm transition hover:bg-primary-hover"
         >
           <Plus size={18} />
           Add user
@@ -203,11 +203,11 @@ const UsersList = () => {
       </header>
 
       {/* Search and filters */}
-      <section className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 sm:flex-row">
+      <section className="flex flex-col gap-3 rounded-2xl border border-line bg-white p-4 sm:flex-row">
         <div className="relative flex-1">
           <Search
             size={18}
-            className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+            className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted"
           />
 
           <input
@@ -216,7 +216,7 @@ const UsersList = () => {
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name, email, phone or ID…"
             aria-label="Search users"
-            className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20"
+            className="w-full rounded-xl border border-field bg-white py-3 pl-11 pr-4 text-sm outline-none transition placeholder:text-muted focus:border-focus focus:ring-2 focus:ring-focus/25"
           />
         </div>
 
@@ -241,18 +241,18 @@ const UsersList = () => {
       {error && users.length > 0 && (
         <p
           role="alert"
-          className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600"
+          className="rounded-xl bg-danger-bg px-4 py-3 text-sm text-danger-text"
         >
           {error}
         </p>
       )}
 
       {/* Users table */}
-      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+      <section className="overflow-hidden rounded-2xl border border-line bg-white">
         <div className="overflow-x-auto">
           <div className="min-w-[760px]">
             <div
-              className={`${GRID} py-4 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500`}
+              className={`${GRID} py-4 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-strong`}
             >
               <span>User</span>
               <span>Role</span>
@@ -290,19 +290,19 @@ const UsersList = () => {
                   type="button"
                   onClick={() => openUserDetails(user.id)}
                   aria-label={`View details for ${user.userName}`}
-                  className={`${GRID} w-full border-t border-slate-100 py-4 text-left transition hover:bg-slate-50/70 focus-visible:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-teal-600`}
+                  className={`${GRID} w-full border-t border-line-soft py-4 text-left transition hover:bg-surface-soft/70 focus-visible:bg-surface-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus`}
                 >
                   <div className="flex min-w-0 items-center gap-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-xs font-bold text-teal-800">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-avatar text-xs font-bold text-on-avatar">
                       {getInitials(user.userName)}
                     </div>
 
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-[#0b2a3d]">
+                      <p className="truncate text-sm font-semibold text-ink">
                         {user.userName}
                       </p>
 
-                      <p className="truncate text-xs text-slate-400">
+                      <p className="truncate text-xs text-muted">
                         {user.email}
                       </p>
                     </div>
@@ -310,13 +310,13 @@ const UsersList = () => {
 
                   <RoleBadge role={user.role} />
 
-                  <span className="truncate text-sm text-slate-600">
+                  <span className="truncate text-sm text-ink-soft">
                     {user.phoneNumber || "—"}
                   </span>
 
                   <StatusBadge isActive={user.isActive} />
 
-                  <ChevronRight size={18} className="text-slate-500" />
+                  <ChevronRight size={18} className="text-muted-strong" />
                 </button>
               ))
             )}
@@ -326,7 +326,7 @@ const UsersList = () => {
 
       {/* Count */}
       {users.length > 0 && (
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-muted-strong">
           Showing {filteredUsers.length} of {users.length} users
         </p>
       )}

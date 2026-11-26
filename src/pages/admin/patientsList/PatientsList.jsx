@@ -129,11 +129,11 @@ const PatientsList = () => {
       {/* Heading */}
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-medium text-[#0b2a3d]">
+          <h1 className="text-4xl font-medium text-ink">
             Patients &amp; assignments
           </h1>
 
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-muted-strong">
             Manage monitored patients and their assigned care teams.
           </p>
         </div>
@@ -141,7 +141,7 @@ const PatientsList = () => {
         <button
           type="button"
           onClick={() => setDrawer({ patient: null })}
-          className="inline-flex items-center gap-2 rounded-xl bg-[#0f3d4c] px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-[#0b2a3d]"
+          className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover"
         >
           <Plus size={18} />
           Assign
@@ -149,12 +149,12 @@ const PatientsList = () => {
       </header>
 
       {/* Search + staff filter */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-4">
+      <section className="rounded-2xl border border-line bg-white p-4">
         <div className="flex flex-col gap-3 sm:flex-row">
           <div className="relative flex-1">
             <Search
               size={18}
-              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted"
             />
 
             <input
@@ -163,7 +163,7 @@ const PatientsList = () => {
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by patient name or ID…"
               aria-label="Search patients"
-              className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20"
+              className="w-full rounded-xl border border-field bg-white py-3 pl-11 pr-4 text-sm outline-none transition placeholder:text-muted focus:border-focus focus:ring-2 focus:ring-focus/25"
             />
           </div>
 
@@ -179,21 +179,21 @@ const PatientsList = () => {
       {error && patients.length > 0 && (
         <p
           role="alert"
-          className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600"
+          className="rounded-xl bg-danger-bg px-4 py-3 text-sm text-danger-text"
         >
           {error}
         </p>
       )}
 
       {/* Count + active filter chip */}
-      <div className="-mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-500">
+      <div className="-mt-4 flex flex-wrap items-center gap-3 text-xs text-muted-strong">
         <p>
           <span className="font-bold">{filteredPatients.length}</span>{" "}
           {filteredPatients.length === 1 ? "patient" : "patients"}
         </p>
 
         {filterLabel && (
-          <span className="inline-flex items-center gap-2 rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-900">
+          <span className="inline-flex items-center gap-2 rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold text-accent-strong">
             {filterLabel}
 
             <button
@@ -210,7 +210,7 @@ const PatientsList = () => {
           <button
             type="button"
             onClick={clearFilters}
-            className="font-semibold text-teal-700 hover:text-teal-900"
+            className="font-semibold text-accent hover:text-accent-strong"
           >
             Clear filters
           </button>

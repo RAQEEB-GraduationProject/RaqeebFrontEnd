@@ -1,6 +1,6 @@
 export const RISK_AVATAR_STYLES = {
-  Critical: "bg-rose-50 text-rose-700",
-  High: "bg-orange-50 text-orange-700",
-  Medium: "bg-indigo-50 text-indigo-700",
-  Stable: "bg-emerald-50 text-emerald-700",
+  Critical: "bg-risk-critical-bg text-risk-critical-text",
+  High: "bg-risk-high-bg text-risk-high-text",
+  Medium: "bg-risk-attention-bg text-risk-attention-text",
+  Stable: "bg-risk-stable-bg text-risk-stable-text",
 };

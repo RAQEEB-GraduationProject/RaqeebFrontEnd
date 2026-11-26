@@ -52,22 +52,22 @@ const validate = (values, rules, editingId) => {
 };
 
 const inputClass = (hasError) =>
-  `w-full rounded-xl border bg-white px-4 py-3 text-sm text-[#0b2a3d] outline-none transition placeholder:text-slate-400 focus:ring-2 ${
+  `w-full rounded-xl border bg-white px-4 py-3 text-sm text-ink outline-none transition placeholder:text-muted focus:ring-2 ${
     hasError
-      ? "border-red-400 focus:border-red-500 focus:ring-red-500/20"
-      : "border-slate-200 focus:border-teal-600 focus:ring-teal-600/20"
+      ? "border-danger focus:border-danger focus:ring-danger/20"
+      : "border-field focus:border-focus focus:ring-focus/25"
   }`;
 
 const Field = ({ id, label, error, children }) => (
   <div>
-    <label htmlFor={id} className="mb-2 block text-xs font-medium text-teal-800">
+    <label htmlFor={id} className="mb-2 block text-xs font-medium text-accent">
       {label}
     </label>
 
     {children}
 
     {error && (
-      <p id={`${id}-error`} role="alert" className="mt-1.5 text-xs text-red-600">
+      <p id={`${id}-error`} role="alert" className="mt-1.5 text-xs text-danger-text">
         {error}
       </p>
     )}
@@ -93,7 +93,7 @@ const SelectField = ({ id, label, value, onChange, options }) => (
 
       <ChevronDown
         size={16}
-        className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#0b2a3d]"
+        className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-ink"
       />
     </div>
   </Field>
@@ -163,7 +163,7 @@ const RuleFormDrawer = ({ rule, rules, categories, onSave, onClose }) => {
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
       <div
-        className="absolute inset-0 bg-slate-900/40"
+        className="absolute inset-0 bg-overlay/40"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -176,17 +176,17 @@ const RuleFormDrawer = ({ rule, rules, categories, onSave, onClose }) => {
         noValidate
         className="relative flex h-full w-full max-w-[560px] flex-col bg-white shadow-xl"
       >
-        <header className="flex items-start justify-between border-b border-slate-100 px-7 py-6">
+        <header className="flex items-start justify-between border-b border-line-soft px-7 py-6">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-teal-700">
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-accent">
               CTCAE rule
             </p>
 
-            <h2 className="mt-2 text-3xl font-medium text-[#0b2a3d]">
+            <h2 className="mt-2 text-3xl font-medium text-ink">
               {isEdit ? "Edit rule" : "Add rule"}
             </h2>
 
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-muted-strong">
               {isEdit
                 ? "Update the grading thresholds and pediatric information."
                 : "Define a new adverse event and its grading thresholds."}
@@ -197,7 +197,7 @@ const RuleFormDrawer = ({ rule, rules, categories, onSave, onClose }) => {
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="rounded-xl border border-slate-200 p-2.5 text-slate-600 transition hover:bg-slate-50"
+            className="rounded-xl border border-line p-2.5 text-ink-soft transition hover:bg-surface-soft"
           >
             <X size={18} />
           </button>
@@ -235,7 +235,7 @@ const RuleFormDrawer = ({ rule, rules, categories, onSave, onClose }) => {
             </datalist>
           </Field>
 
-          <div className="space-y-5 border-t border-slate-100 pt-5">
+          <div className="space-y-5 border-t border-line-soft pt-5">
             {GRADES.map((grade, index) => (
               <Field
                 key={grade}
@@ -252,7 +252,7 @@ const RuleFormDrawer = ({ rule, rules, categories, onSave, onClose }) => {
             ))}
           </div>
 
-          <div className="grid gap-5 border-t border-slate-100 pt-5 sm:grid-cols-2">
+          <div className="grid gap-5 border-t border-line-soft pt-5 sm:grid-cols-2">
             <SelectField
               id="homeMonitoring"
               label="Suitable for home monitoring"
@@ -287,18 +287,18 @@ const RuleFormDrawer = ({ rule, rules, categories, onSave, onClose }) => {
           </Field>
         </div>
 
-        <footer className="flex justify-end gap-3 border-t border-slate-100 px-7 py-5">
+        <footer className="flex justify-end gap-3 border-t border-line-soft px-7 py-5">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-[#0f3d4c] transition hover:bg-slate-50"
+            className="rounded-xl border border-line bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:bg-surface-soft"
           >
             Cancel
           </button>
 
           <button
             type="submit"
-            className="rounded-xl bg-[#0f3d4c] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#0b2a3d]"
+            className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-on-primary transition hover:bg-primary-hover"
           >
             {isEdit ? "Save changes" : "Add rule"}
           </button>

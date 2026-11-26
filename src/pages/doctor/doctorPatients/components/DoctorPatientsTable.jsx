@@ -12,19 +12,19 @@ const SkeletonRows = () => (
     {Array.from({ length: 5 }).map((_, index) => (
       <div
         key={index}
-        className={`${GRID} animate-pulse border-t border-slate-100 py-5`}
+        className={`${GRID} animate-pulse border-t border-line-soft py-5`}
       >
         <div className="flex items-center gap-4">
-          <div className="h-11 w-11 rounded-full bg-slate-100" />
+          <div className="h-11 w-11 rounded-full bg-surface-muted" />
           <div className="space-y-2">
-            <div className="h-3 w-28 rounded bg-slate-100" />
-            <div className="h-2.5 w-20 rounded bg-slate-100" />
+            <div className="h-3 w-28 rounded bg-surface-muted" />
+            <div className="h-2.5 w-20 rounded bg-surface-muted" />
           </div>
         </div>
-        <div className="h-3 w-32 rounded bg-slate-100" />
-        <div className="h-3 w-32 rounded bg-slate-100" />
-        <div className="h-5 w-16 rounded-full bg-slate-100" />
-        <div className="h-3 w-16 rounded bg-slate-100" />
+        <div className="h-3 w-32 rounded bg-surface-muted" />
+        <div className="h-3 w-32 rounded bg-surface-muted" />
+        <div className="h-5 w-16 rounded-full bg-surface-muted" />
+        <div className="h-3 w-16 rounded bg-surface-muted" />
         <span />
       </div>
     ))}
@@ -45,11 +45,11 @@ const DoctorPatientsTable = ({
   const openPatient = (patient) => navigate(`${patientsPath}/${patient.id}`);
 
   return (
-    <section className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
+    <section className="overflow-hidden rounded-3xl border border-line-soft bg-white shadow-sm">
       <div className="overflow-x-auto">
         <div className="min-w-[860px]">
           <div
-            className={`${GRID} py-5 text-[11px] font-medium uppercase tracking-[0.1em] text-slate-400`}
+            className={`${GRID} py-5 text-[11px] font-medium uppercase tracking-[0.1em] text-muted`}
           >
             <span>Patient</span>
             <span>Diagnosis</span>
@@ -62,27 +62,27 @@ const DoctorPatientsTable = ({
           {isLoading ? (
             <SkeletonRows />
           ) : error ? (
-            <div className="border-t border-slate-100 px-6 py-14 text-center">
-              <p className="text-sm font-semibold text-slate-800">
+            <div className="border-t border-line-soft px-6 py-14 text-center">
+              <p className="text-sm font-semibold text-ink">
                 Couldn't load patients
               </p>
-              <p className="mt-1 text-sm text-slate-500">{error}</p>
+              <p className="mt-1 text-sm text-muted-strong">{error}</p>
               <button
                 type="button"
                 onClick={onRetry}
-                className="mt-5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-[#3f5ea8] transition hover:bg-slate-50"
+                className="mt-5 rounded-xl border border-line bg-white px-4 py-2 text-sm font-semibold text-accent transition hover:bg-surface-soft"
               >
                 Try again
               </button>
             </div>
           ) : patients.length === 0 ? (
-            <div className="border-t border-slate-100 px-6 py-14 text-center">
-              <p className="text-sm font-semibold text-slate-800">
+            <div className="border-t border-line-soft px-6 py-14 text-center">
+              <p className="text-sm font-semibold text-ink">
                 {hasFilters
                   ? "No patients match your filters"
                   : "No patients yet"}
               </p>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-muted-strong">
                 {hasFilters
                   ? "Try a different search or clear the filters."
                   : "Patients assigned to you will appear here."}
@@ -91,7 +91,7 @@ const DoctorPatientsTable = ({
                 <button
                   type="button"
                   onClick={onClearFilters}
-                  className="mt-5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-[#3f5ea8] transition hover:bg-slate-50"
+                  className="mt-5 rounded-xl border border-line bg-white px-4 py-2 text-sm font-semibold text-accent transition hover:bg-surface-soft"
                 >
                   Clear filters
                 </button>
@@ -110,54 +110,54 @@ const DoctorPatientsTable = ({
                     openPatient(patient);
                   }
                 }}
-                className={`${GRID} cursor-pointer border-t border-slate-100 py-5 transition hover:bg-slate-50 focus:bg-slate-50 focus:outline-none`}
+                className={`${GRID} cursor-pointer border-t border-line-soft py-5 transition hover:bg-surface-soft focus:bg-surface-soft focus:outline-none`}
               >
                 <div className="flex min-w-0 items-center gap-4">
                   <div
                     className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
                       RISK_AVATAR_STYLES[patient.risk] ??
-                      "bg-slate-100 text-slate-600"
+                      "bg-surface-muted text-ink-soft"
                     }`}
                   >
                     {getInitials(patient.name)}
                   </div>
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-slate-900">
+                    <p className="truncate text-sm font-semibold text-ink">
                       {patient.name}
                     </p>
-                    <p className="truncate text-xs text-slate-400">
+                    <p className="truncate text-xs text-muted">
                       {patient.medicalRecordNumber || "—"}
                     </p>
                   </div>
                 </div>
 
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-slate-800">
+                  <p className="truncate text-sm font-semibold text-ink">
                     {patient.diagnosis || "—"}
                   </p>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-muted">
                     {patient.stage || "—"}
                   </p>
                 </div>
 
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-slate-800">
+                  <p className="truncate text-sm font-semibold text-ink">
                     {patient.treatment || "—"}
                   </p>
-                  <p className="truncate text-xs text-slate-400">
+                  <p className="truncate text-xs text-muted">
                     {patient.protocol || "—"}
                   </p>
                 </div>
 
                 <RiskBadge risk={patient.risk} />
 
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-ink-soft">
                   —
                 </p>
 
                 <ChevronRight
                   size={18}
-                  className="text-slate-400"
+                  className="text-muted"
                   aria-hidden="true"
                 />
               </div>

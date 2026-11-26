@@ -24,9 +24,9 @@ const toRow = (entry) => ({
   badge: formatJournalDate(entry.createdAt),
   details: (
     <>
-      <p className="whitespace-pre-line break-words text-sm text-slate-800">{entry.content}</p>
+      <p className="whitespace-pre-line break-words text-sm text-ink">{entry.content}</p>
       {formatJournalFull(entry.createdAt) && (
-        <p className="mt-2 text-xs text-slate-400">{formatJournalFull(entry.createdAt)}</p>
+        <p className="mt-2 text-xs text-muted">{formatJournalFull(entry.createdAt)}</p>
       )}
     </>
   ),

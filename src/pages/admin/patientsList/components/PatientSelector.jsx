@@ -17,8 +17,8 @@ const PatientSelector = ({ patients, selectedIds, onChange }) => {
   return (
     <div className="space-y-3">
       <div>
-        <h3 className="text-base font-semibold text-[#0b2a3d]">Patients</h3>
-        <p className="text-sm text-slate-500">Select one or more patients</p>
+        <h3 className="text-base font-semibold text-ink">Patients</h3>
+        <p className="text-sm text-muted-strong">Select one or more patients</p>
       </div>
 
       {selected.length > 0 && (
@@ -26,7 +26,7 @@ const PatientSelector = ({ patients, selectedIds, onChange }) => {
           {selected.map((patient) => (
             <span
               key={patient.id}
-              className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold text-[#0b2a3d]"
+              className="inline-flex items-center gap-2 rounded-full bg-surface-muted px-3 py-1.5 text-sm font-semibold text-ink"
             >
               {patient.userName}
 

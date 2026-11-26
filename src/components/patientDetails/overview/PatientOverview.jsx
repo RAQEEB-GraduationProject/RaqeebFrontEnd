@@ -32,10 +32,10 @@ const SectionTabs = ({ active }) => (
           key={key}
           to={{ search }}
           aria-current={isActive ? "page" : undefined}
-          className={`rounded-xl border px-4 py-2.5 text-xs font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3f5ea8]/40 ${
+          className={`rounded-xl border px-4 py-2.5 text-xs font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-focus/60 ${
             isActive
-              ? "border-[#3f5ea8]/30 bg-[#eef3fc] text-[#3f5ea8]"
-              : "border-slate-200 bg-white text-slate-600 hover:text-slate-900"
+              ? "border-accent/30 bg-accent-soft text-accent"
+              : "border-line bg-white text-ink-soft hover:text-ink"
           }`}
         >
           {label}
@@ -47,23 +47,23 @@ const SectionTabs = ({ active }) => (
 
 const Card = ({ title, subtitle, action, className = "", children }) => (
   <section
-    className={`rounded-2xl border border-slate-100 bg-white p-6 shadow-sm ${className}`}
+    className={`rounded-2xl border border-line-soft bg-white p-6 shadow-sm ${className}`}
   >
     <div className="flex items-start justify-between gap-4">
-      <h2 className="text-lg font-medium text-slate-900">{title}</h2>
+      <h2 className="text-lg font-medium text-ink">{title}</h2>
       {action}
     </div>
-    {subtitle && <p className="mt-1 text-sm text-slate-400">{subtitle}</p>}
+    {subtitle && <p className="mt-1 text-sm text-muted">{subtitle}</p>}
     <dl className="mt-6 grid gap-x-8 gap-y-5 sm:grid-cols-2">{children}</dl>
   </section>
 );
 
 const Field = ({ label, value, children }) => (
   <div className="min-w-0">
-    <dt className="text-xs text-slate-400">{label}</dt>
-    <dd className="mt-1 break-words text-sm font-medium text-slate-800">
+    <dt className="text-xs text-muted">{label}</dt>
+    <dd className="mt-1 break-words text-sm font-medium text-ink">
       {value == null ? (
-        <span className="font-normal text-slate-400">Not recorded</span>
+        <span className="font-normal text-muted">Not recorded</span>
       ) : (
         (children ?? value)
       )}
@@ -101,7 +101,7 @@ const Summary = ({ overview }) => {
         <Field label="Treatment status" value={clinical.treatmentStatus}>
           <span className="inline-flex items-center gap-2">
             <span
-              className="h-2 w-2 rounded-full bg-emerald-500"
+              className="h-2 w-2 rounded-full bg-success"
               aria-hidden="true"
             />
             {clinical.treatmentStatus}
@@ -116,7 +116,7 @@ const Summary = ({ overview }) => {
         action={
           <Link
             to={{ search: SECTIONS[1].search }}
-            className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-[#3f5ea8] hover:underline"
+            className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-accent hover:underline"
           >
             Medical history
             <ArrowRight size={16} aria-hidden="true" />

@@ -17,9 +17,9 @@ const COLUMN_DEFS = {
     width: "minmax(110px,1fr)",
     render: (row) => (
       <div>
-        <p className="text-sm font-semibold text-[#0b2a3d]">{row.id}</p>
+        <p className="text-sm font-semibold text-ink">{row.id}</p>
 
-        <p className="mt-1 text-xs text-slate-400">
+        <p className="mt-1 text-xs text-muted">
           {formatGenerated(row.createdAt)}
         </p>
       </div>
@@ -29,14 +29,14 @@ const COLUMN_DEFS = {
     label: "Patient",
     width: "minmax(150px,1.4fr)",
     render: (row) => (
-      <span className="truncate text-sm text-slate-600">{row.patientName}</span>
+      <span className="truncate text-sm text-ink-soft">{row.patientName}</span>
     ),
   },
   event: {
     label: "Event",
     width: "minmax(180px,1.8fr)",
     render: (row) => (
-      <span className="break-words text-sm text-slate-600">{row.event}</span>
+      <span className="break-words text-sm text-ink-soft">{row.event}</span>
     ),
   },
   color: {
@@ -53,14 +53,14 @@ const COLUMN_DEFS = {
     label: "Doctor",
     width: "minmax(150px,1.3fr)",
     render: (row) => (
-      <span className="truncate text-sm text-slate-600">{row.doctorName}</span>
+      <span className="truncate text-sm text-ink-soft">{row.doctorName}</span>
     ),
   },
   response: {
     label: "Response",
     width: "minmax(80px,0.8fr)",
     render: (row) => (
-      <span className="text-sm text-slate-600">
+      <span className="text-sm text-ink-soft">
         {formatResponse(row.responseMinutes)}
       </span>
     ),
@@ -78,7 +78,7 @@ const FilterSelect = ({ label, value, onChange, allLabel, options }) => (
       aria-label={label}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full appearance-none rounded-xl border border-slate-200 bg-white py-3 pl-4 pr-10 text-sm text-slate-600 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20"
+      className="w-full appearance-none rounded-xl border border-field bg-white py-3 pl-4 pr-10 text-sm text-ink-soft outline-none transition focus:border-focus focus:ring-2 focus:ring-focus/25"
     >
       <option value="all">{allLabel}</option>
 
@@ -91,22 +91,22 @@ const FilterSelect = ({ label, value, onChange, allLabel, options }) => (
 
     <ChevronDown
       size={16}
-      className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-500"
+      className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-muted-strong"
     />
   </div>
 );
 
 const Message = ({ title, text, actionLabel, onAction }) => (
-  <div className="border-t border-slate-100 px-6 py-14 text-center">
-    <p className="text-sm font-semibold text-[#0b2a3d]">{title}</p>
+  <div className="border-t border-line-soft px-6 py-14 text-center">
+    <p className="text-sm font-semibold text-ink">{title}</p>
 
-    {text && <p className="mt-1 text-sm text-slate-500">{text}</p>}
+    {text && <p className="mt-1 text-sm text-muted-strong">{text}</p>}
 
     {actionLabel && (
       <button
         type="button"
         onClick={onAction}
-        className="mt-5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-[#0f3d4c] transition hover:bg-slate-50"
+        className="mt-5 rounded-xl border border-line bg-white px-4 py-2 text-sm font-semibold text-ink transition hover:bg-surface-soft"
       >
         {actionLabel}
       </button>
@@ -217,9 +217,9 @@ const AlertsView = ({
       {/* Heading */}
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-medium text-[#0b2a3d]">Alerts</h1>
+          <h1 className="text-4xl font-medium text-ink">Alerts</h1>
 
-          <p className="mt-2 text-sm text-slate-500">{subtitle}</p>
+          <p className="mt-2 text-sm text-muted-strong">{subtitle}</p>
         </div>
 
         {canExport && (
@@ -227,7 +227,7 @@ const AlertsView = ({
             type="button"
             onClick={handleExport}
             disabled={filteredRows.length === 0}
-            className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-6 py-4 text-sm font-bold text-[#0b2a3d] shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex items-center gap-3 rounded-xl border border-line bg-white px-6 py-4 text-sm font-bold text-ink shadow-sm transition hover:bg-surface-soft disabled:cursor-not-allowed disabled:border-disabled disabled:text-disabled-text disabled:hover:bg-white"
           >
             <Download size={18} />
             Export
@@ -239,14 +239,14 @@ const AlertsView = ({
 
       {/* Filters */}
       {filters.length > 0 && (
-        <section className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 sm:flex-row sm:flex-wrap">
+        <section className="flex flex-col gap-3 rounded-2xl border border-line bg-white p-4 sm:flex-row sm:flex-wrap">
           {filters.includes("date") && (
             <input
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
               aria-label="Filter by date"
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20 sm:w-[170px]"
+              className="w-full rounded-xl border border-field bg-white px-4 py-3 text-sm text-ink-soft outline-none transition focus:border-focus focus:ring-2 focus:ring-focus/25 sm:w-[170px]"
             />
           )}
 
@@ -285,19 +285,19 @@ const AlertsView = ({
       {error && alerts.length > 0 && (
         <p
           role="alert"
-          className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600"
+          className="rounded-xl bg-danger-bg px-4 py-3 text-sm text-danger-text"
         >
           {error}
         </p>
       )}
 
       {/* Alerts table */}
-      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+      <section className="overflow-hidden rounded-2xl border border-line bg-white">
         <div className="overflow-x-auto">
           <div className="min-w-[760px]">
             <div
               style={gridStyle}
-              className={`${gridClass} py-4 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500`}
+              className={`${gridClass} py-4 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-strong`}
             >
               {shownColumns.map((c) => (
                 <span key={c.label}>{c.label}</span>
@@ -329,7 +329,7 @@ const AlertsView = ({
                   onClick={() => setSelectedId(row.id)}
                   aria-label={`View details for ${row.id}`}
                   style={gridStyle}
-                  className={`${gridClass} w-full border-t border-slate-100 py-5 text-left transition hover:bg-slate-50/70 focus-visible:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-teal-600`}
+                  className={`${gridClass} w-full border-t border-line-soft py-5 text-left transition hover:bg-surface-soft/70 focus-visible:bg-surface-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus`}
                 >
                   {shownColumns.map((c) => (
                     <div key={c.label} className="min-w-0">
@@ -344,7 +344,7 @@ const AlertsView = ({
       </section>
 
       {alerts.length > 0 && (
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-muted-strong">
           Showing {filteredRows.length} of {alerts.length} alerts
         </p>
       )}

@@ -1,16 +1,422 @@
 @import "tailwindcss";
 
-* {
-  box-sizing: border-box;
+/*
+  ============================================================================
+  RAQEEB VISUAL IDENTITY — the ONLY file that holds color values.
+  ============================================================================
+  Three layers, top to bottom:
+    1. PALETTE        raw colors (official brand + complementary shades).
+    2. DASHBOARDS     which palette color plays which role per dashboard.
+    3. ROLE TOKENS    the names components use (bg-primary, text-accent ...).
+
+  To change a brand color        -> edit it in layer 1.
+  To re-theme one dashboard      -> edit its block in layer 2.
+  Components must only use class names built from these tokens (bg-primary,
+  text-ink, border-line, bg-risk-high-bg ...) or var(--color-*). Tailwind's
+  default palette is switched off below, so classes like `bg-slate-50` or
+  `text-teal-700` do not exist in this project.
+*/
+
+/* ================================ 1. PALETTE ============================= */
+@theme static {
+  --color-*: initial;
+
+  /* ---- Official: primary brand ---- */
+  --color-brand-pink: #f26c9c;
+  --color-brand-pink-deep: #d84b7f;
+  --color-brand-teal: #409eac;
+  --color-brand-teal-deep: #337e8a;
+
+  /* ---- Official: secondary ---- */
+  --color-lime: #c8f48d;
+  --color-powder-pink: #fcd3e5;
+  --color-lavender: #dcccf7;
+  --color-light-aqua: #d2e5ea;
+  --color-soft-blue: #cae1e7;
+  --color-wave-teal: #a9d0d8;
+  --color-aqua-tint: #edf5f7;
+
+  /* ---- Official: neutrals ---- */
+  --color-white: #ffffff;
+  --color-ink: #263b40; /* Charcoal / Deep Ink */
+  --color-muted: #71858a; /* Muted Text */
+  --color-disabled: #d1d1d1; /* Disabled Grey */
+  --color-disabled-text: #a9b8bb;
+  --color-field: #cae1e7; /* Field Border */
+
+  /* ---- Official: risk status (solid = dots, icons, borders) ---- */
+  --color-risk-stable: #16a34a;
+  --color-risk-attention: #ca8a04;
+  --color-risk-high: #ea580c;
+  --color-risk-critical: #dc2626;
+
+  /* ---- Official: risk backgrounds ---- */
+  --color-risk-stable-bg: #ddf3e4;
+  --color-risk-attention-bg: #fbf1d0;
+  --color-risk-high-bg: #fde4d5;
+  --color-risk-critical-bg: #fbdada;
+
+  /* ---- Complementary: darker risk text (readable on the backgrounds) ---- */
+  --color-risk-stable-text: #0f6b32;
+  --color-risk-attention-text: #7a5203;
+  --color-risk-high-text: #a13b06;
+  --color-risk-critical-text: #a81a1a;
+
+  /* ---- Complementary: teal ---- */
+  --color-teal-strong: #2a6975; /* readable teal text */
+  --color-teal-ink: #1f505a;
+
+  /* ---- Complementary: pink ---- */
+  --color-pink-tint: #fef1f6;
+  --color-pink-strong: #b83767; /* solid buttons with white text */
+  --color-pink-ink: #962a53;
+
+  /* ---- Complementary: blue (doctor) ---- */
+  --color-blue-tint: #e6f1f5;
+  --color-blue-strong: #2d6789;
+  --color-blue-ink: #21506c;
+
+  /* ---- Complementary: lavender (nurse, admin) ---- */
+  --color-lavender-mist: #fbf9fe;
+  --color-lavender-tint: #f3eefc;
+  --color-lavender-line: #ebe3f9;
+  --color-lavender-ink: #55408c;
+
+  /* ---- Complementary: lime (admin) ---- */
+  --color-lime-tint: #eefbdc;
+  --color-lime-deep: #b4e673;
+  --color-lime-ink: #3d5c14;
+
+  /* ---- Complementary: neutrals ---- */
+  --color-ink-soft: #3f575d; /* body text one step below ink */
+  --color-muted-strong: #536a70; /* secondary text, AA on tinted surfaces */
+  --color-mist: #f6fafb; /* faintest surface */
+  --color-aqua-line: #e2eef1; /* faintest divider */
+
+  /* ---- Meaning aliases ---- */
+  --color-success: var(--color-risk-stable);
+  --color-success-bg: var(--color-risk-stable-bg);
+  --color-success-text: var(--color-risk-stable-text);
+  --color-warning: var(--color-risk-attention);
+  --color-warning-bg: var(--color-risk-attention-bg);
+  --color-warning-text: var(--color-risk-attention-text);
+  --color-danger: var(--color-risk-critical);
+  --color-danger-bg: var(--color-risk-critical-bg);
+  --color-danger-text: var(--color-risk-critical-text);
+  --color-info: var(--color-brand-teal);
+  --color-info-bg: var(--color-soft-blue);
+  --color-info-text: var(--color-teal-ink);
+  --color-on-disabled: var(--color-ink-soft); /* label on a grey button */
+  --color-overlay: var(--color-ink); /* used with opacity behind drawers */
+
+  /* ---- Care-team chips (match each role's dashboard identity) ---- */
+  --color-doctor-bg: var(--color-soft-blue);
+  --color-doctor-text: var(--color-blue-ink);
+  --color-nurse-bg: var(--color-powder-pink);
+  --color-nurse-text: var(--color-pink-ink);
+  --color-caregiver-bg: var(--color-lavender);
+  --color-caregiver-text: var(--color-lavender-ink);
+
+  /* ---- Neutral highlight tag on record rows ---- */
+  --color-tag-bg: var(--color-lavender-tint);
+  --color-tag-text: var(--color-lavender-ink);
+
+  /* ---- Chart series, in order (use as var(--color-chart-1) ...) ---- */
+  --color-chart-1: var(--color-brand-teal);
+  --color-chart-2: var(--color-brand-pink);
+  --color-chart-3: var(--color-teal-ink);
+  --color-chart-4: var(--color-lavender-ink);
+  --color-chart-5: var(--color-brand-pink-deep);
+  --color-chart-6: var(--color-wave-teal);
+  --color-chart-grid: var(--color-aqua-line);
+  --color-chart-label: var(--color-muted-strong);
 }
 
-html,
-body,
-#root {
-  min-height: 100%;
-  margin: 0;
+/* ============================== 2. DASHBOARDS ============================ */
+@layer base {
+  /* Default / brand theme (login and anything outside a dashboard). */
+  :root {
+    --theme-primary: var(--color-brand-teal-deep);
+    --theme-primary-hover: var(--color-teal-strong);
+    --theme-on-primary: var(--color-white);
+
+    --theme-accent: var(--color-teal-strong);
+    --theme-accent-strong: var(--color-teal-ink);
+    --theme-accent-soft: var(--color-aqua-tint);
+    --theme-accent-muted: var(--color-light-aqua);
+    --theme-highlight: var(--color-brand-pink-deep);
+    --theme-focus: var(--color-brand-teal-deep);
+
+    --theme-page: var(--color-mist);
+    --theme-surface-soft: var(--color-mist);
+    --theme-surface-muted: var(--color-aqua-tint);
+    --theme-line: var(--color-field);
+    --theme-line-soft: var(--color-aqua-line);
+    --theme-line-strong: var(--color-wave-teal);
+
+    --theme-avatar: var(--color-aqua-tint);
+    --theme-on-avatar: var(--color-teal-ink);
+
+    --theme-nav-active: var(--color-aqua-tint);
+    --theme-on-nav-active: var(--color-teal-ink);
+    --theme-nav-indicator: var(--color-brand-teal);
+    --theme-nav-hover: var(--color-mist);
+    --theme-header-tint: var(--color-white);
+
+    /* large brand panels: login hero and admin sidebar (top -> bottom) */
+    --theme-panel-from: var(--color-aqua-tint);
+    --theme-panel-via: var(--color-light-aqua);
+    --theme-panel-to: var(--color-powder-pink);
+
+    /* thin decorative accent strip (left -> right) */
+    --theme-strip-from: var(--color-brand-teal);
+    --theme-strip-via: var(--color-wave-teal);
+    --theme-strip-to: var(--color-brand-pink);
+  }
+
+  /*
+    A dashboard layout opts in with data-theme="..." on its root element. The
+    variables are set on :root so that popups rendered in <body> (SweetAlert)
+    follow the active dashboard too.
+  */
+
+  /* Admin: lime, light aqua, soft blue, lavender. Fresh and calm. */
+  :root:has([data-theme="admin"]) {
+    --theme-primary: var(--color-lavender);
+    --theme-primary-hover: var(--color-lime-deep);
+    --theme-on-primary: var(--color-ink);
+
+    --theme-accent: var(--color-teal-strong);
+    --theme-accent-strong: var(--color-teal-ink);
+    --theme-accent-soft: var(--color-lime-tint);
+    --theme-accent-muted: var(--color-lavender);
+    --theme-highlight: var(--color-lavender-ink);
+
+    --theme-page: var(--color-mist);
+
+    --theme-avatar: var(--color-lavender);
+    --theme-on-avatar: var(--color-lavender-ink);
+
+    --theme-nav-active: var(--color-lavender);
+    --theme-on-nav-active: var(--color-ink);
+    --theme-nav-indicator: var(--color-lime-ink);
+    --theme-nav-hover: var(--color-white);
+
+    --theme-panel-from: var(--color-white);
+    --theme-panel-via: var(--color-light-aqua);
+    --theme-panel-to: var(--color-lavender);
+
+    --theme-strip-from: var(--color-lavender);
+    --theme-strip-via: var(--color-soft-blue);
+    --theme-strip-to: var(--color-lavender);
+  }
+
+  /* Doctor: blue, light aqua, teal, pink. Clean and clinical. */
+  :root:has([data-theme="doctor"]) {
+    --theme-primary: var(--color-blue-strong);
+    --theme-primary-hover: var(--color-blue-ink);
+
+    --theme-accent: var(--color-blue-strong);
+    --theme-accent-strong: var(--color-blue-ink);
+    --theme-accent-soft: var(--color-blue-tint);
+    --theme-accent-muted: var(--color-light-aqua);
+    --theme-focus: var(--color-blue-strong);
+
+    --theme-avatar: var(--color-powder-pink);
+    --theme-on-avatar: var(--color-pink-ink);
+
+    --theme-nav-active: var(--color-light-aqua);
+    --theme-on-nav-active: var(--color-blue-ink);
+    --theme-nav-indicator: var(--color-brand-teal);
+    --theme-nav-hover: var(--color-aqua-tint);
+    --theme-header-tint: var(--color-aqua-tint);
+
+    --theme-strip-from: var(--color-blue-strong);
+    --theme-strip-via: var(--color-brand-teal);
+    --theme-strip-to: var(--color-brand-pink);
+  }
+
+  /* Nurse: pink and soft lavender. Friendly and elegant. */
+  :root:has([data-theme="nurse"]) {
+    --theme-primary: var(--color-pink-strong);
+    --theme-primary-hover: var(--color-pink-ink);
+
+    --theme-accent: var(--color-pink-strong);
+    --theme-accent-strong: var(--color-pink-ink);
+    --theme-accent-soft: var(--color-pink-tint);
+    --theme-accent-muted: var(--color-powder-pink);
+    --theme-focus: var(--color-brand-pink-deep);
+
+    --theme-page: var(--color-lavender-mist);
+    --theme-surface-soft: var(--color-lavender-mist);
+    --theme-surface-muted: var(--color-lavender-tint);
+    --theme-line: var(--color-lavender);
+    --theme-line-soft: var(--color-lavender-line);
+    --theme-line-strong: var(--color-lavender);
+
+    --theme-avatar: var(--color-lavender);
+    --theme-on-avatar: var(--color-lavender-ink);
+
+    --theme-nav-active: var(--color-powder-pink);
+    --theme-on-nav-active: var(--color-pink-ink);
+    --theme-nav-indicator: var(--color-brand-pink);
+    --theme-nav-hover: var(--color-pink-tint);
+    --theme-header-tint: var(--color-lavender-tint);
+
+    --theme-strip-from: var(--color-brand-pink);
+    --theme-strip-via: var(--color-brand-pink-deep);
+    --theme-strip-to: var(--color-lavender);
+  }
 }
 
-body {
-  font-family: Arial, sans-serif;
+/* ============================== 3. ROLE TOKENS =========================== */
+@theme inline {
+  --color-primary: var(--theme-primary);
+  --color-primary-hover: var(--theme-primary-hover);
+  --color-on-primary: var(--theme-on-primary);
+
+  --color-accent: var(--theme-accent);
+  --color-accent-strong: var(--theme-accent-strong);
+  --color-accent-soft: var(--theme-accent-soft);
+  --color-accent-muted: var(--theme-accent-muted);
+  --color-highlight: var(--theme-highlight);
+  --color-focus: var(--theme-focus);
+
+  --color-page: var(--theme-page);
+  --color-surface-soft: var(--theme-surface-soft);
+  --color-surface-muted: var(--theme-surface-muted);
+  --color-line: var(--theme-line);
+  --color-line-soft: var(--theme-line-soft);
+  --color-line-strong: var(--theme-line-strong);
+
+  --color-avatar: var(--theme-avatar);
+  --color-on-avatar: var(--theme-on-avatar);
+
+  --color-nav-active: var(--theme-nav-active);
+  --color-on-nav-active: var(--theme-on-nav-active);
+  --color-nav-indicator: var(--theme-nav-indicator);
+  --color-nav-hover: var(--theme-nav-hover);
+  --color-header-tint: var(--theme-header-tint);
+
+  --color-panel-from: var(--theme-panel-from);
+  --color-panel-via: var(--theme-panel-via);
+  --color-panel-to: var(--theme-panel-to);
+}
+
+/* The official brand gradient. Decorative use: white text on it is too faint. */
+@utility bg-brand-gradient {
+  background-image: linear-gradient(
+    90deg,
+    var(--color-brand-pink),
+    var(--color-brand-pink-deep)
+  );
+}
+
+/* Per-dashboard decorative strip. */
+@utility bg-theme-strip {
+  background-image: linear-gradient(
+    90deg,
+    var(--theme-strip-from),
+    var(--theme-strip-via),
+    var(--theme-strip-to)
+  );
+}
+
+/* ================================== BASE ================================= */
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body,
+  #root {
+    min-height: 100%;
+    margin: 0;
+  }
+
+  body {
+    font-family: Arial, sans-serif;
+    color: var(--color-ink);
+    background-color: var(--color-white);
+    accent-color: var(--theme-accent); /* native checkboxes, radios, pickers */
+  }
+
+  :focus-visible {
+    outline-color: var(--theme-focus);
+  }
+
+  ::selection {
+    background-color: var(--color-powder-pink);
+    color: var(--color-ink);
+  }
+}
+
+/* ============================ SWEETALERT2 THEME ========================== */
+/* The library injects its own :root defaults at runtime; :root:root wins. */
+:root:root {
+  --swal2-background: var(--color-white);
+  --swal2-color: var(--color-ink);
+  --swal2-border-radius: 1rem;
+  --swal2-backdrop: color-mix(in srgb, var(--color-overlay) 45%, transparent);
+  --swal2-outline: 0 0 0 3px
+    color-mix(in srgb, var(--theme-focus) 50%, transparent);
+  --swal2-confirm-button-background-color: var(--theme-primary);
+  --swal2-confirm-button-color: var(--theme-on-primary);
+  --swal2-confirm-button-border-radius: 0.75rem;
+  --swal2-cancel-button-background-color: var(--color-aqua-tint);
+  --swal2-cancel-button-color: var(--color-ink);
+  --swal2-cancel-button-border-radius: 0.75rem;
+  --swal2-deny-button-background-color: var(--color-danger);
+  --swal2-deny-button-color: var(--color-white);
+  --swal2-timer-progress-bar-background: var(--theme-strip-from);
+  --swal2-footer-border-color: var(--color-aqua-line);
+  --swal2-input-border: 1px solid var(--color-field);
+  --swal2-input-focus-border: 1px solid var(--theme-focus);
+  --swal2-progress-step-background: var(--color-wave-teal);
+  --swal2-validation-message-background: var(--color-danger-bg);
+  --swal2-validation-message-color: var(--color-danger-text);
+}
+
+/* Destructive confirmations: customClass: { confirmButton: "swal-danger" } */
+.swal2-container .swal-danger {
+  --swal2-confirm-button-background-color: var(--color-danger);
+  --swal2-confirm-button-color: var(--color-white);
+}
+
+.swal2-container .swal2-icon.swal2-warning {
+  border-color: var(--color-warning);
+  color: var(--color-warning);
+}
+
+.swal2-container .swal2-icon.swal2-error {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.swal2-container .swal2-icon.swal2-error [class^="swal2-x-mark-line"] {
+  background-color: var(--color-danger);
+}
+
+.swal2-container .swal2-icon.swal2-info {
+  border-color: var(--color-info);
+  color: var(--color-info);
+}
+
+.swal2-container .swal2-icon.swal2-question {
+  border-color: var(--theme-accent);
+  color: var(--theme-accent);
+}
+
+.swal2-container .swal2-icon.swal2-success {
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+.swal2-container .swal2-icon.swal2-success [class^="swal2-success-line"] {
+  background-color: var(--color-success);
+}
+
+.swal2-container .swal2-icon.swal2-success .swal2-success-ring {
+  border-color: color-mix(in srgb, var(--color-success) 30%, transparent);
 }

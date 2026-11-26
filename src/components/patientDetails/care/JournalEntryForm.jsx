@@ -77,7 +77,7 @@ const JournalEntryForm = ({ patientId, onAdded, onCancel }) => {
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-5">
       {formError && (
-        <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
+        <p role="alert" className="rounded-xl bg-danger-bg px-4 py-3 text-sm text-danger-text">
           {formError}
         </p>
       )}
@@ -94,7 +94,7 @@ const JournalEntryForm = ({ patientId, onAdded, onCancel }) => {
           </select>
           <ChevronDown
             size={16}
-            className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#0b2a3d]"
+            className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-ink"
           />
         </div>
       </FormField>
@@ -107,7 +107,7 @@ const JournalEntryForm = ({ patientId, onAdded, onCancel }) => {
           placeholder="e.g. Drink plenty of water"
           className={`${inputClass(errors.content)} resize-y`}
         />
-        <p className="mt-1 text-right text-[11px] text-slate-400">
+        <p className="mt-1 text-right text-[11px] text-muted">
           {values.content.length}/{CONTENT_MAX_LENGTH}
         </p>
       </FormField>

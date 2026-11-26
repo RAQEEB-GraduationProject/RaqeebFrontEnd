@@ -12,6 +12,7 @@ import {
   X,
 } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
+import Logo from "../components/brand/Logo";
 
 // ---- Top navbar items (to لازم يطابق path في DoctorRoutes.jsx) ----
 const navItems = [
@@ -36,8 +37,8 @@ const getInitials = (name = "") =>
 const linkClass = ({ isActive }) =>
   `relative flex items-center gap-3 rounded-2xl px-5 py-3 text-[15px] font-medium transition ${
     isActive
-      ? "bg-[#e9f0fc] text-[#3f5ea8]"
-      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+      ? "bg-nav-active text-on-nav-active"
+      : "text-ink-soft hover:bg-nav-hover hover:text-ink"
   }`;
 
 const DoctorLayout = () => {
@@ -65,20 +66,22 @@ const DoctorLayout = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#f6f8fc] text-slate-800">
+    <div data-theme="doctor" className="min-h-screen bg-page text-ink">
       {/* ================= Top navbar ================= */}
-      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white">
+      <header className="sticky top-0 z-30 border-b border-line bg-gradient-to-r from-white to-header-tint">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-[3px] bg-theme-strip"
+        />
         <div className="flex h-[92px] items-center justify-between gap-4 px-6 xl:grid xl:grid-cols-[1fr_auto_1fr] xl:px-12">
           {/* Brand */}
           <NavLink to="/doctor/dashboard" className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#e3eefd] to-[#c3d8f8] text-lg font-bold text-[#3f5ea8] shadow-sm">
-              R
-            </div>
-            <div>
-              <h2 className="text-base font-bold tracking-[0.15em] text-[#1f2f55]">
+            <Logo className="h-10 sm:h-11" />
+            <div className="hidden border-l border-line pl-4 sm:block">
+              <h2 className="text-base font-bold tracking-[0.15em] text-ink">
                 RAQEEB
               </h2>
-              <p className="text-xs text-slate-400">Clinical monitoring</p>
+              <p className="text-xs text-muted">Clinical monitoring</p>
             </div>
           </NavLink>
 
@@ -98,35 +101,35 @@ const DoctorLayout = () => {
             <button
               type="button"
               onClick={() => navigate("/doctor/notifications")}
-              className="relative rounded-lg p-2 text-slate-500 transition hover:bg-slate-50"
+              className="relative rounded-lg p-2 text-muted-strong transition hover:bg-surface-soft"
               aria-label="Open notifications"
             >
               <Bell size={22} strokeWidth={1.6} />
               {HAS_UNREAD_NOTIFICATIONS && (
-                <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
+                <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-highlight ring-2 ring-white" />
               )}
             </button>
 
-            <div className="hidden h-10 w-px bg-slate-200 sm:block" />
+            <div className="hidden h-10 w-px bg-line sm:block" />
 
             {/* Profile */}
             <button
               type="button"
               onClick={() => navigate("/doctor/account")}
-              className="flex items-center gap-3 rounded-xl p-1 text-left transition hover:bg-slate-50"
+              className="flex items-center gap-3 rounded-xl p-1 text-left transition hover:bg-surface-soft"
             >
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#e9f0fc] text-xs font-semibold text-[#3f5ea8]">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-avatar text-xs font-semibold text-on-avatar">
                 {getInitials(displayName)}
               </div>
               <div className="hidden sm:block">
-                <p className="text-sm font-semibold text-slate-800">
+                <p className="text-sm font-semibold text-ink">
                   {displayName}
                 </p>
-                <p className="text-xs text-slate-400">{displayRole}</p>
+                <p className="text-xs text-muted">{displayRole}</p>
               </div>
               <ChevronRight
                 size={16}
-                className="hidden text-slate-400 sm:block"
+                className="hidden text-muted sm:block"
               />
             </button>
 
@@ -134,7 +137,7 @@ const DoctorLayout = () => {
             <button
               type="button"
               onClick={handleLogout}
-              className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-50 hover:text-rose-600"
+              className="rounded-lg p-2 text-muted-strong transition hover:bg-surface-soft hover:text-danger-text"
               aria-label="Sign out"
               title="Sign out"
             >
@@ -145,7 +148,7 @@ const DoctorLayout = () => {
             <button
               type="button"
               onClick={() => setMobileOpen((open) => !open)}
-              className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 xl:hidden"
+              className="rounded-lg p-2 text-ink-soft hover:bg-surface-muted xl:hidden"
               aria-label="Toggle menu"
             >
               {mobileOpen ? <X size={22} /> : <Menu size={22} />}
@@ -155,7 +158,7 @@ const DoctorLayout = () => {
 
         {/* Mobile menu */}
         {mobileOpen && (
-          <nav className="space-y-1 border-t border-slate-100 px-4 py-3 xl:hidden">
+          <nav className="space-y-1 border-t border-line-soft px-4 py-3 xl:hidden">
             {navItems.map(({ label, to, icon: Icon }) => (
               <NavLink
                 key={to}

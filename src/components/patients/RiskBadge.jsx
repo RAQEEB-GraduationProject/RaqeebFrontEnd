@@ -1,14 +1,14 @@
 const STYLES = {
-  Critical: "bg-rose-50 text-rose-700",
-  High: "bg-orange-50 text-orange-700",
-  Medium: "bg-amber-50 text-amber-700",
-  Stable: "bg-emerald-50 text-emerald-700",
+  Critical: "bg-risk-critical-bg text-risk-critical-text",
+  High: "bg-risk-high-bg text-risk-high-text",
+  Medium: "bg-risk-attention-bg text-risk-attention-text",
+  Stable: "bg-risk-stable-bg text-risk-stable-text",
 };
 
 const RiskBadge = ({ risk, label }) => (
   <span
     className={`inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold ${
-      STYLES[risk] ?? "bg-slate-100 text-slate-600"
+      STYLES[risk] ?? "bg-surface-muted text-ink-soft"
     }`}
   >
     {label ?? (risk || "—")}

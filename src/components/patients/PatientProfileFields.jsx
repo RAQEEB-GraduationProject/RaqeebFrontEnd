@@ -33,7 +33,7 @@ const SelectField = ({ name, label, placeholder, options, bind, error }) => (
 
       <ChevronDown
         size={16}
-        className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#0b2a3d]"
+        className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-ink"
       />
     </div>
   </FormField>
@@ -79,7 +79,7 @@ const PatientProfileFields = ({ values, errors, onChange, disabled, fixedGender 
             value={fixedGender}
             readOnly
             aria-readonly="true"
-            className={`${inputClass(errors.gender)} cursor-not-allowed bg-slate-50 text-slate-600`}
+            className={`${inputClass(errors.gender)} cursor-not-allowed bg-surface-soft text-ink-soft`}
           />
         </FormField>
       ) : (
