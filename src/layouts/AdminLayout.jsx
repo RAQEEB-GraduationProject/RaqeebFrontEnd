@@ -6,17 +6,18 @@ import {
   LayoutGrid,
   LogOut,
   Menu,
-  Search,
   Settings,
   ShieldCheck,
   ClipboardCheck,
   BarChart3,
   UserPlus,
+  UserRound,
   Users,
   X,
 } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
 import Logo from "../components/brand/Logo";
+import AdminSearch from "../components/search/AdminSearch";
 
 const navItems = [
   { label: "Dashboard", to: "/admin/dashboard", icon: LayoutGrid },
@@ -26,6 +27,17 @@ const navItems = [
   { label: "Alerts", to: "/admin/alerts", icon: Bell },
   { label: "Reports", to: "/admin/reports", icon: BarChart3 },
   { label: "System", to: "/admin/system", icon: Settings },
+];
+
+// Pages offered by the navbar search: the sidebar items plus the account page.
+const searchPages = [
+  ...navItems,
+  {
+    label: "Account settings",
+    to: "/admin/profile",
+    icon: UserRound,
+    keywords: ["profile"],
+  },
 ];
 
 const getInitials = (name = "") =>
@@ -191,21 +203,7 @@ const AdminLayout = () => {
           </div>
 
           {/* Search */}
-          <div className="relative mx-auto hidden w-full max-w-[640px] md:block">
-            <Search
-              size={18}
-              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted"
-            />
-            <input
-              ref={searchRef}
-              type="search"
-              placeholder="Search users, patients or alerts…"
-              className="w-full rounded-xl border border-field bg-surface-soft py-3 pl-11 pr-16 text-sm outline-none transition placeholder:text-muted focus:border-focus focus:bg-white focus:ring-2 focus:ring-focus/25"
-            />
-            <kbd className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded-md border border-line bg-white px-2 py-0.5 text-[10px] font-semibold text-muted">
-              ⌘ K
-            </kbd>
-          </div>
+          <AdminSearch inputRef={searchRef} pages={searchPages} />
 
           <div className="ml-auto flex items-center gap-5 md:ml-0">
             {/* Notifications */}

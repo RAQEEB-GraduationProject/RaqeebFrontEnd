@@ -153,7 +153,7 @@ const PatientsTable = ({
                     ? "This patient is inactive"
                     : undefined
                 }
-                className="w-fit text-sm font-semibold text-accent transition hover:text-accent-strong disabled:cursor-not-allowed disabled:text-disabled-text disabled:hover:text-disabled-text"
+                className="-mx-3 -my-1.5 w-fit rounded-lg px-3 py-1.5 text-sm font-semibold text-accent transition hover:bg-accent-soft hover:text-accent-strong disabled:cursor-not-allowed disabled:text-disabled-text disabled:hover:bg-transparent disabled:hover:text-disabled-text"
               >
                 View
               </button>

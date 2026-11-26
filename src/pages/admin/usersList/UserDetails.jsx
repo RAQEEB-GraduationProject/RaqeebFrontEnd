@@ -6,7 +6,6 @@ import {
   Mail,
   Phone,
   ShieldCheck,
-  Building2,
   CircleCheck,
   CircleX,
   LoaderCircle,
@@ -214,12 +213,6 @@ export default function UserDetails() {
             />
 
             <DetailItem icon={ShieldCheck} label="Role" value={user.role} />
-
-            <DetailItem
-              icon={Building2}
-              label="Hospital ID"
-              value={user.hospitalId}
-            />
           </div>
         </div>
       </section>

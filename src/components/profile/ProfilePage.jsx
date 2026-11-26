@@ -27,7 +27,6 @@ const ProfilePage = ({ role }) => {
     { label: "Username", value: username },
     { label: "User ID", value: user?.userId || NOT_AVAILABLE },
     { label: "Role", value: roleText },
-    { label: "Hospital ID", value: user?.hospitalId || NOT_AVAILABLE },
     { label: "Email", value: user?.email || NOT_AVAILABLE },
     { label: "Phone number", value: user?.phoneNumber || NOT_AVAILABLE },
   ];
