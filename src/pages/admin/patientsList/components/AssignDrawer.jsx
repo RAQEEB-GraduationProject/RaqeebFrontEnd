@@ -9,8 +9,7 @@ const SECTIONS = [
   {
     role: "doctor",
     title: "Doctor",
-    hint: "Select one primary doctor",
-    single: true,
+    hint: "Select one or more doctors",
     chip: "bg-doctor-bg text-doctor-text",
   },
   {
@@ -30,8 +29,13 @@ const SECTIONS = [
 const EMPTY_TEAM = { doctor: [], nurse: [], caregiver: [] };
 
 /*
-  lockedPatient set  → row mode: that patient only, no selector.
-  lockedPatient null → bulk mode: patient selector is shown.
+  Two separate workflows:
+    lockedPatient set  → single-patient mode. Shows the saved care team (pass
+      the current row). `onAdd(userId)` / `onRemove(userId)` each confirm and
+      save that one change immediately; there is nothing else to save.
+    lockedPatient null → bulk mode. Patients and staff are only selected here;
+      `onBulkSubmit(patientIds, team)` confirms and sends them together, and
+      resolves true when the drawer can close. Cancel discards the selection.
   Mount it only while open (use a `key`) so its state starts fresh.
 */
 const AssignDrawer = ({
@@ -40,41 +44,58 @@ const AssignDrawer = ({
   staff,
   staffById,
   isSaving,
-  onSave,
+  onAdd,
+  onRemove,
+  onBulkSubmit,
   onClose,
 }) => {
-  const [selectedIds, setSelectedIds] = useState(
-    lockedPatient ? [lockedPatient.id] : [],
-  );
-  const [team, setTeam] = useState(
-    lockedPatient ? { ...lockedPatient.assigned } : EMPTY_TEAM,
-  );
+  // Bulk mode's temporary selection.
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [selectedTeam, setSelectedTeam] = useState(EMPTY_TEAM);
+
+  const team = lockedPatient ? lockedPatient.assigned : selectedTeam;
+
+  // The drawer stays open until a running request has finished.
+  const close = () => {
+    if (!isSaving) onClose();
+  };
 
   useEffect(() => {
-    const onKey = (e) => e.key === "Escape" && onClose();
+    const onKey = (e) => e.key === "Escape" && !isSaving && onClose();
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, [isSaving, onClose]);
 
-  const addStaff = (section, id) =>
-    setTeam((current) => ({
-      ...current,
-      [section.role]: section.single ? [id] : [...current[section.role], id],
-    }));
+  const addStaff = (role, id) => {
+    if (lockedPatient) {
+      onAdd(id);
+      return;
+    }
 
-  const removeStaff = (role, id) =>
-    setTeam((current) => ({
+    setSelectedTeam((current) => ({ ...current, [role]: [...current[role], id] }));
+  };
+
+  const removeStaff = (role, id) => {
+    if (lockedPatient) {
+      onRemove(id);
+      return;
+    }
+
+    setSelectedTeam((current) => ({
       ...current,
       [role]: current[role].filter((item) => item !== id),
     }));
+  };
 
-  const canSave = selectedIds.length > 0;
+  const canSubmit =
+    patients.some((patient) => selectedIds.includes(patient.id)) &&
+    Object.values(selectedTeam).some((ids) => ids.length > 0);
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
       <div
         className="absolute inset-0 bg-overlay/40"
-        onClick={onClose}
+        onClick={close}
         aria-hidden="true"
       />
 
@@ -96,22 +117,27 @@ const AssignDrawer = ({
 
             <p className="mt-2 text-sm text-muted-strong">
               {lockedPatient
-                ? "Staff shown are currently assigned. Removing one unassigns them from this patient only; their account is not affected."
-                : "Choose the patients and the staff responsible for their care."}
+                ? "Each addition or removal is saved as soon as you confirm it. Removing someone affects this patient only, not their account."
+                : "Choose the patients and the staff responsible for their care. Nothing is saved until you confirm."}
             </p>
           </div>
 
           <button
             type="button"
-            onClick={onClose}
+            onClick={close}
+            disabled={isSaving}
             aria-label="Close"
-            className="rounded-xl border border-line p-2.5 text-ink-soft transition hover:bg-surface-soft"
+            className="rounded-xl border border-line p-2.5 text-ink-soft transition hover:bg-surface-soft disabled:cursor-not-allowed disabled:text-disabled-text"
           >
             <X size={18} />
           </button>
         </header>
 
-        <div className="flex-1 space-y-7 overflow-y-auto px-7 py-6">
+        {/* Nothing can be changed while a request is running. */}
+        <fieldset
+          disabled={isSaving}
+          className="min-h-0 min-w-0 flex-1 space-y-7 overflow-y-auto px-7 py-6"
+        >
           {lockedPatient ? (
             <div className="flex items-center gap-4 rounded-2xl border border-line p-4">
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-avatar text-xs font-bold text-on-avatar">
@@ -156,17 +182,14 @@ const AssignDrawer = ({
                     >
                       {staffById[id]?.name}
 
-                      {lockedPatient &&
-                        !lockedPatient.assigned[section.role].includes(id) && (
-                          <span className="rounded-full bg-white/70 px-1.5 text-[10px] font-bold uppercase">
-                            New
-                          </span>
-                        )}
-
                       <button
                         type="button"
-                        title="Unassign from this patient"
-                        aria-label={`Unassign ${staffById[id]?.name}`}
+                        title={
+                          lockedPatient
+                            ? "Remove from this patient"
+                            : "Remove from selection"
+                        }
+                        aria-label={`Remove ${staffById[id]?.name}`}
                         onClick={() => removeStaff(section.role, id)}
                       >
                         <X size={14} />
@@ -180,41 +203,45 @@ const AssignDrawer = ({
                 role={section.role}
                 staff={staff}
                 selectedIds={team[section.role]}
-                onPick={(id) => addStaff(section, id)}
+                onPick={(id) => addStaff(section.role, id)}
                 placeholder={
-                  section.single
-                    ? team.doctor.length
-                      ? "Change doctor"
-                      : "Select doctor"
-                    : team[section.role].length
-                      ? `Add another ${section.role}`
-                      : `Add ${section.role}`
+                  team[section.role].length
+                    ? `Add another ${section.role}`
+                    : `Add ${section.role}`
                 }
               />
             </section>
           ))}
-        </div>
+        </fieldset>
 
-        <footer className="flex justify-end gap-3 border-t border-line-soft px-7 py-5">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-xl border border-line bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:bg-surface-soft"
-          >
-            Cancel
-          </button>
+        <footer className="flex items-center justify-end gap-3 border-t border-line-soft px-7 py-5">
+          {lockedPatient && isSaving && (
+            <p role="status" className="mr-auto text-sm text-muted-strong">
+              Saving…
+            </p>
+          )}
 
           <button
             type="button"
-            disabled={!canSave || isSaving}
-            onClick={async () => {
-              if (isSaving) return;
-              if (await onSave(selectedIds, team)) onClose();
-            }}
-            className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-on-primary transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:bg-disabled disabled:text-on-disabled disabled:shadow-none"
+            onClick={close}
+            disabled={isSaving}
+            className="rounded-xl border border-line bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:bg-surface-soft disabled:cursor-not-allowed disabled:text-disabled-text"
           >
-            {isSaving ? "Saving…" : "Save assignments"}
+            {lockedPatient ? "Close" : "Cancel"}
           </button>
+
+          {!lockedPatient && (
+            <button
+              type="button"
+              disabled={!canSubmit || isSaving}
+              onClick={async () => {
+                if (await onBulkSubmit(selectedIds, selectedTeam)) onClose();
+              }}
+              className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-on-primary transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:bg-disabled disabled:text-on-disabled disabled:shadow-none"
+            >
+              {isSaving ? "Saving…" : "Save assignments"}
+            </button>
+          )}
         </footer>
       </aside>
     </div>

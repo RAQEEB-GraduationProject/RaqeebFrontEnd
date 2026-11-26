@@ -23,8 +23,9 @@ const riskRank = (patient) => {
   return rank === -1 ? RISK_ORDER.length : rank;
 };
 
-// profileStatus: "active" (profile listed by GET /Patients), "inactive" (the
-// backend confirmed a profile exists but it is not listed) or "missing".
+// profileStatus: "active" (profile listed by GET /Patients; the row's isActive
+// says whether that profile is active), "inactive" (the backend confirmed a
+// profile exists but it is not listed) or "missing".
 const PROFILE_ACTIVE = "active";
 const PROFILE_INACTIVE = "inactive";
 const PROFILE_MISSING = "missing";
@@ -47,7 +48,8 @@ const NO_STAFF = {
     - assignmentStore (GET /PatientAssignments/Assignments): the care team,
       matched by the profile id (patientId). `assigned` holds staff userIds,
       resolved to names through `staffById`.
-  Rows without a profile have `id: null`: they cannot be assigned yet.
+  Rows without a profile have `id: null`: they cannot be assigned yet. Only
+  rows with `canAssign` (active, with a profile) can receive a care team.
 */
 export default function usePatientAssignments() {
   const apiPatients = useAssignmentStore((state) => state.assignments);
@@ -56,7 +58,8 @@ export default function usePatientAssignments() {
   const assignmentsError = useAssignmentStore((state) => state.error);
   const fetchAssignments = useAssignmentStore((state) => state.fetchAssignments);
   const isAssigning = useAssignmentStore((state) => state.isAssigning);
-  const saveChanges = useAssignmentStore((state) => state.saveChanges);
+  const createAssignments = useAssignmentStore((state) => state.createAssignments);
+  const deleteAssignments = useAssignmentStore((state) => state.deleteAssignments);
 
   const patientRecords = usePatientStore((state) => state.patients);
   const isRecordsLoaded = usePatientStore((state) => state.isLoaded);
@@ -157,6 +160,15 @@ export default function usePatientAssignments() {
           ? PROFILE_INACTIVE
           : PROFILE_MISSING;
 
+      // An inactive profile is Inactive; without any profile the account's
+      // own status is shown, as before.
+      const isActive =
+        profileStatus === PROFILE_INACTIVE
+          ? false
+          : record
+            ? record.isActive
+            : user.isActive;
+
       return {
         id: record?.id ?? null,
         userId: user.id,
@@ -164,14 +176,8 @@ export default function usePatientAssignments() {
         hasProfile: Boolean(record),
         userName: user.userName,
         medicalRecordNumber: record?.medicalRecordNumber ?? null,
-        // An inactive profile is Inactive; without any profile the account's
-        // own status is shown, as before.
-        isActive:
-          profileStatus === PROFILE_INACTIVE
-            ? false
-            : record
-              ? record.isActive
-              : user.isActive,
+        isActive,
+        canAssign: Boolean(record) && Boolean(isActive),
         risk: record?.risk ?? null,
         assigned: {
           doctor: team.assignedDoctor.map((member) => member.userId),
@@ -190,9 +196,9 @@ export default function usePatientAssignments() {
     });
   }, [isReady, patientUsers, recordsByUserId, assignmentsByPatientId, inactiveProfileUserIds]);
 
-  // Only users with a medical profile can receive a care team.
+  // Only active patients with a medical profile can receive a care team.
   const assignablePatients = useMemo(
-    () => patients.filter((patient) => patient.hasProfile),
+    () => patients.filter((patient) => patient.canAssign),
     [patients],
   );
 
@@ -249,38 +255,41 @@ export default function usePatientAssignments() {
     );
   }, [patients, search, staffFilter]);
 
-  // team = { doctor: [staffId], nurse: [staffId], caregiver: [staffId] }
-  // Creates one assignment per (patient, staff) pair that doesn't exist yet.
-  // With removeMissing (single-patient edit only, where the drawer starts from
-  // the current team), staff taken off the team are unassigned.
-  const assign = async (patientIds, team, { removeMissing = false } = {}) => {
-    const requested = ROLES.flatMap((role) => team[role]);
-    const selected = assignablePatients.filter((patient) =>
-      patientIds.includes(patient.id),
-    );
+  // pairs = [{ patientId, userId }]. The store refreshes the list after a
+  // success. When nothing succeeded (e.g. "already assigned") the list may be
+  // out of date, so it is read again here, except after logout (store reset).
+  const createAndSync = async (pairs) => {
+    const result = await createAssignments(pairs);
 
-    const create = selected.flatMap((patient) => {
-      const existing = ROLES.flatMap((role) => patient.assigned[role]);
-
-      return requested
-        .filter((userId) => !existing.includes(userId))
-        .map((userId) => ({ patientId: patient.id, userId }));
-    });
-
-    const remove = removeMissing
-      ? selected.flatMap((patient) =>
-          ROLES.flatMap((role) => patient.assigned[role])
-            .filter((userId) => !requested.includes(userId))
-            .map((userId) => patient.assignmentIds[userId])
-            .filter(Boolean),
-        )
-      : [];
-
-    if (create.length === 0 && remove.length === 0) {
-      return { succeeded: 0, errors: [], nothingToDo: true };
+    if (
+      result.succeeded === 0 &&
+      result.errors.length > 0 &&
+      useAssignmentStore.getState().isLoaded
+    ) {
+      await fetchAssignments();
     }
 
-    return saveChanges({ create, remove });
+    return result;
+  };
+
+  // Single-patient mode: one action, sent immediately.
+  const assignStaff = (patientId, userId) => createAndSync([{ patientId, userId }]);
+  const unassignStaff = (assignmentId) => deleteAssignments([assignmentId]);
+
+  // Bulk mode: the (patient, staff) pairs that don't exist yet. Bulk only adds.
+  // team = { doctor: [staffId], nurse: [staffId], caregiver: [staffId] }
+  const getNewAssignments = (patientIds, team) => {
+    const requested = ROLES.flatMap((role) => team[role]);
+
+    return assignablePatients
+      .filter((patient) => patientIds.includes(patient.id))
+      .flatMap((patient) => {
+        const existing = ROLES.flatMap((role) => patient.assigned[role]);
+
+        return requested
+          .filter((userId) => !existing.includes(userId))
+          .map((userId) => ({ patientId: patient.id, userId }));
+      });
   };
 
   const clearFilters = () => {
@@ -306,6 +315,9 @@ export default function usePatientAssignments() {
     setStaffFilter,
     hasFilters: search.trim() !== "" || staffFilter !== null,
     clearFilters,
-    assign,
+    assignStaff,
+    unassignStaff,
+    getNewAssignments,
+    createAssignments: createAndSync,
   };
 }

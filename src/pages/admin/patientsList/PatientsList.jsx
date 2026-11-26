@@ -10,13 +10,22 @@ import StaffFilter from "./components/StaffFilter";
 import notify from "./notify";
 import { patientUserPath } from "./patientPaths";
 
-// Names go into the dialog's HTML, so escape them.
-const escapeHtml = (value) =>
-  String(value).replace(
-    /[&<>"']/g,
-    (char) =>
-      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char],
-  );
+// Resolves true only when the Admin confirms. `text` is plain text, so names
+// need no escaping.
+const confirmAction = async ({ title, text, isRemoval = false }) => {
+  const { isConfirmed } = await Swal.fire({
+    icon: isRemoval ? "warning" : "question",
+    title,
+    text,
+    showCancelButton: true,
+    confirmButtonText: "Confirm",
+    cancelButtonText: "Cancel",
+    focusCancel: isRemoval,
+    customClass: isRemoval ? { confirmButton: "swal-danger" } : {},
+  });
+
+  return isConfirmed;
+};
 
 const PatientsList = () => {
   const navigate = useNavigate();
@@ -39,64 +48,85 @@ const PatientsList = () => {
     setStaffFilter,
     hasFilters,
     clearFilters,
-    assign,
+    assignStaff,
+    unassignStaff,
+    getNewAssignments,
+    createAssignments,
   } = usePatientAssignments();
 
-  // Resolves true when the drawer can close (everything saved, or nothing to save).
-  const handleSave = async (patientIds, team) => {
-    const isRowEdit = Boolean(drawer?.patient);
+  const staffName = (userId) => staffById[userId]?.name ?? "this user";
 
-    // Taking someone off a team unassigns them, so confirm first.
-    if (isRowEdit) {
-      const removedNames = Object.entries(drawer.patient.assigned)
-        .flatMap(([role, ids]) => ids.filter((id) => !team[role].includes(id)))
-        .map((id) => staffById[id]?.name ?? "A staff member");
+  /* Single-patient mode: each action is confirmed, then saved immediately. */
 
-      if (removedNames.length > 0) {
-        const { isConfirmed } = await Swal.fire({
-          icon: "warning",
-          title: "Unassign from this patient?",
-          html:
-            `<p><b>${removedNames.map(escapeHtml).join(", ")}</b> will no longer be ` +
-            `assigned to <b>${escapeHtml(drawer.patient.userName)}</b>.</p>` +
-            `<p style="margin-top:8px">Their account and their assignments to ` +
-            `other patients are not affected. This ends only this assignment.</p>`,
-          showCancelButton: true,
-          confirmButtonText: "Yes, unassign",
-        });
+  const handleAdd = async (patient, userId) => {
+    const name = staffName(userId);
+    const confirmed = await confirmAction({
+      title: "Confirm assignment",
+      text: `Are you sure you want to assign ${name} to this patient?`,
+    });
 
-        if (!isConfirmed) return false;
-      }
+    if (!confirmed) return;
+
+    const { errors } = await assignStaff(patient.id, userId);
+
+    if (errors.length > 0) notify("error", errors.join(" "));
+    else notify("success", `${name} assigned`);
+  };
+
+  const handleRemove = async (patient, userId) => {
+    const name = staffName(userId);
+    const confirmed = await confirmAction({
+      title: "Confirm removal",
+      text: `Are you sure you want to remove ${name} from this patient?`,
+      isRemoval: true,
+    });
+
+    if (!confirmed) return;
+
+    const { errors } = await unassignStaff(patient.assignmentIds[userId]);
+
+    if (errors.length > 0) notify("error", errors.join(" "));
+    else notify("success", `${name} removed`);
+  };
+
+  /*
+    Bulk mode: the selections are temporary until this one confirmation.
+    Resolves true when the drawer can close (everything saved).
+  */
+  const handleBulkSubmit = async (patientIds, team) => {
+    const pairs = getNewAssignments(patientIds, team);
+
+    if (pairs.length === 0) {
+      notify("info", "The selected staff are already assigned to these patients");
+      return false;
     }
 
-    const { succeeded, errors, nothingToDo, created, removed } = await assign(
-      patientIds,
-      team,
-      { removeMissing: isRowEdit },
-    );
+    const staffNames = Object.values(team).flat().map(staffName).join(", ");
+    const patientNames = assignablePatients
+      .filter((patient) => patientIds.includes(patient.id))
+      .map((patient) => patient.userName)
+      .join(", ");
 
-    if (nothingToDo) {
-      notify("info", "No changes to save");
-      return true;
-    }
+    const confirmed = await confirmAction({
+      title: "Confirm bulk assignment",
+      text:
+        `Are you sure you want to assign ${staffNames} to ${patientNames}? ` +
+        `New assignments: ${pairs.length}. Existing assignments are kept.`,
+    });
+
+    if (!confirmed) return false;
+
+    const { succeeded, errors } = await createAssignments(pairs);
 
     if (errors.length === 0) {
-      notify(
-        "success",
-        [
-          created > 0 && `${created} assigned`,
-          removed > 0 && `${removed} unassigned`,
-        ]
-          .filter(Boolean)
-          .join(", "),
-      );
+      notify("success", `${succeeded} assigned`);
       return true;
     }
 
     notify(
       "error",
       succeeded > 0
-        ? `Some changes failed: ${errors.join(" ")}`
+        ? `Some assignments failed: ${errors.join(" ")}`
         : errors.join(" "),
     );
 
@@ -105,6 +135,12 @@ const PatientsList = () => {
 
   // null = closed, { patient: null } = bulk, { patient } = locked to one row
   const [drawer, setDrawer] = useState(null);
+
+  // The open row as it is saved now, so the drawer follows every change.
+  const drawerPatient =
+    drawer?.patient &&
+    (patients.find((patient) => patient.userId === drawer.patient.userId) ??
+      drawer.patient);
 
   // With a profile: open its details. Without one: the "complete patient
   // account" page (the form is a separate page, see CompletePatientAccount).
@@ -232,12 +268,14 @@ const PatientsList = () => {
       {drawer && (
         <AssignDrawer
           key={drawer.patient?.id ?? "bulk"}
-          lockedPatient={drawer.patient}
+          lockedPatient={drawerPatient}
           patients={assignablePatients}
           staff={staff}
           staffById={staffById}
           isSaving={isAssigning}
-          onSave={handleSave}
+          onAdd={(userId) => handleAdd(drawerPatient, userId)}
+          onRemove={(userId) => handleRemove(drawerPatient, userId)}
+          onBulkSubmit={handleBulkSubmit}
           onClose={() => setDrawer(null)}
         />
       )}

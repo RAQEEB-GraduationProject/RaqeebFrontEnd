@@ -161,11 +161,11 @@ const PatientsTable = ({
               <button
                 type="button"
                 onClick={() => onAssign(patient)}
-                disabled={!patient.hasProfile}
+                disabled={!patient.canAssign}
                 title={
-                  patient.hasProfile
+                  patient.canAssign
                     ? undefined
-                    : patient.profileStatus === "inactive"
+                    : !patient.isActive
                       ? "This patient is inactive"
                       : "Complete the patient account first"
                 }
