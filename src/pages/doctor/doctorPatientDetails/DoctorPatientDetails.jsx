@@ -46,8 +46,8 @@ const DoctorActions = () => (
   </>
 );
 
-// Also used by the admin and nurse routes: pass that role's list path and
-// `actions={null}` (the actions above are doctor-only).
+// Also used by the admin and nurse routes: pass that role's list path and its
+// own `actions` (or null): the actions above are doctor-only.
 const DoctorPatientDetails = ({
   listPath = LIST_PATH,
   actions = <DoctorActions />,
@@ -115,7 +115,7 @@ const DoctorPatientDetails = ({
 
   return (
     <PatientDetailsLayout
-      patient={overview.header}
+      patient={overview.patient}
       overview={overview}
       tabs={doctorPatientTabs}
       actions={actions}

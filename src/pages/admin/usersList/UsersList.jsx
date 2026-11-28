@@ -150,7 +150,13 @@ const UsersList = () => {
 
       if (!term) return true;
 
-      return [user.userName, user.email, user.phoneNumber, user.id].some(
+      return [
+        user.fullName,
+        user.userName,
+        user.email,
+        user.phoneNumber,
+        user.id,
+      ].some(
         (value) =>
           String(value ?? "")
             .toLowerCase()
@@ -289,21 +295,24 @@ const UsersList = () => {
                   key={user.id}
                   type="button"
                   onClick={() => openUserDetails(user.id)}
-                  aria-label={`View details for ${user.userName}`}
+                  aria-label={`View details for ${user.name}`}
                   className={`${GRID} w-full border-t border-line-soft py-4 text-left transition hover:bg-surface-soft/70 focus-visible:bg-surface-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus`}
                 >
                   <div className="flex min-w-0 items-center gap-4">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-avatar text-xs font-bold text-on-avatar">
-                      {getInitials(user.userName)}
+                      {getInitials(user.name)}
                     </div>
 
                     <div className="min-w-0">
                       <p className="truncate text-sm font-semibold text-ink">
-                        {user.userName}
+                        {user.name}
                       </p>
 
+                      {/* The user name too, when another name is shown. */}
                       <p className="truncate text-xs text-muted">
-                        {user.email}
+                        {[user.userName !== user.name && user.userName, user.email]
+                          .filter(Boolean)
+                          .join(" · ") || "—"}
                       </p>
                     </div>
                   </div>

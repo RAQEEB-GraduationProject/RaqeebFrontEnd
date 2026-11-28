@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import patientService from "../services/patientService";
+import getDisplayName from "../utils/getDisplayName";
 import getErrorMessage from "../utils/getErrorMessage";
+import { usePatientOverviewStore } from "./patientOverviewStore";
 
 /*
   Patients only: the patient records from GET /Patients (clinical data).
@@ -19,11 +21,11 @@ const initialState = {
   error: null,
 
   isCreatingProfile: false,
-  createProfileError: null,
+  createProfileError: null, // the failed request's error (see utils/formErrors)
 
   // userIds that the backend confirmed already have a profile which GET
-  // /Patients (active profiles only) does not list = inactive profiles.
-  // Kept for this session only: no endpoint lists inactive profiles.
+  // /Patients does not list = treated as inactive profiles. Kept for this
+  // session only.
   inactiveProfileUserIds: [],
 };
 
@@ -55,7 +57,7 @@ export const usePatientStore = create((set, get) => {
 
     // Creates the medical profile of an existing Patient user. Returns the
     // created profile (its `id` is the new patientId) only when the backend
-    // confirmed it; otherwise null (the message is stored in createProfileError).
+    // confirmed it; otherwise null (the error is stored in createProfileError).
     createPatientProfile: async (profile) => {
       if (get().isCreatingProfile) return null;
 
@@ -73,7 +75,7 @@ export const usePatientStore = create((set, get) => {
         return created;
       } catch (error) {
         if (!isCurrent(requestGeneration)) return null;
-        set({ isCreatingProfile: false, createProfileError: getErrorMessage(error) });
+        set({ isCreatingProfile: false, createProfileError: error });
 
         if (error?.errorCode === PROFILE_EXISTS) {
           await get().markIfProfileInactive(profile.userId);
@@ -105,6 +107,43 @@ export const usePatientStore = create((set, get) => {
     },
 
     clearCreateProfileError: () => set({ createProfileError: null }),
+
+    // Saves the medical profile (all nine fields, see patientService). Returns
+    //   { record }  the updated patient, also applied to the list and to the
+    //               open patient details page;
+    //   { error }   the ApiError (or Error) for the form to show.
+    updatePatient: async (patientId, values) => {
+      const requestGeneration = generation;
+
+      try {
+        const record = await patientService.updatePatient(patientId, values);
+
+        if (isCurrent(requestGeneration)) {
+          set((state) => ({
+            patients: state.patients.map((patient) =>
+              patient.id === record.id ? record : patient,
+            ),
+          }));
+          usePatientOverviewStore.getState().applyPatient(record);
+        }
+
+        return { record };
+      } catch (error) {
+        return { error };
+      }
+    },
+
+    // An account was edited (see userStore): keep the account fields of that
+    // user's patient record in step.
+    applyAccount: ({ id, fullName, email, phoneNumber }) =>
+      set((state) => ({
+        patients: state.patients.map((patient) => {
+          if (patient.userId !== id) return patient;
+
+          const next = { ...patient, fullName, email, phoneNumber };
+          return { ...next, name: getDisplayName(next, "Unknown patient") };
+        }),
+      })),
 
     // Logout: drop the signed-in user's patients and ignore pending answers.
     reset: () => {

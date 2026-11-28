@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import userService from "../services/userService";
 import getErrorMessage from "../utils/getErrorMessage";
+import { usePatientStore } from "./patientStore";
 
 /*
   Admin screens: the hospital's users (GET /Users) and Patient users
@@ -19,7 +20,7 @@ const initialState = {
   patientUsersError: null,
 
   isCreating: false,
-  createError: null,
+  createError: null, // the failed request's error (see utils/formErrors)
 };
 
 export const useUserStore = create((set, get) => {
@@ -63,7 +64,7 @@ export const useUserStore = create((set, get) => {
     },
 
     // Returns the created user ({ userId, userName, email, role }) when the
-    // backend confirmed success, or null otherwise (the message is stored in
+    // backend confirmed success, or null otherwise (the error is stored in
     // createError).
     addUser: async (payload) => {
       if (get().isCreating) return null;
@@ -83,12 +84,39 @@ export const useUserStore = create((set, get) => {
         return createdUser;
       } catch (error) {
         if (!isCurrent(requestGeneration)) return null;
-        set({ isCreating: false, createError: getErrorMessage(error) });
+        set({ isCreating: false, createError: error });
         return null;
       }
     },
 
     clearCreateError: () => set({ createError: null }),
+
+    // Saves the account details (full name, email, phone number). Returns
+    //   { record }  the updated user, also applied to the user lists and the
+    //               user's patient record;
+    //   { error }   the ApiError (or Error) for the form to show.
+    updateUser: async (userId, values) => {
+      const requestGeneration = generation;
+
+      try {
+        const record = await userService.updateUser(userId, values);
+
+        if (isCurrent(requestGeneration)) {
+          const replace = (list) =>
+            list.map((user) => (user.id === record.id ? record : user));
+
+          set((state) => ({
+            users: replace(state.users),
+            patientUsers: replace(state.patientUsers),
+          }));
+          usePatientStore.getState().applyAccount(record);
+        }
+
+        return { record };
+      } catch (error) {
+        return { error };
+      }
+    },
 
     // Logout: drop the hospital's users and ignore pending answers.
     reset: () => {

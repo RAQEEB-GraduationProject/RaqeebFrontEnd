@@ -1,35 +1,43 @@
 import api from "./api";
+import getDisplayName from "../utils/getDisplayName";
+import { textOrNull } from "../utils/text";
 
-// Blank strings and nulls both mean "not provided".
-const textOrNull = (value) =>
-  typeof value === "string" && value.trim() ? value.trim() : null;
+// The fields of PUT /Patients/{id}. The backend requires every one of them in
+// every request (full replacement).
+const UPDATE_FIELDS = [
+  "dateOfBirth",
+  "gender",
+  "bloodGroup",
+  "medicalRecordNumber",
+  "diagnosis",
+  "stage",
+  "treatment",
+  "protocol",
+  "riskLevel",
+];
 
-// A date of birth in the future (bad data) must not produce a negative age.
-const getAge = (dateOfBirth) => {
-  const birth = new Date(dateOfBirth);
-  if (!dateOfBirth || Number.isNaN(birth.getTime())) return null;
+const unexpectedResponse = () => new Error("The server returned an unexpected response.");
 
-  const today = new Date();
-  let age = today.getFullYear() - birth.getFullYear();
-  const hadBirthday =
-    today.getMonth() > birth.getMonth() ||
-    (today.getMonth() === birth.getMonth() && today.getDate() >= birth.getDate());
-  if (!hadBirthday) age -= 1;
+const numberOrNull = (value) => (Number.isFinite(value) ? value : null);
 
-  return age >= 0 ? age : null;
-};
-
-// GET /Patients item -> shape used by the doctor's patient list and details.
-// `id` is the patient record id; `userId` is the linked account and is never
-// used for routing. Missing values stay null (no default risk level).
+/*
+  The backend's one patient object (GET /Patients, GET /Patients/{id}, the
+  POST / PUT responses and overview.patient) -> the app's patient shape.
+  `id` is the patient record id; `userId` is the linked account and is never
+  used for routing. `name` is for display only. `age` and `phoneNumber` come
+  from the backend. Missing values stay null (no default risk level or MRN).
+*/
 const mapPatient = (data) => ({
   id: data.id,
   userId: data.userId,
-  name: textOrNull(data.userName) ?? textOrNull(data.email) ?? "Unknown patient",
+  name: getDisplayName(data, "Unknown patient"),
+  userName: textOrNull(data.userName),
+  fullName: textOrNull(data.fullName),
   email: textOrNull(data.email),
+  phoneNumber: textOrNull(data.phoneNumber),
   hospitalId: data.hospitalId ?? null,
   dateOfBirth: data.dateOfBirth ?? null,
-  age: getAge(data.dateOfBirth),
+  age: numberOrNull(data.age),
   gender: textOrNull(data.gender),
   bloodGroup: textOrNull(data.bloodGroup),
   medicalRecordNumber: textOrNull(data.medicalRecordNumber),
@@ -42,44 +50,37 @@ const mapPatient = (data) => ({
   createdAt: data.createdAt ?? null,
 });
 
-const numberOrNull = (value) => (Number.isFinite(value) ? value : null);
+// One care team member of the overview, or null (no active assignment).
+const mapCareMember = (member) =>
+  member
+    ? {
+        userId: member.userId,
+        name: getDisplayName(member),
+        userName: textOrNull(member.userName),
+        fullName: textOrNull(member.fullName),
+        phoneNumber: textOrNull(member.phoneNumber),
+        role: textOrNull(member.role),
+        assignedAt: member.assignedAt ?? null,
+      }
+    : null;
 
-// GET /Patients/{patientId}/overview -> data of the whole patient details page:
-//   header   -> shared patient header (same field names as mapPatient, so
-//               PatientDetailsHeader reads both shapes; patientCode is the
-//               backend's MedicalRecordNumber)
-//   clinical / personal -> Patient Overview tab
-// Missing values stay null (treatment status and cycle fields are null until
-// the backend's chemotherapy module fills them; no default risk level).
+/*
+  GET /Patients/{patientId}/overview -> data of the whole patient details page:
+    patient            the patient object (header and Overview tab)
+    careTeam           doctor, nurse and caregiver (each may be null)
+    treatmentProgress  null until the backend has a treatment module
+*/
 const mapOverview = (data) => {
-  const header = data.patientHeader ?? {};
-  const clinical = data.clinicalOverview ?? {};
-  const personal = data.personalInfo ?? {};
+  if (!data.patient) throw unexpectedResponse();
 
   return {
-    header: {
-      id: header.patientId,
-      name: textOrNull(header.fullName) ?? "Unknown patient",
-      medicalRecordNumber: textOrNull(header.patientCode),
-      age: numberOrNull(header.age),
-      gender: textOrNull(header.gender),
-      bloodGroup: textOrNull(header.bloodGroup),
-      risk: textOrNull(header.riskLevel),
+    patient: mapPatient(data.patient),
+    careTeam: {
+      treatingDoctor: mapCareMember(data.careTeam?.treatingDoctor),
+      nurse: mapCareMember(data.careTeam?.nurse),
+      primaryCaregiver: mapCareMember(data.careTeam?.primaryCaregiver),
     },
-    clinical: {
-      cancerType: textOrNull(clinical.cancerType),
-      stage: textOrNull(clinical.stage),
-      treatingDoctor: textOrNull(clinical.treatingDoctor?.name),
-      treatmentStatus: textOrNull(clinical.treatmentStatus),
-      protocol: textOrNull(clinical.protocol),
-      currentCycle: numberOrNull(clinical.currentCycle),
-      totalCycles: numberOrNull(clinical.totalCycles),
-      currentDay: numberOrNull(clinical.currentDay),
-    },
-    personal: {
-      phone: textOrNull(personal.phone),
-      primaryCaregiver: textOrNull(personal.primaryCaregiver),
-    },
+    treatmentProgress: data.treatmentProgress ?? null,
   };
 };
 
@@ -179,11 +180,45 @@ const mapDiagnosticList = (data, mapItem) => {
 };
 
 const patientService = {
-  // GET {VITE_API_BASE_URL}/Patients  -> direct JSON array
+  // GET {VITE_API_BASE_URL}/Patients
   async getPatients() {
     const { data } = await api.get("/Patients");
 
     return Array.isArray(data) ? data.map(mapPatient) : [];
+  },
+
+  // GET {VITE_API_BASE_URL}/Patients/{patientId}  (any role with access to the
+  // patient; 404 otherwise). Used by the edit form, so a response that lacks an
+  // editable field is refused: saving it would clear that field.
+  async getPatientById(patientId) {
+    const { data } = await api.get(`/Patients/${encodeURIComponent(patientId)}`);
+
+    if (!data || !UPDATE_FIELDS.every((field) => field in data)) {
+      throw unexpectedResponse();
+    }
+
+    return mapPatient(data);
+  },
+
+  // PUT {VITE_API_BASE_URL}/Patients/{patientId}  (Admin only, active patients).
+  // `values` must hold all nine UPDATE_FIELDS: a blank one is sent as null,
+  // which clears it. A field that is missing altogether is never turned into
+  // null; nothing is sent. Returns the updated patient.
+  async updatePatient(patientId, values) {
+    if (!UPDATE_FIELDS.every((field) => values[field] !== undefined)) {
+      throw new Error("The patient data is incomplete, so it was not saved.");
+    }
+
+    const { data } = await api.put(
+      `/Patients/${encodeURIComponent(patientId)}`,
+      Object.fromEntries(
+        UPDATE_FIELDS.map((field) => [field, textOrNull(values[field])]),
+      ),
+    );
+
+    if (!data) throw unexpectedResponse();
+
+    return mapPatient(data);
   },
 
   // GET {VITE_API_BASE_URL}/Patients/{patientId}/overview  (Admin, Doctor,

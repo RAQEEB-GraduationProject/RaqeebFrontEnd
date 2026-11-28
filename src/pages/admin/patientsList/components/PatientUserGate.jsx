@@ -84,13 +84,13 @@ const PatientUserGate = ({ userId, current, children }) => {
         {current ? (
           <>
             <Link to={patientUserPath(userId)} className="text-accent hover:underline">
-              {user.userName}
+              {user.name}
             </Link>
             <ChevronRight size={12} className="text-muted" aria-hidden="true" />
             <span className="text-muted-strong">{current}</span>
           </>
         ) : (
-          <span className="text-muted-strong">{user.userName}</span>
+          <span className="text-muted-strong">{user.name}</span>
         )}
       </nav>
 

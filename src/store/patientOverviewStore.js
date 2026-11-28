@@ -51,6 +51,17 @@ export const usePatientOverviewStore = create((set, get) => {
       }
     },
 
+    // The patient was saved (see patientStore): show the returned object on the
+    // open details page. A request still pending may predate the save, so its
+    // answer is ignored.
+    applyPatient: (patient) => {
+      const { overview } = get();
+      if (overview?.patient.id !== patient.id) return;
+
+      latestRequest += 1;
+      set({ overview: { ...overview, patient }, isLoading: false, error: null });
+    },
+
     // Drops the cached patient data and invalidates any pending request.
     reset: () => {
       latestRequest += 1;

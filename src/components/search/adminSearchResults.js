@@ -34,19 +34,32 @@ const matchPages = (pages, term) =>
 
 const matchUsers = (users, term) =>
   users
-    .filter((user) => includes(user.userName, term) || includes(user.email, term))
-    .sort(byRelevance(term, (user) => user.userName))
+    .filter((user) =>
+      [user.fullName, user.userName, user.email].some((value) => includes(value, term)),
+    )
+    .sort(byRelevance(term, (user) => user.name))
     .map((user) => ({
       key: `user-${user.id}`,
       to: `/admin/users/${encodeURIComponent(user.id)}`,
-      title: user.userName || "Unnamed User",
-      subtitle: [user.role, user.email, !user.isActive && "Inactive"].filter(Boolean).join(" · "),
+      title: user.name,
+      subtitle: [
+        user.role,
+        user.userName !== user.name && user.userName,
+        user.email !== user.name && user.email,
+        !user.isActive && "Inactive",
+      ]
+        .filter(Boolean)
+        .join(" · "),
       icon: UserRound,
     }));
 
 const matchPatients = (patients, term) =>
   patients
-    .filter((patient) => includes(patient.name, term) || includes(patient.medicalRecordNumber, term))
+    .filter((patient) =>
+      [patient.name, patient.userName, patient.medicalRecordNumber].some((value) =>
+        includes(value, term),
+      ),
+    )
     .sort(byRelevance(term, (patient) => patient.name))
     .map((patient) => ({
       key: `patient-${patient.id}`,

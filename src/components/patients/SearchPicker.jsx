@@ -5,7 +5,7 @@ import getInitials from "./getInitials";
 
 /*
   Generic "Add …" row that expands into a searchable list.
-  items: [{ id, title, subtitle }]
+  items: [{ id, title, subtitle, keywords? }] (keywords: searchable, not shown)
 */
 const SearchPicker = ({ items, placeholder, searchPlaceholder, onPick }) => {
   const [open, setOpen] = useState(false);
@@ -17,7 +17,9 @@ const SearchPicker = ({ items, placeholder, searchPlaceholder, onPick }) => {
     if (!term) return items;
 
     return items.filter((item) =>
-      `${item.title} ${item.subtitle ?? ""}`.toLowerCase().includes(term),
+      `${item.title} ${item.subtitle ?? ""} ${item.keywords ?? ""}`
+        .toLowerCase()
+        .includes(term),
     );
   }, [items, query]);
 

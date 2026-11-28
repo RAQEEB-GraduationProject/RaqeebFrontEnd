@@ -5,6 +5,7 @@ import FormField from "../../forms/FormField";
 import inputClass from "../../forms/inputClass";
 import { useAuthStore } from "../../../store/authStore";
 import { usePatientCareStore } from "../../../store/patientCareStore";
+import { toFieldErrors } from "../../../utils/formErrors";
 import getErrorMessage from "../../../utils/getErrorMessage";
 import { ROLES } from "../../../utils/roles";
 import CareFormActions from "./CareFormActions";
@@ -14,7 +15,6 @@ import {
   INITIAL_APPOINTMENT_VALUES,
   LOCATION_MAX_LENGTH,
   TITLE_MAX_LENGTH,
-  toFieldErrors,
   validateAppointment,
 } from "./patientCareForm";
 
@@ -147,7 +147,7 @@ const AppointmentForm = ({ patientId, onAdded, onCancel }) => {
               </option>
               {(doctors.items ?? []).map((doctor) => (
                 <option key={doctor.id} value={doctor.id}>
-                  {doctor.userName}
+                  {doctor.name}
                 </option>
               ))}
             </select>

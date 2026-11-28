@@ -15,11 +15,11 @@ const PatientProfileMissing = () => {
       {(user) => (
         <div className="rounded-3xl border border-line bg-white px-6 py-16 text-center shadow-sm">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-avatar text-base font-bold text-on-avatar">
-            {getInitials(user.userName)}
+            {getInitials(user.name)}
           </div>
 
           <h1 className="mt-5 text-3xl font-medium text-ink">
-            {user.userName}
+            {user.name}
           </h1>
 
           <p className="mx-auto mt-3 max-w-md text-sm text-muted-strong">

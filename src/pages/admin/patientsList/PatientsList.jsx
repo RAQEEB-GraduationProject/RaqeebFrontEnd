@@ -104,7 +104,7 @@ const PatientsList = () => {
     const staffNames = Object.values(team).flat().map(staffName).join(", ");
     const patientNames = assignablePatients
       .filter((patient) => patientIds.includes(patient.id))
-      .map((patient) => patient.userName)
+      .map((patient) => patient.name)
       .join(", ");
 
     const confirmed = await confirmAction({

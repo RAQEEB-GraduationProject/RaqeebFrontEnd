@@ -1,4 +1,5 @@
 import api from "./api";
+import { textOrNull } from "../utils/text";
 
 /*
   Assignment endpoints (PatientAssignmentsController). Response envelopes are
@@ -12,7 +13,9 @@ const mapStaff = (list) =>
         // Id of the assignment record (needed to unassign); not the patientId.
         assignmentId: member.assignmentId,
         userId: member.userId,
-        name: member.name,
+        // The backend already picks the full name or user name; this response
+        // carries neither separately.
+        name: textOrNull(member.name) ?? "Unnamed user",
       }))
     : [];
 

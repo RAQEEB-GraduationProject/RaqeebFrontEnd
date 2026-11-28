@@ -70,9 +70,8 @@ const useDoctorPatients = () => {
           return false;
         }
         if (!query) return true;
-        return (
-          p.name.toLowerCase().includes(query) ||
-          (p.medicalRecordNumber ?? "").toLowerCase().includes(query)
+        return [p.name, p.userName, p.medicalRecordNumber].some((value) =>
+          (value ?? "").toLowerCase().includes(query),
         );
       })
       .sort(SORTERS[tab]);

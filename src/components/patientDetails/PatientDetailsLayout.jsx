@@ -5,8 +5,9 @@ import PatientTabs from "./PatientTabs";
 
 // Role-agnostic shell: breadcrumb, patient header, tabs and the active tab's
 // page (<Outlet />). Each role supplies its own `tabs`, `actions` and list link.
-// `patient` is the header data; `overview` is the whole overview response,
-// handed to the tabs through the outlet context so they don't refetch it.
+// `patient` is overview.patient; `overview` (patient, careTeam,
+// treatmentProgress) is handed to the tabs through the outlet context so they
+// don't refetch it.
 const PatientDetailsLayout = ({
   patient,
   overview,

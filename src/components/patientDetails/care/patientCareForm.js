@@ -1,5 +1,5 @@
 // Patient Care appointment form (POST /Patients/{patientId}/appointments):
-// values, validation, backend-error mapping and date text.
+// values, validation, backend field names and date text.
 
 export const TITLE_MAX_LENGTH = 200;
 export const LOCATION_MAX_LENGTH = 300;
@@ -52,31 +52,7 @@ export const validateAppointment = (values) => {
   return errors;
 };
 
-/*
-  400 VALIDATION_ERROR / INVALID_PROVIDER errors ([{ field, message }], field
-  like "Title", "$.appointmentDate" or "ProviderId") -> messages per form
-  field, plus the ones that match no field. `aliases` maps a backend field
-  name (lower case) to the form field.
-*/
-export const toFieldErrors = (apiErrors = [], fields, aliases = {}) => {
-  const fieldErrors = {};
-  const otherMessages = [];
-
-  apiErrors.forEach(({ field, message }) => {
-    const raw = String(field ?? "")
-      .replace(/^\$\.?/, "")
-      .split(".")
-      .pop()
-      .toLowerCase();
-    const key = fields.find((name) => name.toLowerCase() === (aliases[raw] ?? raw));
-
-    if (key && !fieldErrors[key]) fieldErrors[key] = message;
-    else otherMessages.push(message);
-  });
-
-  return { fieldErrors, otherMessages };
-};
-
+// Form fields that backend errors are mapped to (see utils/formErrors).
 export const APPOINTMENT_FIELDS = ["title", "date", "time", "providerId", "location"];
 export const APPOINTMENT_ALIASES = { appointmentdate: "date", appointmenttime: "time" };
 

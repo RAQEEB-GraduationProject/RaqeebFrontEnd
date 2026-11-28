@@ -5,6 +5,7 @@ import AdminDashboard from "../pages/admin/dashboard/AdminDashboard";
 import UsersList from "../pages/admin/usersList/UsersList";
 import AddUser from "../pages/admin/usersList/AddUser";
 import UserDetails from "../pages/admin/usersList/UserDetails";
+import EditPatientAction from "../components/patientDetails/edit/EditPatientAction";
 import PatientsList from "../pages/admin/patientsList/PatientsList";
 import PatientProfileMissing from "../pages/admin/patientsList/PatientProfileMissing";
 import CompletePatientAccount from "../pages/admin/patientsList/CompletePatientAccount";
@@ -37,10 +38,13 @@ const adminRoutes = (
     {/* Patient users without a medical profile (the id is the USER id). */}
     <Route path="patients/users/:userId" element={<PatientProfileMissing />} />
     <Route path="patients/users/:userId/complete" element={<CompletePatientAccount />} />
-    {/* Same patient details UI as the doctor's, without the doctor-only actions. */}
+    {/* Same patient details UI as the doctor's, with the admin-only edit action
+        instead of the doctor-only ones. */}
     <Route
       path="patients/:patientId"
-      element={<DoctorPatientDetails listPath="/admin/patients" actions={null} />}
+      element={
+        <DoctorPatientDetails listPath="/admin/patients" actions={<EditPatientAction />} />
+      }
     >
       <Route index element={<Navigate to="overview" replace />} />
       <Route path="overview" element={<PatientOverviewTab />} />

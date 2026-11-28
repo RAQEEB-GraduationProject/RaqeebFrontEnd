@@ -114,7 +114,8 @@ export default function usePatientAssignments() {
         byId.set(user.id, {
           id: user.id,
           role,
-          name: user.userName,
+          name: user.name,
+          userName: user.userName,
           detail: user.email,
         });
       }
@@ -174,6 +175,7 @@ export default function usePatientAssignments() {
         userId: user.id,
         profileStatus,
         hasProfile: Boolean(record),
+        name: user.name,
         userName: user.userName,
         medicalRecordNumber: record?.medicalRecordNumber ?? null,
         isActive,
@@ -240,10 +242,11 @@ export default function usePatientAssignments() {
 
       if (!term) return true;
 
-      return [patient.userName, patient.medicalRecordNumber].some((value) =>
-        String(value ?? "")
-          .toLowerCase()
-          .includes(term),
+      return [patient.name, patient.userName, patient.medicalRecordNumber].some(
+        (value) =>
+          String(value ?? "")
+            .toLowerCase()
+            .includes(term),
       );
     });
 

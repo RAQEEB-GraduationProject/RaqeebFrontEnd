@@ -141,12 +141,12 @@ const AssignDrawer = ({
           {lockedPatient ? (
             <div className="flex items-center gap-4 rounded-2xl border border-line p-4">
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-avatar text-xs font-bold text-on-avatar">
-                {getInitials(lockedPatient.userName)}
+                {getInitials(lockedPatient.name)}
               </div>
 
               <div>
                 <p className="text-base font-semibold text-ink">
-                  {lockedPatient.userName}
+                  {lockedPatient.name}
                 </p>
                 <p className="text-sm text-muted">
                   {lockedPatient.medicalRecordNumber}

@@ -116,12 +116,12 @@ const PatientsTable = ({
             >
               <div className="flex min-w-0 items-center gap-4">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-avatar text-xs font-bold text-on-avatar">
-                  {getInitials(patient.userName)}
+                  {getInitials(patient.name)}
                 </div>
 
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold text-ink">
-                    {patient.userName || "—"}
+                    {patient.name}
                   </p>
 
                   <p className="truncate text-xs text-muted">

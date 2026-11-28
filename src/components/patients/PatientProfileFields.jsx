@@ -5,9 +5,12 @@ import inputClass from "../forms/inputClass";
 import {
   BLOOD_GROUP_OPTIONS,
   GENDER_OPTIONS,
+  PROFILE_MAX_LENGTHS,
   RISK_LEVEL_OPTIONS,
   todayString,
 } from "./patientProfileForm";
+
+const RECORD_NUMBER_FIELD = { name: "medicalRecordNumber", label: "Medical record number" };
 
 const TEXT_FIELDS = [
   { name: "diagnosis", label: "Diagnosis" },
@@ -16,39 +19,51 @@ const TEXT_FIELDS = [
   { name: "protocol", label: "Protocol" },
 ];
 
-const SelectField = ({ name, label, placeholder, options, bind, error }) => (
-  <FormField id={name} label={label} error={error}>
-    <div className="relative">
-      <select
-        {...bind(name)}
-        className={`${inputClass(error)} appearance-none pr-10`}
-      >
-        <option value="">{placeholder}</option>
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
+// A saved value outside the list (the backend stores free text, e.g. risk
+// "Low") is offered too, so editing never drops or replaces it.
+const SelectField = ({ name, label, placeholder, options, bind, error }) => {
+  const props = bind(name);
+  const choices =
+    props.value && !options.includes(props.value) ? [props.value, ...options] : options;
 
-      <ChevronDown
-        size={16}
-        className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-ink"
-      />
-    </div>
-  </FormField>
-);
+  return (
+    <FormField id={name} label={label} error={error}>
+      <div className="relative">
+        <select {...props} className={`${inputClass(error)} appearance-none pr-10`}>
+          <option value="">{placeholder}</option>
+          {choices.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+
+        <ChevronDown
+          size={16}
+          className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-ink"
+        />
+      </div>
+    </FormField>
+  );
+};
 
 /*
-  The eight patient medical profile inputs (no medical record number). State
-  lives in the parent:
+  The patient medical profile inputs. State lives in the parent:
     values / errors   objects keyed by field name
     onChange          input change handler
     disabled          true while saving
     fixedGender       optional; when set the gender is shown read-only with
                       this value (the parent keeps values.gender equal to it)
+    withRecordNumber  adds the medical record number (editing only)
 */
-const PatientProfileFields = ({ values, errors, onChange, disabled, fixedGender }) => {
+const PatientProfileFields = ({
+  values,
+  errors,
+  onChange,
+  disabled,
+  fixedGender,
+  withRecordNumber = false,
+}) => {
   const bind = (name) => ({
     id: name,
     name,
@@ -102,17 +117,20 @@ const PatientProfileFields = ({ values, errors, onChange, disabled, fixedGender 
         error={errors.bloodGroup}
       />
 
-      {TEXT_FIELDS.map(({ name, label }) => (
-        <FormField key={name} id={name} label={label} error={errors[name]}>
-          <input
-            {...bind(name)}
-            type="text"
-            autoComplete="off"
-            placeholder={`Enter ${label.toLowerCase()}`}
-            className={inputClass(errors[name])}
-          />
-        </FormField>
-      ))}
+      {(withRecordNumber ? [RECORD_NUMBER_FIELD, ...TEXT_FIELDS] : TEXT_FIELDS).map(
+        ({ name, label }) => (
+          <FormField key={name} id={name} label={label} error={errors[name]}>
+            <input
+              {...bind(name)}
+              type="text"
+              autoComplete="off"
+              maxLength={PROFILE_MAX_LENGTHS[name]}
+              placeholder={`Enter ${label.toLowerCase()}`}
+              className={inputClass(errors[name])}
+            />
+          </FormField>
+        ),
+      )}
 
       <SelectField
         name="riskLevel"

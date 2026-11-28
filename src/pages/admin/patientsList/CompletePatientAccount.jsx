@@ -10,6 +10,7 @@ import {
   validateProfile,
 } from "../../../components/patients/patientProfileForm";
 import { usePatientStore } from "../../../store/patientStore";
+import { toFormErrors } from "../../../utils/formErrors";
 import PatientUserGate from "./components/PatientUserGate";
 import notify from "./notify";
 import { PATIENTS_PATH, patientUserPath } from "./patientPaths";
@@ -20,8 +21,8 @@ import { PATIENTS_PATH, patientUserPath } from "./patientPaths";
   POST /Patients; on failure the entered values stay so the admin can retry.
 */
 // The table reloads its data when it opens and shows the completed profile.
-const finishCompletion = (navigate, userName) => {
-  notify("success", `${userName}'s patient account was completed`);
+const finishCompletion = (navigate, name) => {
+  notify("success", `${name}'s patient account was completed`);
   navigate(PATIENTS_PATH);
 };
 
@@ -30,11 +31,12 @@ const CompletePatientForm = ({ user, onCreated }) => {
 
   const createPatientProfile = usePatientStore((state) => state.createPatientProfile);
   const isSaving = usePatientStore((state) => state.isCreatingProfile);
-  const error = usePatientStore((state) => state.createProfileError);
   const clearError = usePatientStore((state) => state.clearCreateProfileError);
 
   const [values, setValues] = useState(INITIAL_PROFILE_VALUES);
   const [errors, setErrors] = useState({});
+  // The general message of a failed save (field messages go under the fields).
+  const [formError, setFormError] = useState(null);
 
   // Start and leave without a stale error from an earlier attempt.
   useEffect(() => {
@@ -58,6 +60,7 @@ const CompletePatientForm = ({ user, onCreated }) => {
     if (isSaving) return;
 
     clearError();
+    setFormError(null);
 
     const nextErrors = validateProfile(values);
     setErrors(nextErrors);
@@ -68,13 +71,21 @@ const CompletePatientForm = ({ user, onCreated }) => {
 
     if (created?.id) {
       // Optional medical history step for the new patientId.
-      onCreated({ patientId: created.id, userName: user.userName });
+      onCreated({ patientId: created.id, name: user.name });
     } else if (created) {
-      finishCompletion(navigate, user.userName);
+      finishCompletion(navigate, user.name);
     } else if (usePatientStore.getState().inactiveProfileUserIds.includes(user.id)) {
       // The user already has a profile (inactive): nothing to complete.
-      notify("info", `${user.userName} already has a patient profile, which is inactive`);
+      notify("info", `${user.name} already has a patient profile, which is inactive`);
       navigate(PATIENTS_PATH);
+    } else {
+      // Keep the entries and show the backend's errors (USER_INACTIVE ...).
+      const failure = usePatientStore.getState().createProfileError;
+      if (!failure) return;
+
+      const result = toFormErrors(failure, Object.keys(INITIAL_PROFILE_VALUES));
+      setErrors(result.fieldErrors);
+      setFormError(result.formError);
     }
   };
 
@@ -86,16 +97,16 @@ const CompletePatientForm = ({ user, onCreated }) => {
         </h1>
 
         <p className="mt-3 text-sm text-muted-strong">
-          Enter the medical information for <strong>{user.userName}</strong>.
+          Enter the medical information for <strong>{user.name}</strong>.
         </p>
       </div>
 
-      {error && (
+      {formError && (
         <p
           role="alert"
           className="rounded-xl bg-danger-bg px-4 py-3 text-sm text-danger-text"
         >
-          {error}
+          {formError}
         </p>
       )}
 
@@ -149,7 +160,7 @@ const CompletePatientAccount = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
 
-  // { patientId, userName } once POST /Patients succeeded. Kept here, above
+  // { patientId, name } once POST /Patients succeeded. Kept here, above
   // the gate: the gate redirects users that have an active profile, which is
   // exactly what this user becomes after saving.
   const [created, setCreated] = useState(null);
@@ -163,8 +174,8 @@ const CompletePatientAccount = () => {
 
         <MedicalHistoryStep
           patientId={created.patientId}
-          patientName={created.userName}
-          onDone={() => finishCompletion(navigate, created.userName)}
+          patientName={created.name}
+          onDone={() => finishCompletion(navigate, created.name)}
         />
       </div>
     );

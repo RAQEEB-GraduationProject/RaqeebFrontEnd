@@ -10,8 +10,9 @@ const PatientSelector = ({ patients, selectedIds, onChange }) => {
     .filter((patient) => !selectedIds.includes(patient.id))
     .map((patient) => ({
       id: patient.id,
-      title: patient.userName,
+      title: patient.name,
       subtitle: patient.medicalRecordNumber,
+      keywords: patient.userName,
     }));
 
   return (
@@ -28,11 +29,11 @@ const PatientSelector = ({ patients, selectedIds, onChange }) => {
               key={patient.id}
               className="inline-flex items-center gap-2 rounded-full bg-surface-muted px-3 py-1.5 text-sm font-semibold text-ink"
             >
-              {patient.userName}
+              {patient.name}
 
               <button
                 type="button"
-                aria-label={`Remove ${patient.userName}`}
+                aria-label={`Remove ${patient.name}`}
                 onClick={() =>
                   onChange(selectedIds.filter((id) => id !== patient.id))
                 }

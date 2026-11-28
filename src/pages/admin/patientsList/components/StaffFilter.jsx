@@ -39,7 +39,9 @@ const StaffFilter = ({
 
     return staff
       .filter((member) => member.role === role)
-      .filter((member) => member.name.toLowerCase().includes(term));
+      .filter((member) =>
+        `${member.name} ${member.userName ?? ""}`.toLowerCase().includes(term),
+      );
   }, [staff, role, query]);
 
   const selectTab = (next) => {

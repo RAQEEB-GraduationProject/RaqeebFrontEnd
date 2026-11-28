@@ -2,6 +2,7 @@ import { Link, useOutletContext, useSearchParams } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 
 import SectionTabs from "../SectionTabs";
+import { formatHistoryDate } from "../../patients/medicalHistory/medicalHistoryForm";
 import MedicalHistorySection from "./MedicalHistorySection";
 
 /*
@@ -64,8 +65,11 @@ const formatCycle = ({ currentCycle, totalCycles, currentDay }) => {
     .join(" · ");
 };
 
+// treatmentProgress is null until the backend has a treatment module, so its
+// two fields read "Not recorded".
 const Summary = ({ overview }) => {
-  const { clinical, personal } = overview;
+  const { patient, careTeam, treatmentProgress } = overview;
+  const treatmentStatus = treatmentProgress?.treatmentStatus ?? null;
 
   return (
     <div className="grid items-start gap-6 lg:grid-cols-3">
@@ -74,20 +78,22 @@ const Summary = ({ overview }) => {
         subtitle="Current diagnosis and treatment status"
         className="lg:col-span-2"
       >
-        <Field label="Cancer type" value={clinical.cancerType} />
-        <Field label="Stage" value={clinical.stage} />
-        <Field label="Treating doctor" value={clinical.treatingDoctor} />
-        <Field label="Treatment status" value={clinical.treatmentStatus}>
+        <Field label="Cancer type" value={patient.diagnosis} />
+        <Field label="Stage" value={patient.stage} />
+        <Field label="Treating doctor" value={careTeam.treatingDoctor?.name} />
+        <Field label="Nurse" value={careTeam.nurse?.name} />
+        <Field label="Treatment" value={patient.treatment} />
+        <Field label="Protocol" value={patient.protocol} />
+        <Field label="Treatment status" value={treatmentStatus}>
           <span className="inline-flex items-center gap-2">
             <span
               className="h-2 w-2 rounded-full bg-success"
               aria-hidden="true"
             />
-            {clinical.treatmentStatus}
+            {treatmentStatus}
           </span>
         </Field>
-        <Field label="Protocol" value={clinical.protocol} />
-        <Field label="Current cycle" value={formatCycle(clinical)} />
+        <Field label="Current cycle" value={formatCycle(treatmentProgress ?? {})} />
       </Card>
 
       <Card
@@ -102,8 +108,12 @@ const Summary = ({ overview }) => {
           </Link>
         }
       >
-        <Field label="Phone" value={personal.phone} />
-        <Field label="Primary caregiver" value={personal.primaryCaregiver} />
+        <Field label="Phone" value={patient.phoneNumber} />
+        <Field label="Primary caregiver" value={careTeam.primaryCaregiver?.name} />
+        <Field
+          label="Date of birth"
+          value={formatHistoryDate(patient.dateOfBirth?.slice(0, 10))}
+        />
       </Card>
     </div>
   );

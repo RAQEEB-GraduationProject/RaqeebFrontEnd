@@ -8,6 +8,7 @@ const StaffPicker = ({ role, staff, selectedIds, onPick, placeholder }) => {
       id: member.id,
       title: member.name,
       subtitle: member.detail,
+      keywords: member.userName,
     }));
 
   return (

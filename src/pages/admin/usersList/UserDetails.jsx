@@ -12,11 +12,30 @@ import {
   AlertCircle,
 } from "lucide-react";
 import userService from "../../../services/userService";
+import { useAuthStore } from "../../../store/authStore";
 import getErrorMessage from "../../../utils/getErrorMessage";
+import EditUserAction from "./components/EditUserAction";
+
+const DetailItem = ({ icon: Icon, label, value }) => (
+  <div className="flex min-w-0 items-start gap-3 rounded-xl border border-line-soft bg-surface-soft/70 p-4">
+    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent-soft text-accent">
+      <Icon size={19} strokeWidth={1.7} />
+    </div>
+
+    <div className="min-w-0 flex-1">
+      <p className="text-xs font-medium text-muted-strong">{label}</p>
+      <p className="mt-1 break-words text-sm font-semibold text-ink">
+        {value || "Not provided"}
+      </p>
+    </div>
+  </div>
+);
 
 export default function UserDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const ownUserId = useAuthStore((state) => state.user?.userId);
+  const updateSessionUser = useAuthStore((state) => state.updateUser);
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -55,6 +74,16 @@ export default function UserDetails() {
     };
   }, [id]);
 
+  const handleSaved = (saved) => {
+    // Only while the saved user is still the one shown.
+    setUser((current) => (current?.id === saved.id ? saved : current));
+
+    // Editing your own account: the profile page reads the session.
+    if (saved.id === ownUserId) {
+      updateSessionUser({ email: saved.email, phoneNumber: saved.phoneNumber });
+    }
+  };
+
   const initials = (name = "") =>
     name
       .split(/[\s._-]+/)
@@ -62,21 +91,6 @@ export default function UserDetails() {
       .slice(0, 2)
       .map((part) => part[0].toUpperCase())
       .join("") || "U";
-
-  const DetailItem = ({ icon: Icon, label, value }) => (
-    <div className="flex min-w-0 items-start gap-3 rounded-xl border border-line-soft bg-surface-soft/70 p-4">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent-soft text-accent">
-        <Icon size={19} strokeWidth={1.7} />
-      </div>
-
-      <div className="min-w-0 flex-1">
-        <p className="text-xs font-medium text-muted-strong">{label}</p>
-        <p className="mt-1 break-words text-sm font-semibold text-ink">
-          {value || "Not provided"}
-        </p>
-      </div>
-    </div>
-  );
 
   if (loading) {
     return (
@@ -134,6 +148,8 @@ export default function UserDetails() {
             View account information and access status.
           </p>
         </div>
+
+        <EditUserAction user={user} onSaved={handleSaved} />
       </div>
 
       {/* User Profile Card */}
@@ -143,13 +159,13 @@ export default function UserDetails() {
         <div className="p-6 sm:p-8">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
             <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-avatar text-2xl font-bold text-on-avatar ring-1 ring-accent-muted">
-              {initials(user.userName)}
+              {initials(user.name)}
             </div>
 
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-3">
                 <h2 className="break-words text-xl font-bold text-ink sm:text-2xl">
-                  {user.userName || "Unnamed User"}
+                  {user.name}
                 </h2>
 
                 <span
@@ -198,6 +214,8 @@ export default function UserDetails() {
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <DetailItem icon={UserRound} label="Full name" value={user.fullName} />
+
             <DetailItem
               icon={UserRound}
               label="Username"

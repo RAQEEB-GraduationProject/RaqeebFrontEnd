@@ -13,6 +13,9 @@ import {
 } from "../../../components/patients/patientProfileForm";
 import { usePatientStore } from "../../../store/patientStore";
 import { useUserStore } from "../../../store/userStore";
+import { EMAIL_PATTERN, PHONE_PATTERN } from "../../../utils/accountValidation";
+import { toFormErrors } from "../../../utils/formErrors";
+import getDisplayName from "../../../utils/getDisplayName";
 
 // Same role list as the Users page filter. Values are sent as-is to
 // POST /Auth/register: capitalized, matching the "Admin" the backend
@@ -34,8 +37,6 @@ const INITIAL_VALUES = {
   role: "Patient",
 };
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_PATTERN = /^\+?[0-9\s-]{7,15}$/;
 // ASP.NET Identity's default allowed user name characters (no spaces).
 const USERNAME_PATTERN = /^[A-Za-z0-9\-._@+]+$/;
 
@@ -76,28 +77,28 @@ const AddUser = () => {
 
   const addUser = useUserStore((state) => state.addUser);
   const isCreating = useUserStore((state) => state.isCreating);
-  const createError = useUserStore((state) => state.createError);
   const clearCreateError = useUserStore((state) => state.clearCreateError);
 
   const createPatientProfile = usePatientStore((state) => state.createPatientProfile);
   const isCreatingProfile = usePatientStore((state) => state.isCreatingProfile);
-  const createProfileError = usePatientStore((state) => state.createProfileError);
   const clearCreateProfileError = usePatientStore(
     (state) => state.clearCreateProfileError,
   );
 
   const [values, setValues] = useState(INITIAL_VALUES);
   const [errors, setErrors] = useState({});
+  // The general message of a failed save (field messages go under the fields).
+  const [formError, setFormError] = useState(null);
   const [createdUser, setCreatedUser] = useState(null);
 
-  // Set once a Patient account exists: { userId, userName }. While it is set
+  // Set once a Patient account exists: { userId, name }. While it is set
   // the account fields are locked and the medical profile section is shown;
   // it is kept after a failed profile save so the user can retry.
   const [pendingPatient, setPendingPatient] = useState(null);
   const [profileValues, setProfileValues] = useState(INITIAL_PATIENT_PROFILE);
   const [profileErrors, setProfileErrors] = useState({});
 
-  // Set once the medical profile exists: { patientId, userName }. Shows the
+  // Set once the medical profile exists: { patientId, name }. Shows the
   // optional medical history step for that patientId (from POST /Patients).
   const [historyPatient, setHistoryPatient] = useState(null);
 
@@ -129,6 +130,15 @@ const AddUser = () => {
     }
   };
 
+  // Nothing to show when there is no error (e.g. signed out meanwhile).
+  const showFailure = (failure, fields, setFieldErrors) => {
+    if (!failure) return;
+
+    const { fieldErrors, formError: message } = toFormErrors(failure, fields);
+    setFieldErrors(fieldErrors);
+    setFormError(message);
+  };
+
   // Step 1: create the account (POST /Auth/register).
   const submitAccount = async () => {
     const nextErrors = validate(values);
@@ -146,11 +156,17 @@ const AddUser = () => {
       role: values.role,
     });
 
-    // On failure keep the entries and show the error from the store.
-    if (!newUser) return;
+    // On failure keep the entries and show the backend's errors.
+    if (!newUser) {
+      showFailure(useUserStore.getState().createError, Object.keys(INITIAL_VALUES), setErrors);
+      return;
+    }
+
+    // The register response has no full name: use the one that was sent.
+    const name = getDisplayName({ fullName: values.fullName, userName: newUser.userName });
 
     if (values.role !== PATIENT_ROLE) {
-      setCreatedUser(newUser.userName);
+      setCreatedUser(name);
       setValues(INITIAL_VALUES);
       return;
     }
@@ -161,7 +177,7 @@ const AddUser = () => {
       return;
     }
 
-    setPendingPatient({ userId: newUser.userId, userName: newUser.userName });
+    setPendingPatient({ userId: newUser.userId, name });
   };
 
   // Step 2: create the medical profile (POST /Patients) for the new account.
@@ -177,20 +193,27 @@ const AddUser = () => {
 
     // On failure pendingPatient stays, so the user can retry without
     // registering the account again.
-    if (!created) return;
-
-    // Step 3 (optional): medical history, now that the patientId exists.
-    if (created.id) {
-      setHistoryPatient({ patientId: created.id, userName: pendingPatient.userName });
+    if (!created) {
+      showFailure(
+        usePatientStore.getState().createProfileError,
+        Object.keys(INITIAL_PROFILE_VALUES),
+        setProfileErrors,
+      );
       return;
     }
 
-    finishRegistration(pendingPatient.userName);
+    // Step 3 (optional): medical history, now that the patientId exists.
+    if (created.id) {
+      setHistoryPatient({ patientId: created.id, name: pendingPatient.name });
+      return;
+    }
+
+    finishRegistration(pendingPatient.name);
   };
 
   // Ends the flow (after the profile, or after / skipping medical history).
-  const finishRegistration = (userName) => {
-    setCreatedUser(userName);
+  const finishRegistration = (name) => {
+    setCreatedUser(name);
     setPendingPatient(null);
     setHistoryPatient(null);
     setValues(INITIAL_VALUES);
@@ -202,6 +225,7 @@ const AddUser = () => {
 
     if (isBusy) return;
 
+    setFormError(null);
     clearCreateProfileError();
 
     if (pendingPatient) {
@@ -264,12 +288,12 @@ const AddUser = () => {
 
           {historyPatient ? (
             <p>
-              The patient profile for <strong>{historyPatient.userName}</strong> was
+              The patient profile for <strong>{historyPatient.name}</strong> was
               created. You can add medical history now or skip this step.
             </p>
           ) : (
             <p>
-              The account for <strong>{pendingPatient.userName}</strong> was
+              The account for <strong>{pendingPatient.name}</strong> was
               created. Complete the patient medical profile below.
             </p>
           )}
@@ -279,17 +303,17 @@ const AddUser = () => {
       {historyPatient ? (
         <MedicalHistoryStep
           patientId={historyPatient.patientId}
-          patientName={historyPatient.userName}
-          onDone={() => finishRegistration(historyPatient.userName)}
+          patientName={historyPatient.name}
+          onDone={() => finishRegistration(historyPatient.name)}
         />
       ) : (
       <>
-      {(createError || createProfileError) && (
+      {formError && (
         <p
           role="alert"
           className="rounded-xl bg-danger-bg px-4 py-3 text-sm text-danger-text"
         >
-          {createError || createProfileError}
+          {formError}
         </p>
       )}
 
