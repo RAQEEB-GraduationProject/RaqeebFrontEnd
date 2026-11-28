@@ -1,6 +1,7 @@
 import { Link, useOutletContext, useSearchParams } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 
+import SectionTabs from "../SectionTabs";
 import MedicalHistorySection from "./MedicalHistorySection";
 
 /*
@@ -22,28 +23,6 @@ const SECTIONS = [
   { key: "summary", label: "Summary", search: "" },
   { key: MEDICAL_HISTORY, label: "Medical History", search: `?${SECTION_PARAM}=${MEDICAL_HISTORY}` },
 ];
-
-const SectionTabs = ({ active }) => (
-  <nav aria-label="Patient overview sections" className="flex flex-wrap gap-3">
-    {SECTIONS.map(({ key, label, search }) => {
-      const isActive = key === active;
-      return (
-        <Link
-          key={key}
-          to={{ search }}
-          aria-current={isActive ? "page" : undefined}
-          className={`rounded-xl border px-4 py-2.5 text-xs font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-focus/60 ${
-            isActive
-              ? "border-accent/30 bg-accent-soft text-accent"
-              : "border-line bg-white text-ink-soft hover:text-ink"
-          }`}
-        >
-          {label}
-        </Link>
-      );
-    })}
-  </nav>
-);
 
 const Card = ({ title, subtitle, action, className = "", children }) => (
   <section
@@ -139,7 +118,7 @@ const PatientOverview = () => {
 
   return (
     <div className="space-y-6">
-      <SectionTabs active={section} />
+      <SectionTabs label="Patient overview sections" sections={SECTIONS} active={section} />
 
       {section === MEDICAL_HISTORY ? (
         <MedicalHistorySection patientName={patient.name} />

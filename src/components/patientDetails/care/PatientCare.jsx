@@ -1,5 +1,6 @@
-import { Link, useOutletContext, useSearchParams } from "react-router-dom";
+import { useOutletContext, useSearchParams } from "react-router-dom";
 
+import SectionTabs from "../SectionTabs";
 import AppointmentsSection from "./AppointmentsSection";
 
 /*
@@ -17,28 +18,6 @@ const SECTIONS = [
   { key: "appointments", label: "Appointments", search: "" },
   { key: "questions", label: "Questions", search: `?${SECTION_PARAM}=questions` },
 ];
-
-const SectionTabs = ({ active }) => (
-  <nav aria-label="Patient care sections" className="flex flex-wrap gap-3">
-    {SECTIONS.map(({ key, label, search }) => {
-      const isActive = key === active;
-      return (
-        <Link
-          key={key}
-          to={{ search }}
-          aria-current={isActive ? "page" : undefined}
-          className={`rounded-xl border px-4 py-2.5 text-xs font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-focus/60 ${
-            isActive
-              ? "border-accent/30 bg-accent-soft text-accent"
-              : "border-line bg-white text-ink-soft hover:text-ink"
-          }`}
-        >
-          {label}
-        </Link>
-      );
-    })}
-  </nav>
-);
 
 const QuestionsPlaceholder = ({ patientName }) => (
   <div className="space-y-6">
@@ -64,7 +43,7 @@ const PatientCare = () => {
 
   return (
     <div className="space-y-6">
-      <SectionTabs active={section} />
+      <SectionTabs label="Patient care sections" sections={SECTIONS} active={section} />
 
       {section === "appointments" && <AppointmentsSection patientName={patient.name} />}
       {section === "questions" && <QuestionsPlaceholder patientName={patient.name} />}

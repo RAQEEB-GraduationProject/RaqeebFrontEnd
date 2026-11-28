@@ -140,6 +140,44 @@ const mapAppointments = (data) => {
   };
 };
 
+// The optional PDF attached to a diagnostic record. `fileUrl` is a protected
+// API path (see diagnosticsFileService), null when there is no file.
+const mapAttachment = (item) => ({
+  fileName: textOrNull(item.fileName),
+  fileUrl: textOrNull(item.fileUrl),
+});
+
+// One lab result. `flag` is the backend's own value ("Normal" | "High" |
+// "Low" | null); nothing is derived from the result.
+const mapLabResult = (item) => ({
+  id: item.labResultId,
+  testName: textOrNull(item.testName) ?? "Unnamed test",
+  value: textOrNull(item.resultValue),
+  unit: textOrNull(item.unit),
+  flag: textOrNull(item.flag),
+  recordedAt: textOrNull(item.recordedAt),
+  ...mapAttachment(item),
+});
+
+// One imaging record. The finding is kept exactly as written.
+const mapImagingRecord = (item) => ({
+  id: item.imagingId,
+  studyName: textOrNull(item.studyName) ?? "Unnamed study",
+  studyDate: textOrNull(item.studyDate),
+  finding: textOrNull(item.finding) ? item.finding : null,
+  ...mapAttachment(item),
+});
+
+// A diagnostics list must be an array ([] = no records). Anything else is a
+// failure, never an empty list: it must not read as "no results".
+const mapDiagnosticList = (data, mapItem) => {
+  if (!Array.isArray(data)) {
+    throw new Error("The server returned an unexpected response.");
+  }
+
+  return data.map(mapItem);
+};
+
 const patientService = {
   // GET {VITE_API_BASE_URL}/Patients  -> direct JSON array
   async getPatients() {
@@ -245,6 +283,26 @@ const patientService = {
     );
 
     return data ? mapAppointment(data) : null;
+  },
+
+  // GET {VITE_API_BASE_URL}/Patients/{patientId}/diagnostics/labs (any role
+  // with access to the patient; 404 otherwise). Newest first.
+  async getLabResults(patientId) {
+    const { data } = await api.get(
+      `/Patients/${encodeURIComponent(patientId)}/diagnostics/labs`,
+    );
+
+    return mapDiagnosticList(data, mapLabResult);
+  },
+
+  // GET {VITE_API_BASE_URL}/Patients/{patientId}/diagnostics/imaging (same
+  // access rule). Newest first.
+  async getImagingRecords(patientId) {
+    const { data } = await api.get(
+      `/Patients/${encodeURIComponent(patientId)}/diagnostics/imaging`,
+    );
+
+    return mapDiagnosticList(data, mapImagingRecord);
   },
 };
 

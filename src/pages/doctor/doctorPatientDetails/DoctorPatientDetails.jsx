@@ -5,6 +5,7 @@ import PatientDetailsLayout from "../../../components/patientDetails/PatientDeta
 import usePatientOverview from "../../../components/patientDetails/usePatientOverview";
 import { usePatientMedicalHistoryStore } from "../../../store/patientMedicalHistoryStore";
 import { usePatientCareStore } from "../../../store/patientCareStore";
+import { usePatientDiagnosticsStore } from "../../../store/patientDiagnosticsStore";
 import { doctorPatientTabs } from "./doctorPatientTabs";
 
 const LIST_PATH = "/doctor/patients";
@@ -66,6 +67,10 @@ const DoctorPatientDetails = ({
   // Same for the Patient Care appointments.
   const resetPatientCare = usePatientCareStore((state) => state.reset);
   useEffect(() => () => resetPatientCare(), [patientId, resetPatientCare]);
+
+  // And for the Diagnostics lists.
+  const resetDiagnostics = usePatientDiagnosticsStore((state) => state.reset);
+  useEffect(() => () => resetDiagnostics(), [patientId, resetDiagnostics]);
 
   if (!overview && !error && isLoading) {
     return (

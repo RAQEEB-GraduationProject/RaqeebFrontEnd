@@ -7,6 +7,8 @@ import { getDashboardPath } from "../utils/roles";
 import { usePatientOverviewStore } from "./patientOverviewStore";
 import { usePatientMedicalHistoryStore } from "./patientMedicalHistoryStore";
 import { usePatientCareStore } from "./patientCareStore";
+import { usePatientDiagnosticsStore } from "./patientDiagnosticsStore";
+import { releaseDiagnosticFiles } from "../services/diagnosticsFileService";
 import { usePatientStore } from "./patientStore";
 import { useUserStore } from "./userStore";
 import { useAssignmentStore } from "./assignmentStore";
@@ -17,6 +19,7 @@ const SESSION_STORES = [
   usePatientOverviewStore,
   usePatientMedicalHistoryStore,
   usePatientCareStore,
+  usePatientDiagnosticsStore,
   usePatientStore,
   useUserStore,
   useAssignmentStore,
@@ -70,6 +73,7 @@ export const useAuthStore = create(
       // token on reload), so every store's session data is cleared here too.
       logout: () => {
         SESSION_STORES.forEach((store) => store.getState().reset());
+        releaseDiagnosticFiles();
         set({ ...emptySession, error: null });
       },
 
